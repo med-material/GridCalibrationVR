@@ -5,14 +5,14 @@ using UnityEngine;
 public class TargetCube
 {
     private Vector3 previous_scale;
-    public float default_x_max;
+    private float default_x_max;
     private float default_y_max;
     private float default_x_min;
     private float default_y_min;
-    public float x_min;
-    public float y_min;
-    public float x_max;
-    public float y_max;
+    private float x_min;
+    private float y_min;
+    private float x_max;
+    private float y_max;
     private GameObject cube;
     public bool was_looked;
     public bool calibration_max = false;

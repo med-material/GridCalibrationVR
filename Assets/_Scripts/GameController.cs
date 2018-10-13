@@ -137,7 +137,7 @@ public class GameController : MonoBehaviour
         do
         {
             target_index = rand.Next(targets.Count - 1);
-        } while (last_index == target_index && targets[target_index].calibration_max);
+        } while (last_index == target_index || targets[target_index].calibration_max);
         last_index = target_index;
         TargetCube target = targets[target_index];
         return target;
