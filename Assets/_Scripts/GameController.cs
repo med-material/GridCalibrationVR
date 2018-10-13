@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,12 +18,16 @@ public class GameController : MonoBehaviour
     private static System.Random rand = new System.Random();
     private int last_index;
     private int target_index;
-    private float timeLeft = 1.0f;
+    private float timeLeft;
     private TargetCube last_target;
-    private RaycastHit current_target;
+    private RaycastHit looking_at_cube;
+    private RaycastHit looking_at_cube_before;
+    private float target_timer;
 
     void Start()
     {
+        ResetTargetTimer();
+        ResetTimer();
         //target_script = GetComponent<TargetCube>();
 
         // Create const value for x, y min and max
@@ -50,14 +55,14 @@ public class GameController : MonoBehaviour
     void Update()
     {
         // Get the current object looked at
-        current_target = gridController.GetCurrentCollider();
-        //print(current_target.collider.tag);
+        looking_at_cube = gridController.GetCurrentCollider();
+        //print(looking_at_cube.collider.tag);
 
+        // Create and Destroy targets
         timeLeft -= Time.deltaTime;
         if (timeLeft < 0)
         {
-            // Reset timer 
-            timeLeft = 1.0f;
+            ResetTimer();
             // Destroy last target
             if (last_target != null)
             {
@@ -65,27 +70,61 @@ public class GameController : MonoBehaviour
             }
             // Get a random target and spawn it
             TargetCube trgt = selectItem();
-             if (current_target.collider.name == "Cube")
-            {
-                last_target.was_looked = true;
-            }
             trgt.CreateTarget(wall);
             last_target = trgt;
+        }
 
-
+        // Process the target looked at 
+        if (looking_at_cube.collider)
+        {
+            if (looking_at_cube.collider.name == "Cube")
+            {
+                if (looking_at_cube_before.collider)
+                {
+                    if (System.Object.ReferenceEquals(looking_at_cube.collider, looking_at_cube_before.collider))
+                    {
+                        // If the target looked at is the same as before start time
+                        target_timer -= Time.deltaTime;
+                    }
+                    else
+                    {
+                        ResetTargetTimer();
+                    }
+                }
+                looking_at_cube_before = looking_at_cube;
+            }
+            else
+            {
+                ResetTargetTimer();
+            }
+        }
+        // If the target has been fixed
+        if (target_timer < 0)
+        {
+            print("The target was looked for 300ms");
+            last_target.was_looked = true;
+            ResetTargetTimer();
         }
     }
 
-    public TargetCube selectItem()
+    private TargetCube selectItem()
     {
         // Get a random target in the list
         do
         {
-            target_index = rand.Next(targets.Count);
+            target_index = rand.Next(targets.Count-1);
         } while (last_index == target_index);
         last_index = target_index;
         TargetCube target = targets[target_index];
         return target;
+    }
+
+    private void ResetTargetTimer() {
+        target_timer = 0.3f;
+    }
+    private void ResetTimer()
+    {
+       timeLeft = 0.35f;
     }
 
 }

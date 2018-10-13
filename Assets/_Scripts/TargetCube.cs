@@ -29,10 +29,13 @@ public class TargetCube
         cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         // Set the cube as child of the wall
         cube.transform.parent = wall.transform;
+        cube.transform.localScale = previous_scale;
         if (was_looked)
         {
-            // Ne passe pas par ici, TODO a regarder.
-           cube.transform.localScale -= new Vector3(0.05f,0.05f,0);
+            if (cube.transform.localScale.x > 0.04f || cube.transform.localScale.y > 0.04f)
+            {
+                cube.transform.localScale -= new Vector3(0.04f, 0.04f, 0.0f);
+            }
         }
         else
         {
