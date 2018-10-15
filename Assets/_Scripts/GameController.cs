@@ -26,12 +26,27 @@ public class GameController : MonoBehaviour
     private float target_timer;
     private bool calib_end = false;
     private bool only_one = true;
+    public bool is_started = false;
 
     void Start()
     {
+        /**
+            Ideas TODO : 
+                - UI menu 
+                    - DONE Start button with countdown before start
+                    - Possibility to change the speed (timeLeft : default 1 sec)
+                    - Restart the game (fixation 2 sec or confirmation)
+                    - Go to Menu (fixation 2 sec or confirmation)
+                - Change color (green) when fixation is egual 300ms on target (or popup message)
+                - (Destroy target when fixation is 300ms)
+                - (Change color to red just before Destroying the cube if no fixation detected (or popup message)
+                - Print the size (or a score/percentage) near all targets at the end
+                - Clean the pupil lab plugin folder to only get the minimum configuration
+         */
+         
+        // Set the timers's default time
         ResetTargetTimer();
         ResetTimer();
-        //target_script = GetComponent<TargetCube>();
 
         // Create const value for x, y min and max
         CENTER_X_L = wall_width / 3;
@@ -50,14 +65,13 @@ public class GameController : MonoBehaviour
         targets.Add(new TargetCube(0, CENTER_X_L, CENTER_Y_T, wall_height));
         targets.Add(new TargetCube(CENTER_X_L, CENTER_X_R, CENTER_Y_T, wall_height));
         targets.Add(new TargetCube(CENTER_X_R, wall_width, CENTER_Y_T, wall_height));
-
-        // gridController = gameObject.GetComponent<GridController>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Check if calibration is ended, delete current target, create each target in centered position
+        if(is_started) {
+// Check if calibration is ended, delete current target, create each target in centered position
         if (calib_end && only_one)
         {
             print("Calibration test end.");
@@ -118,11 +132,14 @@ public class GameController : MonoBehaviour
             if (target_timer < 0)
             {
                 print("The target was looked for 300ms");
+                timeLeft = -1.0f;
                 last_target.was_looked = true;
                 ResetTargetTimer();
             }
 
         }
+        }
+        
     }
 
     private TargetCube selectItem()
@@ -149,7 +166,7 @@ public class GameController : MonoBehaviour
     }
     private void ResetTimer()
     {
-        timeLeft = 0.35f;
+        timeLeft = 1.0f;
     }
 
 }
