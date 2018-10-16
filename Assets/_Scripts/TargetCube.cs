@@ -13,7 +13,7 @@ public class TargetCube
     private float y_min;
     private float x_max;
     private float y_max;
-    private GameObject cube;
+    public GameObject cube;
     public bool was_looked;
     public bool calibration_max = false;
     public bool cube_created;
@@ -35,9 +35,10 @@ public class TargetCube
             cube.transform.localScale = previous_scale;
             if (was_looked)
             {
-                if (cube.transform.localScale.x > 0.04f || cube.transform.localScale.y > 0.04f)
+                if (cube.transform.localScale.x > 0.02f || cube.transform.localScale.y > 0.02f)
                 {
-                    cube.transform.localScale -= new Vector3(0.04f, 0.04f, 0.0f);
+                    //cube.transform.localScale -= new Vector3(0.04f, 0.04f, 0.0f);
+                    cube.transform.localScale /= 1.5f;
                 }
                 else
                 {
