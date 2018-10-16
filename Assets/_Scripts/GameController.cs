@@ -27,7 +27,6 @@ public class GameController : MonoBehaviour
     private bool calib_end = false;
     private bool only_one = true;
     public bool is_started = false;
-    private Color initial_color = new Color(1, 1, 1, 1);
     private Color success_color = new Color(0.07f, 0.8f, 0.07f, 1);
 
     void Start()
@@ -163,8 +162,8 @@ public class GameController : MonoBehaviour
         {
             do
             {
-                target_index = rand.Next(targets.Count - 1);
-            } while (last_index == target_index);
+                target_index = rand.Next(targets.Count);
+            } while (last_index == target_index || targets[target_index].calibration_max);
             last_index = target_index;
             target = targets[target_index];
         }
@@ -177,7 +176,7 @@ public class GameController : MonoBehaviour
     }
     private void ResetTimer()
     {
-        timeLeft = 1.0f;
+        timeLeft = 1.8f;
     }
 
 }
