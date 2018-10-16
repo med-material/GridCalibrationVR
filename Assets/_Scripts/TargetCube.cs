@@ -16,6 +16,7 @@ public class TargetCube
     public GameObject cube;
     public bool was_looked;
     public bool calibration_max = false;
+    private int calib_failed;
     public bool cube_created;
     public TargetCube(float x_min, float x_max, float y_min, float y_max)
     {
@@ -24,6 +25,7 @@ public class TargetCube
         default_y_min = y_min;
         default_y_max = y_max;
         previous_scale = new Vector3(0.2f, 0.2f, 0.1f);
+        calib_failed = 0;
     }
     public void CreateTarget(GameObject wall, bool centered)
     {
@@ -35,19 +37,20 @@ public class TargetCube
             cube.transform.localScale = previous_scale;
             if (was_looked)
             {
-                if (cube.transform.localScale.x > 0.02f || cube.transform.localScale.y > 0.02f)
+                if (cube.transform.localScale.x > 0.06f || cube.transform.localScale.y > 0.06f)
                 {
                     //cube.transform.localScale -= new Vector3(0.04f, 0.04f, 0.0f);
-                    cube.transform.localScale /= 1.5f;
+                    cube.transform.localScale /= 1.6f;
                 }
                 else
                 {
-                    calibration_max = true;
+                    calib_failed = 3;
                 }
             }
             else
             {
                 cube.transform.localScale = previous_scale;
+                calib_failed++;
             }
             CalculateOffset();
             if (centered)
@@ -62,6 +65,10 @@ public class TargetCube
 
             previous_scale = cube.transform.localScale;
             was_looked = false;
+
+            if(calib_failed > 2) {
+                calibration_max = true;
+            }
     }
     private void CalculateOffset()
     {

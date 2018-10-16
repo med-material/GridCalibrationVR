@@ -8,7 +8,7 @@ public class GazePrint : MonoBehaviour {
 	{
 		if (PupilTools.IsConnected)
 		{
-			PupilGazeTracker.Instance.StartVisualizingGaze ();		
+			//PupilGazeTracker.Instance.StartVisualizingGaze ();		
 			print ("We are gazing");
 		}
 	}
