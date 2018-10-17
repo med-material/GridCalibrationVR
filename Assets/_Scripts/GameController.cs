@@ -31,19 +31,6 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
-        /**
-            Ideas TODO : 
-                - UI menu 
-                    - Possibility to change the speed (timeLeft : default 1 sec)
-                    - Restart the game (fixation 2 sec or confirmation)
-                    - Go to Menu (fixation 2 sec or confirmation)
-                - Change color (green) when fixation is egual 300ms on target (or popup message)
-                - (Destroy target when fixation is 300ms)
-                - (Change color to red just before Destroying the cube if no fixation detected (or popup message)
-                - Print the size (or a score/percentage) near all targets at the end
-                - Clean the pupil lab plugin folder to only get the minimum configuration
-         */
-
         // Set the timers's default time
         ResetTargetTimer();
         ResetTimer();
