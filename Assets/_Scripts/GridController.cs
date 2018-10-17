@@ -7,18 +7,13 @@ public class GridController : MonoBehaviour {
 
 	private Camera sceneCamera;
 	private GazePrint gazePrint;
-
 	private TextMesh positionText;
-
 	private LineRenderer heading;
 	private Vector3 standardViewportPoint = new Vector3 (0.5f, 0.5f, 10);
-
 	private Vector2 gazePointLeft;
 	private Vector2 gazePointRight;
 	private Vector2 gazePointCenter;
-
 	public Material shaderMaterial;
-
 	private RaycastHit hit;
 
 	void Start () 

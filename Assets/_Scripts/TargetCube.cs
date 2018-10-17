@@ -24,7 +24,7 @@ public class TargetCube
         default_x_max = x_max;
         default_y_min = y_min;
         default_y_max = y_max;
-        previous_scale = new Vector3(0.2f, 0.2f, 0.1f);
+        previous_scale = new Vector3(0.3f, 0.3f, 0.1f);
         calib_failed = 0;
     }
     public void CreateTarget(GameObject wall, bool centered)

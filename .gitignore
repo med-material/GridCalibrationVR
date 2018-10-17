@@ -40,3 +40,11 @@ sysinfo.txt
 # Rider IDEA
 .idea/
 .idea
+
+# Generated Files after build 
+GridCalibrationTest_Data/
+GridCalibrationTest.exe
+Mono/
+UnityCrashHandler64.exe
+UnityPlayer.dll
+WinPixEventRuntime.dll

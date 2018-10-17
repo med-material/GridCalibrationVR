@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-
     private float CENTER_X_L;
     private float CENTER_Y_C;
     private float CENTER_X_R;
@@ -28,6 +27,7 @@ public class GameController : MonoBehaviour
     private bool only_one = true;
     public bool is_started = false;
     private Color success_color = new Color(0.07f, 0.8f, 0.07f, 1);
+    public float choosenTime;
 
     void Start()
     {
@@ -101,8 +101,11 @@ public class GameController : MonoBehaviour
                     }
                     // Get a random target and spawn it
                     TargetCube trgt = selectItem();
-                    trgt.CreateTarget(wall, false);
-                    last_target = trgt;
+                    if(trgt != null) {
+                         trgt.CreateTarget(wall, false);
+                         last_target = trgt;
+                    }
+                   
                 }
                 // Process the target looked at 
                 if (looking_at_cube.collider)
@@ -150,22 +153,25 @@ public class GameController : MonoBehaviour
         if (targets.All(trg => trg.calibration_max))
         {
             calib_end = true;
+            return null;
         }
         // Get a random target in the list
         // exclude the previous target and target with calibration ended
         TargetCube target;
         if (targets.Where(t => !t.calibration_max).ToList().Count == 1)
         {
+            print("Only one remaining");
             target = targets.Find(t => !t.calibration_max);
         }
         else
         {
+            List<TargetCube> lst_trgt = targets.Where(t=>!t.calibration_max).ToList();
             do
             {
-                target_index = rand.Next(targets.Count);
-            } while (last_index == target_index || targets[target_index].calibration_max);
+                target_index = rand.Next(lst_trgt.Count);
+            } while (last_index == target_index);
             last_index = target_index;
-            target = targets[target_index];
+            target = lst_trgt[target_index];
         }
 
         return target;
@@ -176,7 +182,7 @@ public class GameController : MonoBehaviour
     }
     private void ResetTimer()
     {
-        timeLeft = 1.8f;
+        timeLeft = choosenTime;
     }
 
 }
