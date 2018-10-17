@@ -158,7 +158,7 @@ public class GameController : MonoBehaviour
         // Get a random target in the list
         // exclude the previous target and target with calibration ended
         TargetCube target;
-        if (targets.Where(t => !t.calibration_max).ToList().Count == 1)
+        if (targets.Where(t => !t.calibration_max).ToList().Count <= 1)
         {
             print("Only one remaining");
             target = targets.Find(t => !t.calibration_max);
