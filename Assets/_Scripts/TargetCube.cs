@@ -29,46 +29,47 @@ public class TargetCube
     }
     public void CreateTarget(GameObject wall, bool centered)
     {
-            // Create the Cube 
-            cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube_created = true;
-            // Set the cube as child of the wall
-            cube.transform.parent = wall.transform;
+        // Create the Cube 
+        cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        cube_created = true;
+        // Set the cube as child of the wall
+        cube.transform.parent = wall.transform;
+        cube.transform.localRotation = Quaternion.identity;
+        cube.transform.localScale = previous_scale;
+        if (was_looked)
+        {
+            if (cube.transform.localScale.x > 0.005f || cube.transform.localScale.y > 0.005f)
+            {
+                cube.transform.localScale /= 1.6f;
+            }
+            else
+            {
+                calib_failed = 3;
+            }
+        }
+        else
+        {
             cube.transform.localScale = previous_scale;
-            if (was_looked)
-            {
-                if (cube.transform.localScale.x > 0.06f || cube.transform.localScale.y > 0.06f)
-                {
-                    //cube.transform.localScale -= new Vector3(0.04f, 0.04f, 0.0f);
-                    cube.transform.localScale /= 1.6f;
-                }
-                else
-                {
-                    calib_failed = 3;
-                }
-            }
-            else
-            {
-                cube.transform.localScale = previous_scale;
-                calib_failed++;
-            }
-            CalculateOffset();
-            if (centered)
-            {
-                // Place the cube at the center of the cell, for the end process
-                cube.transform.localPosition = new Vector3((x_max+x_min)/2,(y_max+y_min)/2,-0.5f);
-            }
-            else
-            {
-                cube.transform.localPosition = new Vector3(Random.Range(x_min, x_max), Random.Range(y_min, y_max), -0.5f);
-            }
+            calib_failed++;
+        }
+        CalculateOffset();
+        if (centered)
+        {
+            // Place the cube at the center of the cell, for the end process
+            cube.transform.localPosition = new Vector3((x_max + x_min) / 2, (y_max + y_min) / 2, -0.5f);
+        }
+        else
+        {
+            cube.transform.localPosition = new Vector3(Random.Range(x_min, x_max), Random.Range(y_min, y_max), -0.5f);
+        }
 
-            previous_scale = cube.transform.localScale;
-            was_looked = false;
+        previous_scale = cube.transform.localScale;
+        was_looked = false;
 
-            if(calib_failed > 2) {
-                calibration_max = true;
-            }
+        if (calib_failed > 2)
+        {
+            calibration_max = true;
+        }
     }
     private void CalculateOffset()
     {
