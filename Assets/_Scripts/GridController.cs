@@ -31,6 +31,7 @@ public class GridController : MonoBehaviour {
 		{
 			PupilTools.IsGazing = true;
 			PupilTools.SubscribeTo ("gaze");
+        	PupilTools.SubscribeTo("fixation");
 		}
 	}
 

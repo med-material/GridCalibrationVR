@@ -1,10 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class TargetCirle
 {
     private Vector3 previous_scale;
+    private List<Vector3> previous_scales = new List<Vector3>(); 
+    private List<float> scales_factor =  new List<float>();
     private float default_x_max;
     private float default_y_max;
     private float default_x_min;
@@ -15,6 +18,7 @@ public class TargetCirle
     private float y_max;
     public GameObject circle;
     public bool was_looked;
+    private List<bool> l_looked = new List<bool>();
     public bool calibration_max = false;
     private int calib_failed;
     public bool circle_created;
@@ -26,32 +30,21 @@ public class TargetCirle
         default_y_max = y_max;
         previous_scale = new Vector3(0.25f, 0.01f, 0.3f);
         calib_failed = 0;
+        ResetScale();
     }
     public void CreateTarget(GameObject wall, bool centered)
     {
+        l_looked.Add(was_looked);
         // Create the Circle 
         circle = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         circle_created = true;
         // Set the Circle as child of the wall
         circle.transform.parent = wall.transform;
-        circle.transform.localRotation = Quaternion.Euler(90,0,0);
+        circle.transform.localRotation = Quaternion.Euler(90, 0, 0);
         circle.transform.localScale = previous_scale;
-        if (was_looked)
-        {
-            if (circle.transform.localScale.x > 0.005f || circle.transform.localScale.y > 0.005f)
-            {
-                circle.transform.localScale /= 1.6f;
-            }
-            else
-            {
-                calib_failed = 3;
-            }
-        }
-        else
-        {
-            circle.transform.localScale = previous_scale;
-            calib_failed++;
-        }
+
+        CalculateScale();
+
         CalculateOffset();
         if (centered)
         {
@@ -64,6 +57,7 @@ public class TargetCirle
         }
 
         previous_scale = circle.transform.localScale;
+        previous_scales.Add(previous_scale);
         was_looked = false;
 
         if (calib_failed > 2)
@@ -78,6 +72,37 @@ public class TargetCirle
         y_min = default_y_min + circle.transform.localScale.z / 2;
         y_max = default_y_max - circle.transform.localScale.z / 2;
     }
+    private void CalculateScale()
+    {
+        float last_scale_factor = GetLastScale();
+        // If the target was looked at least once
+        if(l_looked.Find(l=>l)) {
+            //if the target is looked 
+            if(was_looked) {
+                scales_factor.Add(last_scale_factor);
+                circle.transform.localScale /= last_scale_factor+1;
+            }
+            // If the target is missed reduce the scale factor
+            else {
+                scales_factor.Add(last_scale_factor/2);
+                circle.transform.localScale += previous_scales[l_looked.FindIndex(l=>l)]-previous_scale;
+            }
+            // If the last four times the target was looked
+            if(l_looked.Reverse<bool>().Take(4).ToList().Where(l=>l).ToList().Count == 4) {
+                ResetScale();
+            }
+        } 
+    }
+
+    private void ResetScale()
+    {
+        scales_factor.Add(0.5f);
+    }
+
+    public float GetLastScale() {
+        return scales_factor[scales_factor.Count-1];
+    }
+
     public void DestroyTarget()
     {
         circle_created = false;

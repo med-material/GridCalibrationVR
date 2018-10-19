@@ -739,6 +739,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1803760985}
   - component: {fileID: 1803760986}
+  - component: {fileID: 1803760987}
   m_Layer: 0
   m_Name: GameController
   m_TagString: Untagged
@@ -773,7 +774,18 @@ MonoBehaviour:
   gridController: {fileID: 1915425636}
   wall: {fileID: 339192480}
   is_started: 0
-  choosenTime: 1.5
+  choosenTime: 0.6
+--- !u!114 &1803760987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1803760984}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 416ed047b1671664d9f1378d39435187, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1915425634
 GameObject:
   m_ObjectHideFlags: 0
@@ -873,7 +885,7 @@ LineRenderer:
   - {x: 0, y: 0, z: 1}
   m_Parameters:
     serializedVersion: 2
-    widthMultiplier: 0
+    widthMultiplier: 0.1
     widthCurve:
       serializedVersion: 2
       m_Curve:

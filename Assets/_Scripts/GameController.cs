@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using MessagePack;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
@@ -43,15 +45,15 @@ public class GameController : MonoBehaviour
 
         // Create the targets
         targets = new List<TargetCirle>();
-        targets.Add(new TargetCirle(0, CENTER_X_L, 0, CENTER_Y_C));
-        targets.Add(new TargetCirle(CENTER_X_L, CENTER_X_R, 0, CENTER_Y_C));
-        targets.Add(new TargetCirle(CENTER_X_R, wall_width, 0, CENTER_Y_C));
-        targets.Add(new TargetCirle(0, CENTER_X_L, CENTER_Y_C, CENTER_Y_T));
+        //targets.Add(new TargetCirle(0, CENTER_X_L, 0, CENTER_Y_C));
+        //targets.Add(new TargetCirle(CENTER_X_L, CENTER_X_R, 0, CENTER_Y_C));
+        //targets.Add(new TargetCirle(CENTER_X_R, wall_width, 0, CENTER_Y_C));
+        //targets.Add(new TargetCirle(0, CENTER_X_L, CENTER_Y_C, CENTER_Y_T));
         targets.Add(new TargetCirle(CENTER_X_L, CENTER_X_R, CENTER_Y_C, CENTER_Y_T));
-        targets.Add(new TargetCirle(CENTER_X_R, wall_width, CENTER_Y_C, CENTER_Y_T));
-        targets.Add(new TargetCirle(0, CENTER_X_L, CENTER_Y_T, wall_height));
-        targets.Add(new TargetCirle(CENTER_X_L, CENTER_X_R, CENTER_Y_T, wall_height));
-        targets.Add(new TargetCirle(CENTER_X_R, wall_width, CENTER_Y_T, wall_height));
+        //targets.Add(new TargetCirle(CENTER_X_R, wall_width, CENTER_Y_C, CENTER_Y_T));
+        //targets.Add(new TargetCirle(0, CENTER_X_L, CENTER_Y_T, wall_height));
+        //targets.Add(new TargetCirle(CENTER_X_L, CENTER_X_R, CENTER_Y_T, wall_height));
+        //targets.Add(new TargetCirle(CENTER_X_R, wall_width, CENTER_Y_T, wall_height));
     }
 
     // Update is called once per frame
@@ -90,6 +92,7 @@ public class GameController : MonoBehaviour
                     TargetCirle trgt = selectItem();
                     if(trgt != null) {
                          trgt.CreateTarget(wall, false);
+                         print(trgt.circle.transform.localScale.ToString("F5"));
                          last_target = trgt;
                     }
                    
@@ -97,7 +100,7 @@ public class GameController : MonoBehaviour
                 // Process the target looked at 
                 if (looking_at_circle.collider)
                 {
-                    if (looking_at_circle.collider.name == "Cube")
+                    if (looking_at_circle.collider.name == "Cylinder")
                     {
                         if (looking_at_circle_before.collider)
                         {
