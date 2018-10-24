@@ -26,7 +26,7 @@ public class PupilDemo : MonoBehaviour
 
 	void CustomReceiveData(string topic, Dictionary<string,object> dictionary, byte[] thirdFrame = null)
 	{
-		if (topic.StartsWith ("pupil") )
+		if (topic.StartsWith ("pupil"))
 		{
 			foreach (var item in dictionary)
 			{

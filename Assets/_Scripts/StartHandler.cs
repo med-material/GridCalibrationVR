@@ -12,14 +12,17 @@ public class StartHandler : MonoBehaviour
     private RaycastHit obj;
     public GameObject Menu;
     public GameObject startButton;
-
+    public GameObject approxButton;
+    public GameObject shrinkButton;
     public GameObject countDownText;
     private float timer;
+    private float modeTimer;
     private float countDown = 3.0f;
 
     void Start()
     {
         ResetTimer();
+        ResetModeTimer();
     }
 
     // Update is called once per frame
@@ -30,13 +33,24 @@ public class StartHandler : MonoBehaviour
         {
             if (ReferenceEquals(obj.collider.gameObject, startButton))
             {
-                obj.collider.gameObject.GetComponent<Renderer>().material.shader = Shader.Find("Self-Illumin/Outlined Diffuse");
+                SetShader();
                 timer -= Time.deltaTime;
+            }
+            else if(ReferenceEquals(obj.collider.gameObject, approxButton)) {
+                SetShader();
+                shrinkButton.GetComponent<Renderer>().material.shader = Shader.Find("Diffuse");
+                modeTimer -= Time.deltaTime;
+            }
+            else if(ReferenceEquals(obj.collider.gameObject, shrinkButton)) {
+                SetShader();
+                approxButton.GetComponent<Renderer>().material.shader = Shader.Find("Diffuse");
+                modeTimer -= Time.deltaTime;
             }
             else
             {
                 startButton.GetComponent<Renderer>().material.shader = Shader.Find("Diffuse");
                 ResetTimer();
+                ResetModeTimer();
             }
         }
         if (timer < 0)
@@ -55,9 +69,24 @@ public class StartHandler : MonoBehaviour
 				countDownText.SetActive(false);
             }
         }
+        if(modeTimer < 0) {
+            if(ReferenceEquals(obj.collider.gameObject, approxButton)) {
+                gameController.choosenMode = "approx";
+            }
+            else if(ReferenceEquals(obj.collider.gameObject, shrinkButton)) {
+                gameController.choosenMode = "shrink";
+            }
+        }
     }
     private void ResetTimer()
     {
         timer = 1.0f;
+    }
+    private void ResetModeTimer()
+    {
+        modeTimer = 0.5f;
+    }
+    private void SetShader() {
+        obj.collider.gameObject.GetComponent<Renderer>().material.shader = Shader.Find("Self-Illumin/Outlined Diffuse");
     }
 }

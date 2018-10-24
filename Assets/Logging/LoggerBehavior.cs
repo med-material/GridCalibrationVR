@@ -21,38 +21,28 @@ namespace RockVR.Video.Demo
         private static List<object> _toLog;
         private Vector3 gazeToWorld;
         private static string CSVheader = AppConstants.CsvFirstRow;
-        //[SerializeField] private Camera dedicatedCapture;
-        //[SerializeField] private Transform viveCtrlRight;
         private Camera dedicatedCapture;
-
-        //private Camera dedicatedCapture;
-
+        GameController gameController;
         public static string sceneName = "_";
-
 
         #region Unity Methods
 
         private void Start()
         {
+            PupilTools.OnConnected += StartPupilSubscription;
+            PupilTools.OnDisconnecting += StopPupilSubscription;
+
+            PupilTools.OnReceiveData += CustomReceiveData;
+
+
+            gameController = GetComponent<GameController>();
             _toLog = new List<object>();
             dedicatedCapture = Camera.main;
         }
 
         private void Update()
         {
-
-            // synchronizes data logging with video capture beginning and end
-            //if (VideoCaptureCtrl.instance.status != VideoCaptureCtrl.StatusType.STARTED || VideoCaptureCtrl.instance.status == VideoCaptureCtrl.StatusType.STOPPED) return;
-
             DoLog();
-
-            /*
-            if (SceneManage.loadTestScene == -2 && PupilManager.calibrationStarted)
-            {
-                SceneManage.loadTestScene = -1;
-            }
-            */
-
             AddToLog();
         }
 
@@ -64,14 +54,12 @@ namespace RockVR.Video.Demo
                 gazeToWorld = dedicatedCapture.ViewportToWorldPoint(new Vector3(PupilData._2D.GazePosition.x, PupilData._2D.GazePosition.y, Camera.main.nearClipPlane));
             }
 
-            //var raycastHit = EyeRay.CurrentlyHit;
             var tmp = new
             {
                 // default variables for all scenes
                 a = DateTime.Now,
                 b = (int)(1.0f / Time.unscaledDeltaTime), // frames per second during the last frame, could calucate an average frame rate instead
-                //c = PupilManager.SceneClass.sceneStat,
-                //cc = SceneTimer.sceneTimer,
+                c = gameController.choosenMode,
                 d = dedicatedCapture.transform.position.x,
                 e = dedicatedCapture.transform.position.y,
                 f = dedicatedCapture.transform.position.z,
@@ -83,33 +71,10 @@ namespace RockVR.Video.Demo
                 l = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : double.NaN,
                 m = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : double.NaN,
                 n = PupilData._2D.GazePosition != Vector2.zero ? PupilTools.FloatFromDictionary(PupilTools.gazeDictionary, "confidence") : double.NaN, // confidence value calculated after calibration 
+                o = gameController.travel_time < 0 ? gameController.travel_time : double.NaN,
+                p = gameController.last_target.circle.transform.position.x,
+                q = gameController.last_target.circle.transform.position.y,
 
-                /* 
-                // Baking tray variables
-                o = SceneManage.loadTestScene == 2 ? SceneManage.getViveCtrlRight.transform.position.x : double.NaN,
-                p = SceneManage.loadTestScene == 2 ? SceneManage.getViveCtrlRight.transform.position.y : double.NaN,
-                q = SceneManage.loadTestScene == 2 ? SceneManage.getViveCtrlRight.transform.position.z : double.NaN,
-                r = SceneManage.loadTestScene == 2 ? SceneManage.getViveCtrlRight.transform.rotation.x : double.NaN,
-                s = SceneManage.loadTestScene == 2 ? SceneManage.getViveCtrlRight.transform.rotation.y : double.NaN,
-                t = SceneManage.loadTestScene == 2 ? SceneManage.getViveCtrlRight.transform.rotation.z : double.NaN,
-                tt = SceneManage.loadTestScene == 2 ? ControllerGrabObject.bunLastActive.ctrlEventHolder : "null",
-                ttt = SceneManage.loadTestScene == 2 && ControllerGrabObject.objectInHand != null ? ControllerGrabObject.bunLastActive.bunActive.name : "null",
-                u = SceneManage.loadTestScene == 2 && ControllerGrabObject.objectInHand != null ? ControllerGrabObject.bunLastActive.bunActive.transform.position.x : double.NaN,
-                v = SceneManage.loadTestScene == 2 && ControllerGrabObject.objectInHand != null ? ControllerGrabObject.bunLastActive.bunActive.transform.position.y : double.NaN,
-                x = SceneManage.loadTestScene == 2 && ControllerGrabObject.objectInHand != null ? ControllerGrabObject.bunLastActive.bunActive.transform.position.z : double.NaN,
-
-                // Museum variables
-                cbis = SceneManage.loadTestScene == 3 && PaintingsSets.CurrentSet != null ? PaintingsSets.CurrentSet.SetName : "null",
-                ord = SceneManage.loadTestScene == 3 ? PaintingsSets.myIntArrayString : "null",
-                oo = SceneManage.loadTestScene == 3 && raycastHit.transform != null ? raycastHit.transform.name : "null",
-                ox = SceneManage.loadTestScene == 3 && raycastHit.transform != null ? raycastHit.transform.position.x : double.NaN,
-                oy = SceneManage.loadTestScene == 3 && raycastHit.transform != null ? raycastHit.transform.position.y : double.NaN,
-                oz = SceneManage.loadTestScene == 3 && raycastHit.transform != null ? raycastHit.transform.position.z : double.NaN,
-                oox = SceneManage.loadTestScene == 3 && raycastHit.transform != null ? CalculEyeGazeOnObject(raycastHit).x : double.NaN,
-                ooy = SceneManage.loadTestScene == 3 && raycastHit.transform != null ? CalculEyeGazeOnObject(raycastHit).y : double.NaN,
-                ooz = SceneManage.loadTestScene == 3 && raycastHit.transform != null ? CalculEyeGazeOnObject(raycastHit).z : double.NaN
-
-                */
             };
             _toLog.Add(tmp);
         }
@@ -132,6 +97,64 @@ namespace RockVR.Video.Demo
             _toLog.Clear();
         }
 
+        void StartPupilSubscription()
+        {
+            PupilTools.CalibrationMode = Calibration.Mode._2D;
+
+            PupilTools.SubscribeTo("pupil.");
+            PupilTools.SubscribeTo("fixation");
+        }
+
+        void StopPupilSubscription()
+        {
+            PupilTools.UnSubscribeFrom("pupil.");
+        }
+
+        void CustomReceiveData(string topic, Dictionary<string, object> dictionary, byte[] thirdFrame = null)
+        {
+            if (topic.StartsWith("pupil"))
+            {
+                foreach (var item in dictionary)
+                {
+                    switch (item.Key)
+                    {
+                        case "topic":
+                            var textForKey = PupilTools.StringFromDictionary(dictionary, item.Key);
+                            // Do stuff
+                            break;
+                        case "confidence":
+                            print("Confidence : " + PupilTools.FloatFromDictionary(dictionary, item.Key));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            else if (topic.StartsWith("fixation"))
+            {
+                foreach (var item in dictionary)
+                {
+                    switch (item.Key)
+                    {
+                        case "base_data":
+                            print("Base_data : " + PupilTools.StringFromDictionary(dictionary, item.Key));
+                            break;
+                        case "confidence":
+                           print("Confidence : " +PupilTools.FloatFromDictionary(dictionary, item.Key)); 
+                            break;
+                        case "duration":
+                            print("Duration : " +PupilTools.FloatFromDictionary(dictionary, item.Key) + "ms");
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+      
+
         #endregion
     }
+
+
 }
