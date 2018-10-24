@@ -137,14 +137,14 @@ public class TargetCirle
                 circle.transform.localScale += (last_good_scale - previous_scale) / 2;
             }
             // If the last four times the target was looked
-            if (l_looked.Reverse<bool>().Take(4).ToList().Where(l => l).ToList().Count == 4)
+            /**if (l_looked.Reverse<bool>().Take(4).ToList().Where(l => l).ToList().Count == 4)
             {
                 ResetScale();
-            }
+            }*/
             // If the last four times the target was NOT looked
-            if (l_looked.Reverse<bool>().Take(4).ToList().Where(l => !l).ToList().Count == 4)
+            if (l_looked.Reverse<bool>().Take(5).ToList().Where(l => !l).ToList().Count == 5)
             {
-                missed_four_times_before = true;
+                calibration_max = true;
             }
         }
     }

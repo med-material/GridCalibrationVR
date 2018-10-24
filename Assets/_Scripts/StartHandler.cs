@@ -35,16 +35,19 @@ public class StartHandler : MonoBehaviour
         {
             if (ReferenceEquals(obj.collider.gameObject, startButton))
             {
+                print("Fixing Start button");
                 startLoader.fillAmount =  1.0f - timer;
                 timer -= Time.deltaTime;
             }
             else if (ReferenceEquals(obj.collider.gameObject, approxButton))
             {
+                print("Fixing Approx button");
                 approxLoader.fillAmount = 1.0f - modeTimer*2 ;
                 modeTimer -= Time.deltaTime;
             }
             else if (ReferenceEquals(obj.collider.gameObject, shrinkButton))
             {
+                print("Fixing Shrink button");
                 shrinkLoader.fillAmount = 1.0f - modeTimer*2 ;
                 modeTimer -= Time.deltaTime;
             }

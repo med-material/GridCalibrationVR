@@ -31,7 +31,7 @@ public class GameController : MonoBehaviour
     private Color success_color = new Color(0.07f, 0.8f, 0.07f, 1);
     public float choosenTime;
     public float travel_time;
-    public string choosenMode = "Approx";
+    public string choosenMode;
 
     void Start()
     {
@@ -141,7 +141,6 @@ public class GameController : MonoBehaviour
                 }
                 else
                 {
-                    looking_at_circle.collider.GetComponent<Renderer>().material.color = Color.white;
                     ResetTargetTimer();
                 }
             }

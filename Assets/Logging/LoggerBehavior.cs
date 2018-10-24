@@ -29,10 +29,10 @@ namespace RockVR.Video.Demo
 
         private void Start()
         {
-            PupilTools.OnConnected += StartPupilSubscription;
+            /**PupilTools.OnConnected += StartPupilSubscription;
             PupilTools.OnDisconnecting += StopPupilSubscription;
 
-            PupilTools.OnReceiveData += CustomReceiveData;
+            PupilTools.OnReceiveData += CustomReceiveData;*/
 
 
             gameController = GetComponent<GameController>();
@@ -70,7 +70,7 @@ namespace RockVR.Video.Demo
                 k = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.y : double.NaN,
                 l = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : double.NaN,
                 m = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : double.NaN,
-                n = PupilData._2D.GazePosition != Vector2.zero ? PupilTools.FloatFromDictionary(PupilTools.gazeDictionary, "confidence") : double.NaN, // confidence value calculated after calibration 
+                //n = PupilData._2D.GazePosition != Vector2.zero ? PupilTools.FloatFromDictionary(PupilTools.gazeDictionary, "confidence") : double.NaN, // confidence value calculated after calibration 
                 o = gameController.travel_time < 0 ? gameController.travel_time : double.NaN,
                 p = gameController.last_target.circle.transform.position.x,
                 q = gameController.last_target.circle.transform.position.y,
