@@ -29,10 +29,10 @@ namespace RockVR.Video.Demo
 
         private void Start()
         {
-            /**PupilTools.OnConnected += StartPupilSubscription;
+            PupilTools.OnConnected += StartPupilSubscription;
             PupilTools.OnDisconnecting += StopPupilSubscription;
 
-            PupilTools.OnReceiveData += CustomReceiveData;*/
+            PupilTools.OnReceiveData += CustomReceiveData;
 
 
             gameController = GetComponent<GameController>();
@@ -100,7 +100,6 @@ namespace RockVR.Video.Demo
         void StartPupilSubscription()
         {
             PupilTools.CalibrationMode = Calibration.Mode._2D;
-
             PupilTools.SubscribeTo("pupil.");
             PupilTools.SubscribeTo("fixation");
         }
@@ -108,6 +107,7 @@ namespace RockVR.Video.Demo
         void StopPupilSubscription()
         {
             PupilTools.UnSubscribeFrom("pupil.");
+            PupilTools.UnSubscribeFrom("fication");
         }
 
         void CustomReceiveData(string topic, Dictionary<string, object> dictionary, byte[] thirdFrame = null)
@@ -118,14 +118,36 @@ namespace RockVR.Video.Demo
                 {
                     switch (item.Key)
                     {
-                        case "topic":
-                            var textForKey = PupilTools.StringFromDictionary(dictionary, item.Key);
-                            // Do stuff
-                            break;
                         case "confidence":
                             print("Confidence : " + PupilTools.FloatFromDictionary(dictionary, item.Key));
                             break;
+                        case "norm_pos": // Origin 0,0 at the bottom left and 1,1 at the top right.
+                            print("Norm : " + PupilTools.VectorFromDictionary(dictionary, item.Key));
+                            break;
+                        case "ellipse":
+                            var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
+                            foreach (var pupilEllipse in dictionaryForKey)
+                            {
+                                switch (pupilEllipse.Key.ToString())
+                                {
+                                    case "angle":
+                                        var angle = (float)(double)pupilEllipse.Value;
+                                        // Do stuff
+                                        break;
+                                    case "center":
+                                        print("Pupil center : " + PupilTools.ObjectToVector(pupilEllipse.Value));
+                                        break;
+                                    case "axes":
+                                        var vector = PupilTools.ObjectToVector(pupilEllipse.Value);
+                                        // Do stuff
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            break;
                         default:
+                            print(item.Key);
                             break;
                     }
                 }
@@ -136,22 +158,24 @@ namespace RockVR.Video.Demo
                 {
                     switch (item.Key)
                     {
-                        case "base_data":
-                            print("Base_data : " + PupilTools.StringFromDictionary(dictionary, item.Key));
-                            break;
-                        case "confidence":
-                           print("Confidence : " +PupilTools.FloatFromDictionary(dictionary, item.Key)); 
-                            break;
-                        case "duration":
-                            print("Duration : " +PupilTools.FloatFromDictionary(dictionary, item.Key) + "ms");
-                            break;
+                        case "topic":
+                            print("Topic : " + PupilTools.StringFromDictionary(dictionary,item.Key));
+                        break;
                         default:
-                            break;
+                            print(item.Key);
+                        break;
                     }
                 }
             }
         }
-      
+
+        void OnDisable()
+        {
+            PupilTools.OnConnected -= StartPupilSubscription;
+            PupilTools.OnDisconnecting -= StopPupilSubscription;
+            PupilTools.OnReceiveData -= CustomReceiveData;
+        }
+
 
         #endregion
     }
