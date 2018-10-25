@@ -21,7 +21,7 @@ public class GameController : MonoBehaviour
     private int last_index;
     private int target_index;
     private float timeLeft;
-    public TargetCirle last_target;
+    public TargetCirle last_target = null;
     private RaycastHit looking_at_circle;
     private RaycastHit looking_at_circle_before;
     private float target_timer;
@@ -30,8 +30,8 @@ public class GameController : MonoBehaviour
     public bool is_started = false;
     private Color success_color = new Color(0.07f, 0.8f, 0.07f, 1);
     public float choosenTime;
-    public float travel_time;
-    public string choosenMode;
+    public float travel_time = -1.0f;
+    public string choosenMode = "";
 
     void Start()
     {
@@ -109,7 +109,6 @@ public class GameController : MonoBehaviour
                     //print(trgt.circle.transform.localScale.ToString("F5"));
                     last_target = trgt;
                 }
-
             }
             // Process the target looked at 
             if (looking_at_circle.collider)
@@ -179,14 +178,20 @@ public class GameController : MonoBehaviour
                 if (last_target != null)
                 {
                     last_target.DestroyTarget();
+                    travel_time = -1.0f;
+                    ResetTargetTimer();
                 }
                 // If the target is not created, create it
                 if (!trgt.circle_created)
+                {
                     trgt.CreateTarget(wall, true);
+                    ResetTargetTimer();
+                }
 
                 last_target = trgt;
                 ResetTimer();
             }
+            target_timer += Time.deltaTime;
 
             // Get the current object looked at by the user
             looking_at_circle = gridController.GetCurrentCollider();
@@ -196,6 +201,11 @@ public class GameController : MonoBehaviour
             {
                 if (looking_at_circle.collider.name == "Cylinder")
                 {
+                    if (travel_time < 0)
+                    {
+                        travel_time = target_timer;
+                        print("First time entry : " +travel_time);
+                    }
                     last_target.was_looked = true;
                     last_target.ReduceScale();
                     looking_at_circle_before = looking_at_circle;
