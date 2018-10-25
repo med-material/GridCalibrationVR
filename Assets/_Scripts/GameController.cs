@@ -248,5 +248,4 @@ public class GameController : MonoBehaviour
     {
         timeLeft = choosenTime;
     }
-
 }
