@@ -62,12 +62,12 @@ public class PupilTestData : MonoBehaviour {
                         }
                         break;
                     default:
-                        print(item.Key);
+                        //print(item.Key);
                         break;
                 }
             }
         }
-        else if (topic.StartsWith("fixation"))
+        /**else if (topic.StartsWith("fixation"))
         {
             foreach (var item in dictionary)
             {
@@ -81,7 +81,7 @@ public class PupilTestData : MonoBehaviour {
                         break;
                 }
             }
-        }
+        }*/
     }
 
     void OnDisable()
