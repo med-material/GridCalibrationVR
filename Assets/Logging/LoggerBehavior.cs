@@ -33,8 +33,8 @@ public class LoggerBehavior : MonoBehaviour
 
     private void Update()
     {
-        DoLog();
-        AddToLog();
+        //DoLog();
+        //AddToLog();
     }
 
     private void AddToLog()
@@ -60,6 +60,10 @@ public class LoggerBehavior : MonoBehaviour
             q = gameController.last_target != null ? gameController.last_target.circle.transform.position.y : double.NaN
 
         };
+        _toLog.Add(tmp);
+    }
+
+    public void AddToLog(List<object> tmp) {
         _toLog.Add(tmp);
     }
 

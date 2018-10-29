@@ -33,6 +33,11 @@ public class GameController : MonoBehaviour
     public float travel_time = -1.0f;
     public string choosenMode = "";
 
+    # region log value
+    private LoggerBehavior logger; 
+    # endregion
+
+
     void Start()
     {
         // Set the timers's default time
@@ -56,7 +61,64 @@ public class GameController : MonoBehaviour
         targets.Add(new TargetCirle(0, CENTER_X_L, CENTER_Y_T, wall_height));
         targets.Add(new TargetCirle(CENTER_X_L, CENTER_X_R, CENTER_Y_T, wall_height));
         targets.Add(new TargetCirle(CENTER_X_R, wall_width, CENTER_Y_T, wall_height));
+
+        logger = GetComponent<LoggerBehavior>();
     }
+
+    void OnEnable()
+    {
+        if (PupilTools.IsConnected)
+        {
+            PupilTools.SubscribeTo("pupil.");
+
+            PupilTools.OnReceiveData += CustomReceiveData;
+        }
+    }
+
+    void CustomReceiveData(string topic, Dictionary<string, object> dictionary, byte[] thirdFrame = null)
+    {
+        if (topic.StartsWith("pupil"))
+        {
+            foreach (var item in dictionary)
+            {
+                switch (item.Key)
+                {
+                    case "confidence":
+                        print("Confidence : " + PupilTools.FloatFromDictionary(dictionary, item.Key));
+                        break;
+                    case "norm_pos": // Origin 0,0 at the bottom left and 1,1 at the top right.
+                        //print("Norm : " + PupilTools.VectorFromDictionary(dictionary, item.Key));
+                        break;
+                    case "ellipse":
+                        var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
+                        foreach (var pupilEllipse in dictionaryForKey)
+                        {
+                            switch (pupilEllipse.Key.ToString())
+                            {
+                                case "angle":
+                                    var angle = (float)(double)pupilEllipse.Value;
+                                    // Do stuff
+                                    break;
+                                case "center":
+                                    //print("Center : " + PupilTools.ObjectToVector(pupilEllipse.Value));
+                                    break;
+                                case "axes":
+                                    //print("Axes : " + PupilTools.ObjectToVector(pupilEllipse.Value));
+                                    // Do stuff
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        // Do stuff
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
 
     // Update is called once per frame
     void Update()
@@ -123,6 +185,7 @@ public class GameController : MonoBehaviour
                             if (travel_time < 0)
                             {
                                 travel_time = timeLeft;
+                                LogData();
                             }
                             // If the target looked at is the same as before, start time
                             target_timer -= Time.deltaTime;
@@ -261,5 +324,9 @@ public class GameController : MonoBehaviour
     private void ResetTimer()
     {
         timeLeft = choosenTime;
+    }
+
+    private void LogData() {
+
     }
 }

@@ -33,12 +33,8 @@ public class GridController : MonoBehaviour
             PupilTools.IsGazing = true;
             PupilTools.SubscribeTo("gaze");
             PupilTools.SubscribeTo("fixation");
-            PupilTools.SubscribeTo("pupil.");
-
-            PupilTools.OnReceiveData += CustomReceiveData;
         }
     }
-
 
     void Update()
     {
@@ -69,51 +65,6 @@ public class GridController : MonoBehaviour
             }
         }
     }
-    void CustomReceiveData(string topic, Dictionary<string, object> dictionary, byte[] thirdFrame = null)
-    {
-        if (topic.StartsWith("pupil"))
-        {
-            foreach (var item in dictionary)
-            {
-                switch (item.Key)
-                {
-                    case "confidence":
-                        print("Confidence : " + PupilTools.FloatFromDictionary(dictionary, item.Key));
-                        break;
-                    case "norm_pos": // Origin 0,0 at the bottom left and 1,1 at the top right.
-                        //print("Norm : " + PupilTools.VectorFromDictionary(dictionary, item.Key));
-                        break;
-                    case "ellipse":
-                        var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
-                        foreach (var pupilEllipse in dictionaryForKey)
-                        {
-                            switch (pupilEllipse.Key.ToString())
-                            {
-                                case "angle":
-                                    var angle = (float)(double)pupilEllipse.Value;
-                                    // Do stuff
-                                    break;
-                                case "center":
-                                    print("Center : " + PupilTools.ObjectToVector(pupilEllipse.Value));
-                                    break;
-                                case "axes":
-                                    print("Axes : " + PupilTools.ObjectToVector(pupilEllipse.Value));
-                                    // Do stuff
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        // Do stuff
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-
-
     public RaycastHit GetCurrentCollider()
     {
         return hit;
