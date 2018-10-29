@@ -150,7 +150,8 @@ public class Connection
 					if ( PupilTools.ReceiveDataIsSet )
 					{
 						PupilTools.ReceiveData( msgType, MessagePackSerializer.Deserialize<Dictionary<string,object>> (mStream), thirdFrame);
-						continue;
+						//continue;
+						// André : Why ? 
 					}
 
 					switch(msgType)

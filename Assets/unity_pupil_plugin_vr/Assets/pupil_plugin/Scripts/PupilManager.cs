@@ -8,8 +8,6 @@ public class PupilManager : MonoBehaviour
 {
     public Calibration.Mode calibrationMode = Calibration.Mode._2D;
     public bool displayEyeImages = true;
-
-    public TestPupilData testPupilData;
     GameObject cameraObject;
     Text calibrationText;
 
@@ -17,7 +15,7 @@ public class PupilManager : MonoBehaviour
     {
         PupilTools.OnConnected += OnConnected;
         PupilTools.OnDisconnecting += OnDisconnecting;
-        PupilTools.OnCalibrationStarted += OnCalibtaionStarted;
+        PupilTools.OnCalibrationStarted += OnCalibrationStarted;
         PupilTools.OnCalibrationEnded += OnCalibrationEnded;
         PupilTools.OnCalibrationFailed += OnCalibrationFailed;
 
@@ -27,7 +25,6 @@ public class PupilManager : MonoBehaviour
         ResetCalibrationText();
     }
 
-   
 
     void ResetCalibrationText()
     {
@@ -39,7 +36,6 @@ public class PupilManager : MonoBehaviour
 
     void OnDisconnecting()
     {
-
         ResetCalibrationText();
 
         if (displayEyeImages)
@@ -49,7 +45,6 @@ public class PupilManager : MonoBehaviour
     void OnConnected()
     {
         calibrationText.text = "Success";
-        testPupilData.enabled = true;
         PupilTools.CalibrationMode = calibrationMode;
 
         InitializeCalibrationPointPreview();
@@ -87,7 +82,7 @@ public class PupilManager : MonoBehaviour
         calibrationText.text = "Press 'c' to start calibration.";
     }
 
-    void OnCalibtaionStarted()
+    void OnCalibrationStarted()
     {
         cameraObject.SetActive(true);
         PupilSettings.Instance.currentCamera = cameraObject.GetComponent<Camera>();
@@ -156,7 +151,7 @@ public class PupilManager : MonoBehaviour
     {
         PupilTools.OnConnected -= OnConnected;
         PupilTools.OnDisconnecting -= OnDisconnecting;
-        PupilTools.OnCalibrationStarted -= OnCalibtaionStarted;
+        PupilTools.OnCalibrationStarted -= OnCalibrationStarted;
         PupilTools.OnCalibrationEnded -= OnCalibrationEnded;
         PupilTools.OnCalibrationFailed -= OnCalibrationFailed;
     }

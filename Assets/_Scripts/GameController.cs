@@ -70,6 +70,7 @@ public class GameController : MonoBehaviour
             else print("No mode is selected. Please verify you have selected a mode");
         }
     }
+
     private void StartApproxMode()
     {
 
@@ -204,7 +205,7 @@ public class GameController : MonoBehaviour
                     if (travel_time < 0)
                     {
                         travel_time = target_timer;
-                        print("First time entry : " +travel_time);
+                        print("First time entry : " + travel_time);
                     }
                     last_target.was_looked = true;
                     last_target.ReduceScale();
@@ -214,9 +215,12 @@ public class GameController : MonoBehaviour
                 {
                     timeLeft -= Time.deltaTime;
                 }
-                if (last_target.was_looked && looking_at_circle.collider.name != "Cylinder")
+                if (last_target != null)
                 {
-                    last_target.calibration_max = true;
+                    if (last_target.was_looked && looking_at_circle.collider.name != "Cylinder")
+                    {
+                        last_target.calibration_max = true;
+                    }
                 }
             }
         }
