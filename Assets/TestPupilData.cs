@@ -2,32 +2,48 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PupilTestData : MonoBehaviour {
+public class TestPupilData : MonoBehaviour
+{
 
-	 private void OnEnable()
+    // Use this for initialization
+    void onEnable()
     {
-        PupilTools.OnConnected += StartPupilSubscription;
-        PupilTools.OnDisconnecting += StopPupilSubscription;
+        PupilTools.OnConnected += OnConnected;
+        PupilTools.OnDisconnecting += OnDisconnecting;
+    }
 
+    void Update()
+    {
+        print(PupilTools.IsConnected);
+    }
+
+    void AddCustomReceive()
+    {
+        print("Method added to event");
         PupilTools.OnReceiveData += CustomReceiveData;
     }
-	
-    void StartPupilSubscription()
+
+    void RemoveCustomReceive()
     {
-        PupilTools.CalibrationMode = Calibration.Mode._2D;
-        PupilTools.SubscribeTo("pupil.");
-        //PupilTools.SubscribeTo("fixation");
+        PupilTools.OnReceiveData -= CustomReceiveData;
     }
 
-    void StopPupilSubscription()
+    void OnConnected()
     {
-        PupilTools.UnSubscribeFrom("pupil.");
-        //PupilTools.UnSubscribeFrom("fication");
+        print("Connected!!!!!");
+        AddCustomReceive();
     }
+
+    void OnDisconnecting()
+    {
+        RemoveCustomReceive();
+    }
+
 
     void CustomReceiveData(string topic, Dictionary<string, object> dictionary, byte[] thirdFrame = null)
     {
-        if (topic.StartsWith("pupil"))
+        print("Event");
+        /**if (topic.StartsWith("pupil"))
         {
             foreach (var item in dictionary)
             {
@@ -37,7 +53,7 @@ public class PupilTestData : MonoBehaviour {
                         print("Confidence : " + PupilTools.FloatFromDictionary(dictionary, item.Key));
                         break;
                     case "norm_pos": // Origin 0,0 at the bottom left and 1,1 at the top right.
-                        print("Norm : " + PupilTools.VectorFromDictionary(dictionary, item.Key));
+                        //print("Norm : " + PupilTools.VectorFromDictionary(dictionary, item.Key));
                         break;
                     case "ellipse":
                         var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
@@ -50,7 +66,7 @@ public class PupilTestData : MonoBehaviour {
                                     // Do stuff
                                     break;
                                 case "center":
-                                    print("Pupil center : " + PupilTools.ObjectToVector(pupilEllipse.Value));
+                                    //print("Pupil center : " + PupilTools.ObjectToVector(pupilEllipse.Value));
                                     break;
                                 case "axes":
                                     var vector = PupilTools.ObjectToVector(pupilEllipse.Value);
@@ -62,32 +78,9 @@ public class PupilTestData : MonoBehaviour {
                         }
                         break;
                     default:
-                        //print(item.Key);
-                        break;
-                }
-            }
-        }
-        /**else if (topic.StartsWith("fixation"))
-        {
-            foreach (var item in dictionary)
-            {
-                switch (item.Key)
-                {
-                    case "topic":
-                        print("Topic : " + PupilTools.StringFromDictionary(dictionary, item.Key));
-                        break;
-                    default:
-                        print(item.Key);
                         break;
                 }
             }
         }*/
-    }
-
-    void OnDisable()
-    {
-        PupilTools.OnConnected -= StartPupilSubscription;
-        PupilTools.OnDisconnecting -= StopPupilSubscription;
-        PupilTools.OnReceiveData -= CustomReceiveData;
     }
 }

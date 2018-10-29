@@ -9,6 +9,7 @@ public class PupilManager : MonoBehaviour
     public Calibration.Mode calibrationMode = Calibration.Mode._2D;
     public bool displayEyeImages = true;
 
+    public TestPupilData testPupilData;
     GameObject cameraObject;
     Text calibrationText;
 
@@ -20,61 +21,13 @@ public class PupilManager : MonoBehaviour
         PupilTools.OnCalibrationEnded += OnCalibrationEnded;
         PupilTools.OnCalibrationFailed += OnCalibrationFailed;
 
-        StartCoroutine("AddCustomReceive");
-
         PupilSettings.Instance.currentCamera = GetComponentInChildren<Camera>();
         cameraObject = PupilSettings.Instance.currentCamera.gameObject;
 
         ResetCalibrationText();
     }
 
-    void AddCustomReceive()
-    {
-        PupilTools.OnReceiveData += CustomReceiveData;
-    }
-
-    void CustomReceiveData(string topic, Dictionary<string, object> dictionary, byte[] thirdFrame = null)
-    {
-        if (topic.StartsWith("pupil"))
-        {
-            foreach (var item in dictionary)
-            {
-                switch (item.Key)
-                {
-                    case "confidence":
-                        print("Confidence : " + PupilTools.FloatFromDictionary(dictionary, item.Key));
-                        break;
-                    case "norm_pos": // Origin 0,0 at the bottom left and 1,1 at the top right.
-                        //print("Norm : " + PupilTools.VectorFromDictionary(dictionary, item.Key));
-                        break;
-                    case "ellipse":
-                        var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
-                        foreach (var pupilEllipse in dictionaryForKey)
-                        {
-                            switch (pupilEllipse.Key.ToString())
-                            {
-                                case "angle":
-                                    var angle = (float)(double)pupilEllipse.Value;
-                                    // Do stuff
-                                    break;
-                                case "center":
-                                    //print("Pupil center : " + PupilTools.ObjectToVector(pupilEllipse.Value));
-                                    break;
-                                case "axes":
-                                    var vector = PupilTools.ObjectToVector(pupilEllipse.Value);
-                                    // Do stuff
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    }
+   
 
     void ResetCalibrationText()
     {
@@ -91,13 +44,12 @@ public class PupilManager : MonoBehaviour
 
         if (displayEyeImages)
             GetComponent<FramePublishing>().enabled = false;
-        //PupilTools.UnSubscribeFrom("pupil.");
     }
 
     void OnConnected()
     {
         calibrationText.text = "Success";
-
+        testPupilData.enabled = true;
         PupilTools.CalibrationMode = calibrationMode;
 
         InitializeCalibrationPointPreview();
@@ -106,8 +58,6 @@ public class PupilManager : MonoBehaviour
             gameObject.AddComponent<FramePublishing>();
 
         Invoke("ShowCalibrate", 1f);
-
-        //PupilTools.SubscribeTo("pupil.");
     }
 
     void InitializeCalibrationPointPreview()
@@ -209,6 +159,5 @@ public class PupilManager : MonoBehaviour
         PupilTools.OnCalibrationStarted -= OnCalibtaionStarted;
         PupilTools.OnCalibrationEnded -= OnCalibrationEnded;
         PupilTools.OnCalibrationFailed -= OnCalibrationFailed;
-        PupilTools.OnReceiveData -= CustomReceiveData;
     }
 }
