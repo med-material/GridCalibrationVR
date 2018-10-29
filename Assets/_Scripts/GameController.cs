@@ -41,6 +41,8 @@ public class GameController : MonoBehaviour
     private Vector3 norm_pos;
     #endregion
 
+    private bool oui = true;
+
 
     void Start()
     {
@@ -76,6 +78,7 @@ public class GameController : MonoBehaviour
     {
         if (PupilTools.IsConnected)
         {
+            PupilTools.SubscribeTo("gqze");
             PupilTools.SubscribeTo("pupil.");
 
             PupilTools.OnReceiveData += CustomReceiveData;
@@ -123,6 +126,27 @@ public class GameController : MonoBehaviour
                         break;
                 }
             }
+        }
+        if (topic.StartsWith("gaze") && oui)
+        {
+            foreach (var item in dictionary)
+            {
+                switch (item.Key)
+                {
+                    case "2D":
+                        var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
+                        foreach (var twoDEllipse in dictionaryForKey)
+                        {
+                            print(twoDEllipse.Key + " : " + twoDEllipse.Value);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                print(item.Key + " : " + item.Value);
+
+            }
+            oui = false;
         }
     }
 
@@ -348,8 +372,8 @@ public class GameController : MonoBehaviour
             m = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN,
             n = confidence, // confidence value calculated after calibration 
             o = travel_time,
-            p = last_target != null ? last_target.circle.transform.position.x : double.NaN,
-            q = last_target != null ? last_target.circle.transform.position.y : double.NaN
+            p = last_target != null ? last_target.circle.transform.localPosition.x : double.NaN,
+            q = last_target != null ? last_target.circle.transform.localPosition.y : double.NaN
         });
     }
 }

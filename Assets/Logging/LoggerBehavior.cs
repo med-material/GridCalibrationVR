@@ -63,7 +63,9 @@ public class LoggerBehavior : MonoBehaviour
         _toLog.Add(tmp);
     }
 
-    public void AddObjToLog(object tmp) {
+    public void AddObjToLog(object tmp)
+    {
+        DoLog();
         _toLog.Add(tmp);
     }
 
