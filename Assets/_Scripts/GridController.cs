@@ -83,6 +83,29 @@ public class GridController : MonoBehaviour
                     case "norm_pos": // Origin 0,0 at the bottom left and 1,1 at the top right.
                         //print("Norm : " + PupilTools.VectorFromDictionary(dictionary, item.Key));
                         break;
+                    case "ellipse":
+                        var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
+                        foreach (var pupilEllipse in dictionaryForKey)
+                        {
+                            switch (pupilEllipse.Key.ToString())
+                            {
+                                case "angle":
+                                    var angle = (float)(double)pupilEllipse.Value;
+                                    // Do stuff
+                                    break;
+                                case "center":
+                                    print("Center : " + PupilTools.ObjectToVector(pupilEllipse.Value));
+                                    break;
+                                case "axes":
+                                    print("Axes : " + PupilTools.ObjectToVector(pupilEllipse.Value));
+                                    // Do stuff
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        // Do stuff
+                        break;
                     default:
                         break;
                 }
