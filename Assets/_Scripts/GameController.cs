@@ -8,6 +8,8 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
+    private Camera dedicatedCapture;
+    private Vector3 gazeToWorld;
     private float CENTER_X_L;
     private float CENTER_Y_C;
     private float CENTER_X_R;
@@ -34,8 +36,10 @@ public class GameController : MonoBehaviour
     public string choosenMode = "";
 
     # region log value
-    private LoggerBehavior logger; 
-    # endregion
+    private LoggerBehavior logger;
+    private float confidence;
+    private Vector3 norm_pos;
+    #endregion
 
 
     void Start()
@@ -43,6 +47,9 @@ public class GameController : MonoBehaviour
         // Set the timers's default time
         ResetTargetTimer();
         ResetTimer();
+
+
+        dedicatedCapture = Camera.main;
 
         // Create const value for x, y min and max
         CENTER_X_L = wall_width / 3;
@@ -84,10 +91,10 @@ public class GameController : MonoBehaviour
                 switch (item.Key)
                 {
                     case "confidence":
-                        print("Confidence : " + PupilTools.FloatFromDictionary(dictionary, item.Key));
+                        confidence = PupilTools.FloatFromDictionary(dictionary, item.Key);
                         break;
                     case "norm_pos": // Origin 0,0 at the bottom left and 1,1 at the top right.
-                        //print("Norm : " + PupilTools.VectorFromDictionary(dictionary, item.Key));
+                        norm_pos = PupilTools.VectorFromDictionary(dictionary, item.Key);
                         break;
                     case "ellipse":
                         var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
@@ -118,7 +125,6 @@ public class GameController : MonoBehaviour
             }
         }
     }
-
 
     // Update is called once per frame
     void Update()
@@ -268,6 +274,7 @@ public class GameController : MonoBehaviour
                     if (travel_time < 0)
                     {
                         travel_time = target_timer;
+                        LogData();
                         print("First time entry : " + travel_time);
                     }
                     last_target.was_looked = true;
@@ -326,7 +333,23 @@ public class GameController : MonoBehaviour
         timeLeft = choosenTime;
     }
 
-    private void LogData() {
-
+    private void LogData()
+    {
+        if (PupilData._2D.GazePosition != Vector2.zero)
+        {
+            gazeToWorld = dedicatedCapture.ViewportToWorldPoint(new Vector3(PupilData._2D.GazePosition.x, PupilData._2D.GazePosition.y, Camera.main.nearClipPlane));
+        }
+        logger.AddObjToLog(new
+        {
+            a = DateTime.Now,
+            j = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.x : double.NaN,
+            k = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.y : double.NaN,
+            l = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN,
+            m = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN,
+            n = confidence, // confidence value calculated after calibration 
+            o = travel_time,
+            p = last_target != null ? last_target.circle.transform.position.x : double.NaN,
+            q = last_target != null ? last_target.circle.transform.position.y : double.NaN
+        });
     }
 }

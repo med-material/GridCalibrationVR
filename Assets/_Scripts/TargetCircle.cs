@@ -18,6 +18,7 @@ public class TargetCirle
     private float x_max;
     private float y_max;
     public GameObject circle;
+    public GameObject dot;
     public bool was_looked;
     private List<bool> l_looked = new List<bool>();
     public bool calibration_max = false;
@@ -47,7 +48,7 @@ public class TargetCirle
         circle.transform.localScale = previous_scale;
 
         // Add red dot at the center of the target
-        GameObject dot = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        dot = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         dot.gameObject.name = "Dot";
         dot.transform.parent = circle.transform;
         dot.transform.localRotation = Quaternion.Euler(0, 0, 0);
@@ -88,7 +89,7 @@ public class TargetCirle
         circle.transform.localScale = previous_scale;
 
         // Add red dot at the center of the target
-        GameObject dot = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        dot = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         dot.gameObject.name = "Dot";
         dot.transform.parent = circle.transform;
         dot.transform.localRotation = Quaternion.Euler(0, 0, 0);
@@ -168,6 +169,7 @@ public class TargetCirle
     internal void ReduceScale()
     {
         circle.transform.localScale *= 0.995f;
+        dot.transform.localScale = new Vector3(0.0225f/circle.transform.localScale.x,1.0f,0.027f/circle.transform.localScale.z);
         previous_scale = circle.transform.localScale;
         previous_scales.Add(previous_scale);
     }

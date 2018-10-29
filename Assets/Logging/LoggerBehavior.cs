@@ -63,7 +63,7 @@ public class LoggerBehavior : MonoBehaviour
         _toLog.Add(tmp);
     }
 
-    public void AddToLog(List<object> tmp) {
+    public void AddObjToLog(object tmp) {
         _toLog.Add(tmp);
     }
 
