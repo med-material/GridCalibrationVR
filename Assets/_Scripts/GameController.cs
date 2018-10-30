@@ -78,7 +78,7 @@ public class GameController : MonoBehaviour
     {
         if (PupilTools.IsConnected)
         {
-            PupilTools.SubscribeTo("gqze");
+            PupilTools.SubscribeTo("gaze");
             PupilTools.SubscribeTo("pupil.");
 
             PupilTools.OnReceiveData += CustomReceiveData;
@@ -139,6 +139,10 @@ public class GameController : MonoBehaviour
                         {
                             print(twoDEllipse.Key + " : " + twoDEllipse.Value);
                         }
+                        break;
+                    case "gaze.2d.0.":
+                    case "gaze.2d.1.":
+                        print(item.Value);
                         break;
                     default:
                         break;
@@ -272,16 +276,14 @@ public class GameController : MonoBehaviour
                 if (last_target != null)
                 {
                     last_target.DestroyTarget();
-                    travel_time = -1.0f;
-                    ResetTargetTimer();
                 }
                 // If the target is not created, create it
                 if (!trgt.circle_created)
                 {
                     trgt.CreateTarget(wall, true);
-                    ResetTargetTimer();
+                    travel_time = -1.0f;
+                    target_timer = 0.0f;
                 }
-
                 last_target = trgt;
                 ResetTimer();
             }
@@ -297,7 +299,7 @@ public class GameController : MonoBehaviour
                 {
                     if (travel_time < 0)
                     {
-                        travel_time = target_timer;
+                        travel_time = target_timer - 0.3f;
                         LogData();
                         print("First time entry : " + travel_time);
                     }
