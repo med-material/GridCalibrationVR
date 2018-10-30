@@ -10,15 +10,8 @@ public class PupilDataGetter
     # region public_data
     public float confidence;
     public Vector3 norm_pos;
-
-    public
-
     # endregion
-<<<<<<< HEAD
     private bool oui = true; 
-=======
-    private bool oui = true;
->>>>>>> c37ba763518edd66532030a6f80cb2fc622c63d5
     public void startSubscribe()
     {
         if (PupilTools.IsConnected)
