@@ -78,7 +78,7 @@ public class GameController : MonoBehaviour
     {
         if (PupilTools.IsConnected)
         {
-            PupilTools.SubscribeTo("gqze");
+            PupilTools.SubscribeTo("gaze");
             PupilTools.SubscribeTo("pupil.");
 
             PupilTools.OnReceiveData += CustomReceiveData;
