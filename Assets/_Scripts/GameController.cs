@@ -36,13 +36,11 @@ public class GameController : MonoBehaviour
     public string choosenMode = "";
 
     # region log value
+    private PupilDataGetter pupilDataGetter;
     private LoggerBehavior logger;
-    private float confidence;
     private Vector3 norm_pos;
     #endregion
 
-    private bool oui = true;
-    
     void Start()
     {
         // Set the timers's default time
@@ -70,88 +68,14 @@ public class GameController : MonoBehaviour
         targets.Add(new TargetCirle(CENTER_X_R, wall_width, CENTER_Y_T, wall_height));
 
         logger = GetComponent<LoggerBehavior>();
+
     }
 
     void OnEnable()
     {
-        if (PupilTools.IsConnected)
-        {
-            PupilTools.SubscribeTo("gaze");
-            PupilTools.SubscribeTo("pupil.");
-
-            PupilTools.OnReceiveData += CustomReceiveData;
-        }
+        pupilDataGetter = new PupilDataGetter();
+        pupilDataGetter.startSubscribe();
     }
-
-    void CustomReceiveData(string topic, Dictionary<string, object> dictionary, byte[] thirdFrame = null)
-    {
-        if (topic.StartsWith("pupil"))
-        {
-            foreach (var item in dictionary)
-            {
-                switch (item.Key)
-                {
-                    case "confidence":
-                        confidence = PupilTools.FloatFromDictionary(dictionary, item.Key);
-                        break;
-                    case "norm_pos": // Origin 0,0 at the bottom left and 1,1 at the top right.
-                        norm_pos = PupilTools.VectorFromDictionary(dictionary, item.Key);
-                        break;
-                    case "ellipse":
-                        var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
-                        foreach (var pupilEllipse in dictionaryForKey)
-                        {
-                            switch (pupilEllipse.Key.ToString())
-                            {
-                                case "angle":
-                                    var angle = (float)(double)pupilEllipse.Value;
-                                    // Do stuff
-                                    break;
-                                case "center":
-                                    //print("Center : " + PupilTools.ObjectToVector(pupilEllipse.Value));
-                                    break;
-                                case "axes":
-                                    //print("Axes : " + PupilTools.ObjectToVector(pupilEllipse.Value));
-                                    // Do stuff
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        // Do stuff
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        if (topic.StartsWith("gaze") && oui)
-        {
-            foreach (var item in dictionary)
-            {
-                switch (item.Key)
-                {
-                    case "2D":
-                        var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
-                        foreach (var twoDEllipse in dictionaryForKey)
-                        {
-                            print(twoDEllipse.Key + " : " + twoDEllipse.Value);
-                        }
-                        break;
-                    case "gaze.2d.0.":
-                    case "gaze.2d.1.":
-                        print(item.Value);
-                        break;
-                    default:
-                        break;
-                }
-                print(item.Key + " : " + item.Value);
-
-            }
-            oui = false;
-        }
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -167,7 +91,6 @@ public class GameController : MonoBehaviour
 
     private void StartApproxMode()
     {
-
         // Check if calibration is ended, delete current target, create each target in centered position
         if (calib_end && only_one)
         {
@@ -217,7 +140,6 @@ public class GameController : MonoBehaviour
                             if (travel_time < 0)
                             {
                                 travel_time = timeLeft;
-                                LogData();
                             }
                             // If the target looked at is the same as before, start time
                             target_timer -= Time.deltaTime;
@@ -251,6 +173,7 @@ public class GameController : MonoBehaviour
     }
     private void StartShrinkMode()
     {
+        print(pupilDataGetter.confidence);
         if (calib_end && only_one)
         {
             print("Calibration test end.");
@@ -286,19 +209,18 @@ public class GameController : MonoBehaviour
                 ResetTimer();
             }
             target_timer += Time.deltaTime;
-
             // Get the current object looked at by the user
             looking_at_circle = gridController.GetCurrentCollider();
-
             // If the user is looking the target, reduce its scale 
             if (looking_at_circle.collider)
             {
                 if (looking_at_circle.collider.name == "Cylinder")
                 {
+                    LogData(true);
                     if (travel_time < 0)
                     {
-                        travel_time = target_timer - 0.3f;
-                        LogData();
+                        travel_time = target_timer;
+                        //LogData(false);
                         print("First time entry : " + travel_time);
                     }
                     last_target.was_looked = true;
@@ -345,7 +267,6 @@ public class GameController : MonoBehaviour
             last_index = target_index;
             target = lst_trgt[target_index];
         }
-
         return target;
     }
     private void ResetTargetTimer()
@@ -357,23 +278,41 @@ public class GameController : MonoBehaviour
         timeLeft = choosenTime;
     }
 
-    private void LogData()
+    private void LogData(bool isFullLog)
     {
         if (PupilData._2D.GazePosition != Vector2.zero)
         {
             gazeToWorld = dedicatedCapture.ViewportToWorldPoint(new Vector3(PupilData._2D.GazePosition.x, PupilData._2D.GazePosition.y, Camera.main.nearClipPlane));
         }
-        logger.AddObjToLog(new
+        object tmp;
+        if (isFullLog)
         {
-            a = DateTime.Now,
-            j = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.x : double.NaN,
-            k = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.y : double.NaN,
-            l = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN,
-            m = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN,
-            n = confidence, // confidence value calculated after calibration 
-            o = travel_time,
-            p = last_target != null ? last_target.circle.transform.localPosition.x : double.NaN,
-            q = last_target != null ? last_target.circle.transform.localPosition.y : double.NaN
-        });
+            tmp = new
+            {
+                a = DateTime.Now,
+                j = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.x : double.NaN,
+                k = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.y : double.NaN,
+                l = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN,
+                m = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN,
+                n = pupilDataGetter.confidence, // confidence value on real time 
+                o = travel_time,
+                p = last_target != null ? last_target.circle.transform.localPosition.x : double.NaN,
+                q = last_target != null ? last_target.circle.transform.localPosition.y : double.NaN
+            };
+        }
+        else {
+            tmp = new {
+                a = DateTime.Now,
+                j = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.x : double.NaN,
+                k = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.y : double.NaN,
+                l = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN,
+                m = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN,
+                n = pupilDataGetter.confidence, // confidence value on real time 
+                o = travel_time,
+                p = last_target != null ? last_target.circle.transform.localPosition.x : double.NaN,
+                q = last_target != null ? last_target.circle.transform.localPosition.y : double.NaN
+            };
+        }
+        logger.AddObjToLog(tmp);
     }
 }

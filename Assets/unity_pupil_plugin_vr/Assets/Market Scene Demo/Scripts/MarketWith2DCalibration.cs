@@ -5,11 +5,8 @@ using UnityEngine;
 public class MarketWith2DCalibration : MonoBehaviour 
 {
 	private Camera sceneCamera;
-	private GazePrint gazePrint;
-
 	private LineRenderer heading;
 	private Vector3 standardViewportPoint = new Vector3 (0.5f, 0.5f, 10);
-
 	private Vector2 gazePointLeft;
 	private Vector2 gazePointRight;
 	private Vector2 gazePointCenter;
@@ -21,7 +18,6 @@ public class MarketWith2DCalibration : MonoBehaviour
 		PupilData.calculateMovingAverage = false;
 
 		sceneCamera = gameObject.GetComponent<Camera> ();
-		gazePrint = gameObject.GetComponent<GazePrint> ();
 		heading = gameObject.GetComponent<LineRenderer> ();
 	}
 
@@ -45,9 +41,6 @@ public class MarketWith2DCalibration : MonoBehaviour
 			gazePointCenter = PupilData._2D.GazePosition;
 			viewportPoint = new Vector3 (gazePointCenter.x, gazePointCenter.y, 1f);
 		}
-
-		if (Input.GetKeyUp (KeyCode.G))
-			gazePrint.enabled = !gazePrint.enabled;
 
 		if (Input.GetKeyUp (KeyCode.L))
 			heading.enabled = !heading.enabled;

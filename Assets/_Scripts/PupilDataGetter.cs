@@ -11,7 +11,12 @@ public class PupilDataGetter
     public float confidence;
     public Vector3 norm_pos;
     # endregion
-    private bool oui = true; 
+
+    public PupilDataGetter ()
+    {
+        
+    }
+
     public void startSubscribe()
     {
         if (PupilTools.IsConnected)
@@ -45,7 +50,6 @@ public class PupilDataGetter
                             {
                                 case "angle":
                                     var angle = (float)(double)pupilEllipse.Value;
-                                    // Do stuff
                                     break;
                                 case "center":
                                     //print("Center : " + PupilTools.ObjectToVector(pupilEllipse.Value));
@@ -64,31 +68,6 @@ public class PupilDataGetter
                         break;
                 }
             }
-        }
-        if (topic.StartsWith("gaze") && oui)
-        {
-            foreach (var item in dictionary)
-            {
-                switch (item.Key)
-                {
-                    case "2D":
-                        var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
-                        foreach (var twoDEllipse in dictionaryForKey)
-                        {
-                            //print(twoDEllipse.Key + " : " + twoDEllipse.Value);
-                        }
-                        break;
-                    case "gaze.2d.0.":
-                    case "gaze.2d.1.":
-                        //print(item.Value);
-                        break;
-                    default:
-                        break;
-                }
-                //print(item.Key + " : " + item.Value);
-
-            }
-            oui = false;
         }
     }
 

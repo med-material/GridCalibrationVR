@@ -33,8 +33,6 @@ public class LoggerBehavior : MonoBehaviour
 
     private void Update()
     {
-        //DoLog();
-        //AddToLog();
     }
 
     private void AddToLog()
@@ -65,6 +63,7 @@ public class LoggerBehavior : MonoBehaviour
 
     public void AddObjToLog(object tmp)
     {
+
         DoLog();
         _toLog.Add(tmp);
     }
@@ -78,7 +77,7 @@ public class LoggerBehavior : MonoBehaviour
     {
         CSVheader = AppConstants.CsvFirstRow;
         _logger = Logger.Instance;
-        if (_toLog.Count == 0) //&& SceneManage.loadTestScene == -2) // check this in Profiler 
+        if (_toLog.Count == 0)
         {
             var firstRow = new { CSVheader };
             _toLog.Add(firstRow);
