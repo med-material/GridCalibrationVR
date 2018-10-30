@@ -42,14 +42,12 @@ public class GameController : MonoBehaviour
     #endregion
 
     private bool oui = true;
-
-
+    
     void Start()
     {
         // Set the timers's default time
         ResetTargetTimer();
         ResetTimer();
-
 
         dedicatedCapture = Camera.main;
 
