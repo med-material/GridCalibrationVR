@@ -1,158 +1,158 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
-public class PupilManager : MonoBehaviour 
+public class PupilManager : MonoBehaviour
 {
-	public Calibration.Mode calibrationMode = Calibration.Mode._2D;
-	public bool displayEyeImages = true;
+    public Calibration.Mode calibrationMode = Calibration.Mode._2D;
+    public bool displayEyeImages = true;
+    GameObject cameraObject;
+    Text calibrationText;
 
-	GameObject cameraObject;
-	Text calibrationText;
+    void Start()
+    {
+        PupilTools.OnConnected += OnConnected;
+        PupilTools.OnDisconnecting += OnDisconnecting;
+        PupilTools.OnCalibrationStarted += OnCalibrationStarted;
+        PupilTools.OnCalibrationEnded += OnCalibrationEnded;
+        PupilTools.OnCalibrationFailed += OnCalibrationFailed;
 
-	void Start()
-	{	
-		PupilTools.OnConnected += OnConnected;
-		PupilTools.OnDisconnecting += OnDisconnecting;
-		PupilTools.OnCalibrationStarted += OnCalibtaionStarted;
-		PupilTools.OnCalibrationEnded += OnCalibrationEnded;
-		PupilTools.OnCalibrationFailed += OnCalibrationFailed;
-	
-		PupilSettings.Instance.currentCamera = GetComponentInChildren<Camera> ();
-		cameraObject = PupilSettings.Instance.currentCamera.gameObject;
+        PupilSettings.Instance.currentCamera = GetComponentInChildren<Camera>();
+        cameraObject = PupilSettings.Instance.currentCamera.gameObject;
 
-		ResetCalibrationText ();
-	}
+        ResetCalibrationText();
+    }
 
-	void ResetCalibrationText()
-	{
-		if (calibrationText == null)
-			calibrationText = cameraObject.GetComponentInChildren<Text> ();
 
-		calibrationText.text = "Trying to connect to Pupil.\nPlease start Pupil Service/Capture\n(if you have not done so, already)";
-	}
+    void ResetCalibrationText()
+    {
+        if (calibrationText == null)
+            calibrationText = cameraObject.GetComponentInChildren<Text>();
 
-	void OnDisconnecting()
-	{
-		ResetCalibrationText ();
+        calibrationText.text = "Trying to connect to Pupil.\nPlease start Pupil Service/Capture\n(if you have not done so, already)";
+    }
 
-		if (displayEyeImages)
-			GetComponent<FramePublishing> ().enabled = false;
-	}
+    void OnDisconnecting()
+    {
+        ResetCalibrationText();
 
-	void OnConnected()
-	{
-		calibrationText.text = "Success";
+        if (displayEyeImages)
+            GetComponent<FramePublishing>().enabled = false;
+    }
 
-		PupilTools.CalibrationMode = calibrationMode;
+    void OnConnected()
+    {
+        calibrationText.text = "Success";
+        PupilTools.CalibrationMode = calibrationMode;
 
-		InitializeCalibrationPointPreview ();
+        InitializeCalibrationPointPreview();
 
-		if (displayEyeImages)
-			gameObject.AddComponent<FramePublishing> ();
-		
-		Invoke ("ShowCalibrate", 1f);
-	}
+        if (displayEyeImages)
+            gameObject.AddComponent<FramePublishing>();
 
-	void InitializeCalibrationPointPreview()
-	{
-		var type = PupilTools.CalibrationType;
-		var camera = PupilSettings.Instance.currentCamera;
-		Vector3 centerPoint = PupilTools.CalibrationType.centerPoint;
-		foreach (var vector in type.vectorDepthRadius)
-		{
-			Transform previewCircle = GameObject.Instantiate<Transform> (Resources.Load<Transform> ("CalibrationPointExtendPreview"));
-			previewCircle.parent = camera.transform;
-			float scaleFactor = (centerPoint.x + vector.y) * 0.2f;
-			if (PupilTools.CalibrationMode == Calibration.Mode._2D)
-			{
-				centerPoint.z = type.vectorDepthRadius [0].x;
-				scaleFactor = camera.worldToCameraMatrix.MultiplyPoint3x4 (camera.ViewportToWorldPoint (centerPoint + Vector3.right * vector.y)).x * 0.2f;
-				centerPoint = camera.worldToCameraMatrix.MultiplyPoint3x4 (camera.ViewportToWorldPoint (centerPoint));
-			}
-			previewCircle.localScale = new Vector3 (scaleFactor, scaleFactor / PupilSettings.Instance.currentCamera.aspect, 1);
-			previewCircle.localPosition = new Vector3(centerPoint.x, centerPoint.y, vector.x);
-			previewCircle.localEulerAngles = Vector3.zero;
-		}
-	}
+        Invoke("ShowCalibrate", 1f);
+    }
 
-	void ShowCalibrate()
-	{
-		calibrationText.text = "Press 'c' to start calibration.";
-	}
+    void InitializeCalibrationPointPreview()
+    {
+        var type = PupilTools.CalibrationType;
+        var camera = PupilSettings.Instance.currentCamera;
+        Vector3 centerPoint = PupilTools.CalibrationType.centerPoint;
+        foreach (var vector in type.vectorDepthRadius)
+        {
+            Transform previewCircle = GameObject.Instantiate<Transform>(Resources.Load<Transform>("CalibrationPointExtendPreview"));
+            previewCircle.parent = camera.transform;
+            float scaleFactor = (centerPoint.x + vector.y) * 0.2f;
+            if (PupilTools.CalibrationMode == Calibration.Mode._2D)
+            {
+                centerPoint.z = type.vectorDepthRadius[0].x;
+                scaleFactor = camera.worldToCameraMatrix.MultiplyPoint3x4(camera.ViewportToWorldPoint(centerPoint + Vector3.right * vector.y)).x * 0.2f;
+                centerPoint = camera.worldToCameraMatrix.MultiplyPoint3x4(camera.ViewportToWorldPoint(centerPoint));
+            }
+            previewCircle.localScale = new Vector3(scaleFactor, scaleFactor / PupilSettings.Instance.currentCamera.aspect, 1);
+            previewCircle.localPosition = new Vector3(centerPoint.x, centerPoint.y, vector.x);
+            previewCircle.localEulerAngles = Vector3.zero;
+        }
+    }
 
-	void OnCalibtaionStarted()
-	{
-		cameraObject.SetActive (true);
-		PupilSettings.Instance.currentCamera = cameraObject.GetComponent<Camera> ();
-		calibrationText.text = "";
+    void ShowCalibrate()
+    {
+        calibrationText.text = "Press 'c' to start calibration.";
+    }
 
-		if (displayEyeImages)
-			GetComponent<FramePublishing> ().enabled = false;
+    void OnCalibrationStarted()
+    {
+        cameraObject.SetActive(true);
+        PupilSettings.Instance.currentCamera = cameraObject.GetComponent<Camera>();
+        calibrationText.text = "";
 
-		if (loadedSceneIndex != -1)
-			StartCoroutine (UnloadCurrentScene());
-	}
-		
-	void OnCalibrationEnded()
-	{
-		calibrationText.text = "Calibration ended.";
+        if (displayEyeImages)
+            GetComponent<FramePublishing>().enabled = false;
 
-		Invoke ("StartDemo", 1f);
-	}
+        if (loadedSceneIndex != -1)
+            StartCoroutine(UnloadCurrentScene());
+    }
 
-	void OnCalibrationFailed()
-	{
-		calibrationText.text = "Calibration failed\nPress 'c' to start it again.";
+    void OnCalibrationEnded()
+    {
+        calibrationText.text = "Calibration ended.";
 
-		if (displayEyeImages)
-			GetComponent<FramePublishing> ().enabled = true;
-	}
+        Invoke("StartDemo", 1f);
+    }
 
-	public string[] availableScenes;
-	public int currentSceneIndex;
-	private int loadedSceneIndex = -1;
-	IEnumerator LoadCurrentScene()
-	{
-		AsyncOperation asyncScene = SceneManager.LoadSceneAsync(availableScenes[currentSceneIndex],LoadSceneMode.Additive);
+    void OnCalibrationFailed()
+    {
+        calibrationText.text = "Calibration failed\nPress 'c' to start it again.";
 
-		while (!asyncScene.isDone)
-		{
-			yield return null;
-		}
-		loadedSceneIndex = currentSceneIndex;
-	}
-	IEnumerator UnloadCurrentScene()
-	{
-		AsyncOperation asyncLoad = SceneManager.UnloadSceneAsync(availableScenes[loadedSceneIndex]);
+        if (displayEyeImages)
+            GetComponent<FramePublishing>().enabled = true;
+    }
 
-		while (!asyncLoad.isDone)
-		{
-			yield return null;
-		}
-		loadedSceneIndex = -1;
-	}
+    public string[] availableScenes;
+    public int currentSceneIndex;
+    private int loadedSceneIndex = -1;
+    IEnumerator LoadCurrentScene()
+    {
+        AsyncOperation asyncScene = SceneManager.LoadSceneAsync(availableScenes[currentSceneIndex], LoadSceneMode.Additive);
 
-	void StartDemo()
-	{
-		StartCoroutine (LoadCurrentScene());
+        while (!asyncScene.isDone)
+        {
+            yield return null;
+        }
+        loadedSceneIndex = currentSceneIndex;
+    }
+    IEnumerator UnloadCurrentScene()
+    {
+        AsyncOperation asyncLoad = SceneManager.UnloadSceneAsync(availableScenes[loadedSceneIndex]);
 
-		cameraObject.SetActive (false);
-	}
+        while (!asyncLoad.isDone)
+        {
+            yield return null;
+        }
+        loadedSceneIndex = -1;
+    }
 
-	void Update()
-	{
-		if (Input.GetKeyUp (KeyCode.S)) 
-			StartDemo ();
-	}
+    void StartDemo()
+    {
+        StartCoroutine(LoadCurrentScene());
 
-	void OnDisable()
-	{
-		PupilTools.OnConnected -= OnConnected;
-		PupilTools.OnDisconnecting -= OnDisconnecting;
-		PupilTools.OnCalibrationStarted -= OnCalibtaionStarted;
-		PupilTools.OnCalibrationEnded -= OnCalibrationEnded;
-		PupilTools.OnCalibrationFailed -= OnCalibrationFailed;
-	}
+        cameraObject.SetActive(false);
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyUp(KeyCode.S))
+            StartDemo();
+    }
+
+    void OnDisable()
+    {
+        PupilTools.OnConnected -= OnConnected;
+        PupilTools.OnDisconnecting -= OnDisconnecting;
+        PupilTools.OnCalibrationStarted -= OnCalibrationStarted;
+        PupilTools.OnCalibrationEnded -= OnCalibrationEnded;
+        PupilTools.OnCalibrationFailed -= OnCalibrationFailed;
+    }
 }
