@@ -83,6 +83,11 @@ public class PupilDataGetter
                         break;
                     default:
                         break;
+                        // Other sub-topics :
+                            //norm_pos: Normalized position of the fixation’s centroid
+                            //base_data: Gaze data that the fixation is based on
+                            //duration: Exact fixation duration, in milliseconds
+                            //dispersion: Dispersion, in degrees
                 }
             }
         }
