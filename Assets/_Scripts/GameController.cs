@@ -24,6 +24,7 @@ public class GameController : MonoBehaviour
     private int target_index;
     private float timeLeft;
     public TargetCirle last_target = null;
+    public HeatMap heatMap;
     private RaycastHit looking_at_circle;
     private RaycastHit looking_at_circle_before;
     private float target_timer;
@@ -72,6 +73,9 @@ public class GameController : MonoBehaviour
         targets.Add(new TargetCirle(CENTER_X_R, wall_width, CENTER_Y_T, wall_height));
 
         logger = GetComponent<LoggerBehavior>();
+
+        //heatMap
+        heatMap = new HeatMap(0, 0, 0);
     }
 
     void OnEnable()
@@ -295,6 +299,8 @@ public class GameController : MonoBehaviour
             // If the user is looking the target, reduce its scale 
             if (looking_at_circle.collider)
             {
+                Vector3 posCircleHeatMap = looking_at_circle.transform.position;
+                heatMap.addCircle(posCircleHeatMap);
                 if (looking_at_circle.collider.name == "Cylinder")
                 {
                     if (travel_time < 0)

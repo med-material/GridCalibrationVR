@@ -11,8 +11,6 @@ public class PupilDataGetter
     public float confidence;
     public Vector3 norm_pos;
 
-    public
-
     # endregion
     private bool oui = true;
     public void startSubscribe()
