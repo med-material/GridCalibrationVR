@@ -28,6 +28,7 @@ public class GameController : MonoBehaviour
     private RaycastHit looking_at_circle;
     private RaycastHit looking_at_circle_before;
     private float target_timer;
+    private float heat_timer;
     private bool calib_end = false;
     private bool only_one = true;
     public bool is_started = false;
@@ -76,6 +77,7 @@ public class GameController : MonoBehaviour
 
         //heatMap
         heatMap = new HeatMap(0, 0, 0);
+        heatMap.setActive(false);
     }
 
     void OnEnable()
@@ -268,6 +270,7 @@ public class GameController : MonoBehaviour
                 }
                 t.CreateTarget(wall, true);
             });
+            heatMap.setActive(true);
             only_one = false;
         }
         else if (only_one)
@@ -299,8 +302,12 @@ public class GameController : MonoBehaviour
             // If the user is looking the target, reduce its scale 
             if (looking_at_circle.collider)
             {
-                Vector3 posCircleHeatMap = looking_at_circle.transform.position;
-                heatMap.addCircle(posCircleHeatMap);
+                Vector3 posCircleHeatMap = new Vector3(looking_at_circle.transform.position.x,looking_at_circle.transform.position.y,looking_at_circle.transform.position.z-0.2f);
+                if(heat_timer > 0.2f){
+                    heatMap.addCircle(posCircleHeatMap);
+                    heat_timer = 0;
+                }
+                heat_timer += Time.deltaTime;
                 if (looking_at_circle.collider.name == "Cylinder")
                 {
                     if (travel_time < 0)
