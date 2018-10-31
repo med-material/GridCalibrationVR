@@ -10,11 +10,13 @@ public class PupilDataGetter
     # region public_data
     public float confidence;
     public Vector3 norm_pos;
+
+    public string current_topic;
     # endregion
 
-    public PupilDataGetter ()
+    public PupilDataGetter()
     {
-        
+
     }
 
     public void startSubscribe()
@@ -23,6 +25,7 @@ public class PupilDataGetter
         {
             PupilTools.SubscribeTo("gaze");
             PupilTools.SubscribeTo("pupil.");
+            PupilTools.SubscribeTo("fixation"); // TODO verify that the plugin is enabled on Pupil Capture
 
             PupilTools.OnReceiveData += CustomReceiveData;
         }
@@ -63,6 +66,20 @@ public class PupilDataGetter
                             }
                         }
                         // Do stuff
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        else if (topic.StartsWith("fixation"))
+        {
+            foreach (var item in dictionary)
+            {
+                switch (item.Key)
+                {
+                    case "topic":
+                        current_topic = PupilTools.StringFromDictionary(dictionary,item.Key);
                         break;
                     default:
                         break;

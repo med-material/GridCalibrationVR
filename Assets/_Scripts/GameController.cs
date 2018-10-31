@@ -202,7 +202,7 @@ public class GameController : MonoBehaviour
                 if (!trgt.circle_created)
                 {
                     trgt.CreateTarget(wall, true);
-                    travel_time = -1.0f;
+                    travel_time = 0.0f;
                     target_timer = 0.0f;
                 }
                 last_target = trgt;
@@ -217,7 +217,7 @@ public class GameController : MonoBehaviour
                 if (looking_at_circle.collider.name == "Cylinder")
                 {
                     LogData(true);
-                    if (travel_time < 0)
+                    if (travel_time <= 0.0f) // Attention comparaison float
                     {
                         travel_time = target_timer;
                         //LogData(false);
@@ -297,7 +297,8 @@ public class GameController : MonoBehaviour
                 n = pupilDataGetter.confidence, // confidence value on real time 
                 o = travel_time,
                 p = last_target != null ? last_target.circle.transform.localPosition.x : double.NaN,
-                q = last_target != null ? last_target.circle.transform.localPosition.y : double.NaN
+                q = last_target != null ? last_target.circle.transform.localPosition.y : double.NaN,
+                r = CalculateCircleRadiusPercent()
             };
         }
         else {
@@ -314,5 +315,11 @@ public class GameController : MonoBehaviour
             };
         }
         logger.AddObjToLog(tmp);
+    }
+
+    private float CalculateCircleRadiusPercent() {
+        float current_scale = looking_at_circle.collider.gameObject.transform.localScale.x;
+        float first_scale = last_target.previous_scales[0].x;
+        return ((first_scale-current_scale)/first_scale)*100;
     }
 }
