@@ -18,13 +18,17 @@ public class PupilDataGetter
     public Vector3 pupil_center;
     #endregion
 
+<<<<<<< HEAD
     private List<string> topics;
     private Vector2 fix_norm_pos;
     private float fix_dispersion;
     private float fix_duration;
     private float fix_base_data;
     private float fix_confidence;
+=======
+>>>>>>> ed903644830e243f6896ca942b68f9b01168bde1
 
+    private List<string> topics;
     public PupilDataGetter()
     {
         topics = new List<string>();
