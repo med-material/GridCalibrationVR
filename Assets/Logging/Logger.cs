@@ -17,6 +17,7 @@ public class Logger
     public string FullPathLogDir
     {
         get { return AppConstants.DefaultEyeTrackingFolder; }
+        set { FullPathLogDir = value; }
     }
 
     public string FullPathLogFile

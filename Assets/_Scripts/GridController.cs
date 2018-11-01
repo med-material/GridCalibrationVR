@@ -7,7 +7,6 @@ public class GridController : MonoBehaviour
 {
 
     private Camera sceneCamera;
-    private GazePrint gazePrint;
     private TextMesh positionText;
     private LineRenderer heading;
     private Vector3 standardViewportPoint = new Vector3(0.5f, 0.5f, 10);
@@ -22,7 +21,6 @@ public class GridController : MonoBehaviour
         PupilData.calculateMovingAverage = false;
         positionText = gameObject.GetComponent<TextMesh>();
         sceneCamera = gameObject.GetComponent<Camera>();
-        gazePrint = gameObject.GetComponent<GazePrint>();
         heading = gameObject.GetComponent<LineRenderer>();
     }
 
@@ -32,7 +30,6 @@ public class GridController : MonoBehaviour
         {
             PupilTools.IsGazing = true;
             PupilTools.SubscribeTo("gaze");
-            PupilTools.SubscribeTo("fixation");
         }
     }
 

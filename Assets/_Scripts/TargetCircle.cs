@@ -7,7 +7,7 @@ using UnityEditor.VersionControl;
 public class TargetCirle
 {
     private Vector3 previous_scale;
-    private List<Vector3> previous_scales = new List<Vector3>();
+    public List<Vector3> previous_scales = new List<Vector3>();
     private List<float> scales_factor = new List<float>();
     private float default_x_max;
     private float default_y_max;

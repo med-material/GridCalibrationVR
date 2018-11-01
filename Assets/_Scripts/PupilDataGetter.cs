@@ -9,31 +9,90 @@ public class PupilDataGetter
 {
     # region public_data
     public float confidence;
+    public float left_confidence;
+    public float right_confidence;
+    public string current_topic;
     public Vector3 norm_pos;
+    public float pupil_angle;
+    public Vector3 pupil_axes;
+    public Vector3 pupil_center;
+    #endregion
 
-    # endregion
-    private bool oui = true;
-    public void startSubscribe()
+
+    private List<string> topics;
+    public PupilDataGetter()
+    {
+        topics = new List<string>();
+    }
+
+    public void startSubscribe(List<string> topics)
     {
         if (PupilTools.IsConnected)
         {
-            PupilTools.SubscribeTo("gaze");
-            PupilTools.SubscribeTo("pupil.");
+            this.topics.AddRange(topics);
+            foreach (string topic in topics)
+            {
+                PupilTools.SubscribeTo(topic);
+            }
+            //PupilTools.SubscribeTo("gaze");
+            //PupilTools.SubscribeTo("pupil.");
+            //PupilTools.SubscribeTo("fixation"); // TODO verify that the plugin is enabled on Pupil Capture
 
             PupilTools.OnReceiveData += CustomReceiveData;
         }
     }
 
+    public void stopSubscribe()
+    {
+        foreach (string topic in topics)
+        {
+            PupilTools.UnSubscribeFrom(topic);
+        }
+        topics.Clear();
+        //PupilTools.UnSubscribeFrom("gaze");
+        //PupilTools.UnSubscribeFrom("pupil.");
+        //PupilTools.UnSubscribeFrom("fixation");
+
+        PupilTools.OnReceiveData -= CustomReceiveData;
+    }
+
     private void CustomReceiveData(string topic, Dictionary<string, object> dictionary, byte[] thirdFrame = null)
     {
+        if (topic.StartsWith("gaze"))
+        {
+            foreach (var item in dictionary)
+            {
+                switch (item.Key)
+                {
+                    case "topic":
+                        current_topic = PupilTools.StringFromDictionary(dictionary, item.Key);
+                        break;
+                    case "confidence":
+                        confidence = PupilTools.FloatFromDictionary(dictionary, item.Key);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
         if (topic.StartsWith("pupil"))
         {
             foreach (var item in dictionary)
             {
                 switch (item.Key)
                 {
+                    case "topic":
+                        current_topic = PupilTools.StringFromDictionary(dictionary, item.Key);
+                        break;
                     case "confidence":
-                        confidence = PupilTools.FloatFromDictionary(dictionary, item.Key);
+                        if (topic.StartsWith("pupil.1"))
+                        {
+                            left_confidence = PupilTools.FloatFromDictionary(dictionary, item.Key);
+                        }
+                        else if (topic.StartsWith("pupil.0"))
+                        {
+                            right_confidence = PupilTools.FloatFromDictionary(dictionary, item.Key);
+                        }
                         break;
                     case "norm_pos": // Origin 0,0 at the bottom left and 1,1 at the top right.
                         norm_pos = PupilTools.VectorFromDictionary(dictionary, item.Key);
@@ -45,52 +104,42 @@ public class PupilDataGetter
                             switch (pupilEllipse.Key.ToString())
                             {
                                 case "angle":
-                                    var angle = (float)(double)pupilEllipse.Value;
-                                    // Do stuff
+                                    pupil_angle = (float)(double)pupilEllipse.Value;
                                     break;
                                 case "center":
-                                    //print("Center : " + PupilTools.ObjectToVector(pupilEllipse.Value));
+                                    pupil_center = PupilTools.ObjectToVector(pupilEllipse.Value);
                                     break;
                                 case "axes":
-                                    //print("Axes : " + PupilTools.ObjectToVector(pupilEllipse.Value));
-                                    // Do stuff
+                                    pupil_axes = PupilTools.ObjectToVector(pupilEllipse.Value);
                                     break;
                                 default:
                                     break;
                             }
                         }
-                        // Do stuff
                         break;
                     default:
                         break;
                 }
             }
         }
-        if (topic.StartsWith("gaze") && oui)
+        else if (topic.StartsWith("fixation"))
         {
             foreach (var item in dictionary)
             {
                 switch (item.Key)
                 {
-                    case "2D":
-                        var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
-                        foreach (var twoDEllipse in dictionaryForKey)
-                        {
-                            //print(twoDEllipse.Key + " : " + twoDEllipse.Value);
-                        }
-                        break;
-                    case "gaze.2d.0.":
-                    case "gaze.2d.1.":
-                        //print(item.Value);
+                    case "topic":
+                        current_topic = PupilTools.StringFromDictionary(dictionary, item.Key);
                         break;
                     default:
                         break;
+                        // Other sub-topics :
+                        //norm_pos: Normalized position of the fixation’s centroid
+                        //base_data: Gaze data that the fixation is based on
+                        //duration: Exact fixation duration, in milliseconds
+                        //dispersion: Dispersion, in degrees
                 }
-                //print(item.Key + " : " + item.Value);
-
             }
-            oui = false;
         }
     }
-
 }

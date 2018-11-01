@@ -36,22 +36,20 @@ public class GameController : MonoBehaviour
     public float choosenTime;
     public float travel_time = -1.0f;
     public string choosenMode = "";
+    private TextMesh left_conf_text;
+    private TextMesh right_conf_text;
 
     # region log value
+    private PupilDataGetter pupilDataGetter;
     private LoggerBehavior logger;
-    private float confidence;
     private Vector3 norm_pos;
     #endregion
-
-    private bool oui = true;
-
 
     void Start()
     {
         // Set the timers's default time
         ResetTargetTimer();
         ResetTimer();
-
 
         dedicatedCapture = Camera.main;
 
@@ -75,92 +73,26 @@ public class GameController : MonoBehaviour
 
         logger = GetComponent<LoggerBehavior>();
 
+
         //heatMap
         heatMap = new HeatMap(0, 0, 0);
         heatMap.setActive(false);
+
+        left_conf_text = GameObject.Find("LeftConf").GetComponent<TextMesh>();
+        right_conf_text = GameObject.Find("RightConf").GetComponent<TextMesh>();
+
     }
 
     void OnEnable()
     {
-        if (PupilTools.IsConnected)
-        {
-            PupilTools.SubscribeTo("gaze");
-            PupilTools.SubscribeTo("pupil.");
-
-            PupilTools.OnReceiveData += CustomReceiveData;
-        }
+        pupilDataGetter = new PupilDataGetter();
+        pupilDataGetter.startSubscribe(new List<string> { "gaze", "pupil.", "fixation" });
     }
 
-    void CustomReceiveData(string topic, Dictionary<string, object> dictionary, byte[] thirdFrame = null)
+    void onDisable()
     {
-        if (topic.StartsWith("pupil"))
-        {
-            foreach (var item in dictionary)
-            {
-                switch (item.Key)
-                {
-                    case "confidence":
-                        confidence = PupilTools.FloatFromDictionary(dictionary, item.Key);
-                        break;
-                    case "norm_pos": // Origin 0,0 at the bottom left and 1,1 at the top right.
-                        norm_pos = PupilTools.VectorFromDictionary(dictionary, item.Key);
-                        break;
-                    case "ellipse":
-                        var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
-                        foreach (var pupilEllipse in dictionaryForKey)
-                        {
-                            switch (pupilEllipse.Key.ToString())
-                            {
-                                case "angle":
-                                    var angle = (float)(double)pupilEllipse.Value;
-                                    // Do stuff
-                                    break;
-                                case "center":
-                                    //print("Center : " + PupilTools.ObjectToVector(pupilEllipse.Value));
-                                    break;
-                                case "axes":
-                                    //print("Axes : " + PupilTools.ObjectToVector(pupilEllipse.Value));
-                                    // Do stuff
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        // Do stuff
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        if (topic.StartsWith("gaze") && oui)
-        {
-            foreach (var item in dictionary)
-            {
-                switch (item.Key)
-                {
-                    case "2D":
-                        var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
-                        foreach (var twoDEllipse in dictionaryForKey)
-                        {
-                            print(twoDEllipse.Key + " : " + twoDEllipse.Value);
-                        }
-                        break;
-                    case "gaze.2d.0.":
-                    case "gaze.2d.1.":
-                        print(item.Value);
-                        break;
-                    default:
-                        break;
-                }
-                print(item.Key + " : " + item.Value);
-
-            }
-            oui = false;
-        }
+        pupilDataGetter.stopSubscribe();
     }
-
-    // Update is called once per frame
     void Update()
     {
         if (is_started)
@@ -171,11 +103,11 @@ public class GameController : MonoBehaviour
                 StartShrinkMode();
             else print("No mode is selected. Please verify you have selected a mode");
         }
+        left_conf_text.
     }
 
     private void StartApproxMode()
     {
-
         // Check if calibration is ended, delete current target, create each target in centered position
         if (calib_end && only_one)
         {
@@ -225,7 +157,6 @@ public class GameController : MonoBehaviour
                             if (travel_time < 0)
                             {
                                 travel_time = timeLeft;
-                                LogData();
                             }
                             // If the target looked at is the same as before, start time
                             target_timer -= Time.deltaTime;
@@ -259,6 +190,7 @@ public class GameController : MonoBehaviour
     }
     private void StartShrinkMode()
     {
+        print(pupilDataGetter.confidence);
         if (calib_end && only_one)
         {
             print("Calibration test end.");
@@ -288,17 +220,15 @@ public class GameController : MonoBehaviour
                 if (!trgt.circle_created)
                 {
                     trgt.CreateTarget(wall, true);
-                    travel_time = -1.0f;
+                    travel_time = 0.0f;
                     target_timer = 0.0f;
                 }
                 last_target = trgt;
                 ResetTimer();
             }
             target_timer += Time.deltaTime;
-
             // Get the current object looked at by the user
             looking_at_circle = gridController.GetCurrentCollider();
-
             // If the user is looking the target, reduce its scale 
             if (looking_at_circle.collider)
             {
@@ -310,10 +240,11 @@ public class GameController : MonoBehaviour
                 heat_timer += Time.deltaTime;
                 if (looking_at_circle.collider.name == "Cylinder")
                 {
-                    if (travel_time < 0)
+                    LogData();
+                    if (travel_time <= 0.0f) // Attention comparaison float
                     {
-                        travel_time = target_timer - 0.3f;
-                        LogData();
+                        travel_time = target_timer;
+                        //LogData(false);
                         print("First time entry : " + travel_time);
                     }
                     last_target.was_looked = true;
@@ -360,7 +291,6 @@ public class GameController : MonoBehaviour
             last_index = target_index;
             target = lst_trgt[target_index];
         }
-
         return target;
     }
     private void ResetTargetTimer()
@@ -378,17 +308,29 @@ public class GameController : MonoBehaviour
         {
             gazeToWorld = dedicatedCapture.ViewportToWorldPoint(new Vector3(PupilData._2D.GazePosition.x, PupilData._2D.GazePosition.y, Camera.main.nearClipPlane));
         }
-        logger.AddObjToLog(new
+        object tmp;
+
+        tmp = new
         {
             a = DateTime.Now,
             j = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.x : double.NaN,
             k = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.y : double.NaN,
             l = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN,
             m = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN,
-            n = confidence, // confidence value calculated after calibration 
+            n = pupilDataGetter.left_confidence, // confidence value on real time 
+            nn = pupilDataGetter.right_confidence,
             o = travel_time,
             p = last_target != null ? last_target.circle.transform.localPosition.x : double.NaN,
-            q = last_target != null ? last_target.circle.transform.localPosition.y : double.NaN
-        });
+            q = last_target != null ? last_target.circle.transform.localPosition.y : double.NaN,
+            r = CalculateCircleRadiusPercent()
+        };
+        logger.AddObjToLog(tmp);
+    }
+
+    private float CalculateCircleRadiusPercent()
+    {
+        float current_scale = looking_at_circle.collider.gameObject.transform.localScale.x;
+        float first_scale = last_target.previous_scales[0].x;
+        return ((first_scale - current_scale) / first_scale) * 100;
     }
 }
