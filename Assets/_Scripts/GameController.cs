@@ -76,7 +76,7 @@ public class GameController : MonoBehaviour
 
         //heatMap
         heatMap = new HeatMap(0, 0, 0);
-        heatMap.setActive(false);
+        //heatMap.setActive(false);
 
         left_conf_text = GameObject.Find("LeftConf").GetComponent<TextMesh>();
         right_conf_text = GameObject.Find("RightConf").GetComponent<TextMesh>();
@@ -103,6 +103,8 @@ public class GameController : MonoBehaviour
                 StartShrinkMode();
             else print("No mode is selected. Please verify you have selected a mode");
         }
+        left_conf_text.text = pupilDataGetter.left_confidence.ToString("F4");
+        right_conf_text.text = pupilDataGetter.right_confidence.ToString("F4");
     }
 
     private void StartApproxMode()
@@ -201,7 +203,7 @@ public class GameController : MonoBehaviour
                 }
                 t.CreateTarget(wall, true);
             });
-            heatMap.setActive(true);
+            //heatMap.setActive(true);
             only_one = false;
         }
         else if (only_one)
@@ -231,7 +233,8 @@ public class GameController : MonoBehaviour
             // If the user is looking the target, reduce its scale 
             if (looking_at_circle.collider)
             {
-                Vector3 posCircleHeatMap = new Vector3(looking_at_circle.transform.position.x,looking_at_circle.transform.position.y,looking_at_circle.transform.position.z-0.2f);
+                Vector3 posCircleHeatMap = new Vector3(looking_at_circle.transform.position.x,looking_at_circle.transform.position.y,looking_at_circle.transform.position.z-0.5f);
+                //Vector3 posCircleHeatMap = looking_at_circle.transform.position;
                 if(heat_timer > 0.2f){
                     heatMap.addCircle(posCircleHeatMap);
                     heat_timer = 0;

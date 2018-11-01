@@ -16,14 +16,15 @@ public class PupilDataGetter
     public float pupil_angle;
     public Vector3 pupil_axes;
     public Vector3 pupil_center;
+    public Vector2 fix_norm_pos;
+    public float fix_dispersion;
+    public float fix_duration;
+    public float fix_base_data;
+    public float fix_confidence;
     #endregion
 
     private List<string> topics;
-    private Vector2 fix_norm_pos;
-    private float fix_dispersion;
-    private float fix_duration;
-    private float fix_base_data;
-    private float fix_confidence;
+    
     public PupilDataGetter()
     {
         topics = new List<string>();

@@ -12,6 +12,7 @@ public class HeatMap  {
         position = new Vector3(x, y, z);
         heatMap = new GameObject();
         heatMap.transform.localPosition = position;
+        heatMap.transform.parent = Camera.main.transform;
         heatMap.name = "HeatMap";
     }
 
