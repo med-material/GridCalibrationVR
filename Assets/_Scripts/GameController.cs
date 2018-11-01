@@ -34,6 +34,8 @@ public class GameController : MonoBehaviour
     public float choosenTime;
     public float travel_time = -1.0f;
     public string choosenMode = "";
+    private TextMesh left_conf_text;
+    private TextMesh right_conf_text;
 
     # region log value
     private PupilDataGetter pupilDataGetter;
@@ -69,14 +71,21 @@ public class GameController : MonoBehaviour
 
         logger = GetComponent<LoggerBehavior>();
 
+        left_conf_text = GameObject.Find("LeftConf").GetComponent<TextMesh>();
+        right_conf_text = GameObject.Find("RightConf").GetComponent<TextMesh>();
+
     }
 
     void OnEnable()
     {
         pupilDataGetter = new PupilDataGetter();
-        pupilDataGetter.startSubscribe();
+        pupilDataGetter.startSubscribe(new List<string> { "gaze", "pupil.", "fixation" });
     }
-    // Update is called once per frame
+
+    void onDisable()
+    {
+        pupilDataGetter.stopSubscribe();
+    }
     void Update()
     {
         if (is_started)
@@ -87,6 +96,7 @@ public class GameController : MonoBehaviour
                 StartShrinkMode();
             else print("No mode is selected. Please verify you have selected a mode");
         }
+        left_conf_text.
     }
 
     private void StartApproxMode()
@@ -216,7 +226,7 @@ public class GameController : MonoBehaviour
             {
                 if (looking_at_circle.collider.name == "Cylinder")
                 {
-                    LogData(true);
+                    LogData();
                     if (travel_time <= 0.0f) // Attention comparaison float
                     {
                         travel_time = target_timer;
@@ -278,48 +288,35 @@ public class GameController : MonoBehaviour
         timeLeft = choosenTime;
     }
 
-    private void LogData(bool isFullLog)
+    private void LogData()
     {
         if (PupilData._2D.GazePosition != Vector2.zero)
         {
             gazeToWorld = dedicatedCapture.ViewportToWorldPoint(new Vector3(PupilData._2D.GazePosition.x, PupilData._2D.GazePosition.y, Camera.main.nearClipPlane));
         }
         object tmp;
-        if (isFullLog)
+
+        tmp = new
         {
-            tmp = new
-            {
-                a = DateTime.Now,
-                j = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.x : double.NaN,
-                k = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.y : double.NaN,
-                l = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN,
-                m = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN,
-                n = pupilDataGetter.confidence, // confidence value on real time 
-                o = travel_time,
-                p = last_target != null ? last_target.circle.transform.localPosition.x : double.NaN,
-                q = last_target != null ? last_target.circle.transform.localPosition.y : double.NaN,
-                r = CalculateCircleRadiusPercent()
-            };
-        }
-        else {
-            tmp = new {
-                a = DateTime.Now,
-                j = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.x : double.NaN,
-                k = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.y : double.NaN,
-                l = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN,
-                m = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN,
-                n = pupilDataGetter.confidence, // confidence value on real time 
-                o = travel_time,
-                p = last_target != null ? last_target.circle.transform.localPosition.x : double.NaN,
-                q = last_target != null ? last_target.circle.transform.localPosition.y : double.NaN
-            };
-        }
+            a = DateTime.Now,
+            j = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.x : double.NaN,
+            k = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.y : double.NaN,
+            l = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN,
+            m = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN,
+            n = pupilDataGetter.left_confidence, // confidence value on real time 
+            nn = pupilDataGetter.right_confidence,
+            o = travel_time,
+            p = last_target != null ? last_target.circle.transform.localPosition.x : double.NaN,
+            q = last_target != null ? last_target.circle.transform.localPosition.y : double.NaN,
+            r = CalculateCircleRadiusPercent()
+        };
         logger.AddObjToLog(tmp);
     }
 
-    private float CalculateCircleRadiusPercent() {
+    private float CalculateCircleRadiusPercent()
+    {
         float current_scale = looking_at_circle.collider.gameObject.transform.localScale.x;
         float first_scale = last_target.previous_scales[0].x;
-        return ((first_scale-current_scale)/first_scale)*100;
+        return ((first_scale - current_scale) / first_scale) * 100;
     }
 }
