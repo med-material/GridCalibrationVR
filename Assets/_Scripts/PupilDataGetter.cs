@@ -18,8 +18,8 @@ public class PupilDataGetter
     public Vector3 pupil_center;
     #endregion
 
-    private List<string> topics;
 
+    private List<string> topics;
     public PupilDataGetter()
     {
         topics = new List<string>();
