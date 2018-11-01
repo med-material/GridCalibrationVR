@@ -96,7 +96,6 @@ public class GameController : MonoBehaviour
                 StartShrinkMode();
             else print("No mode is selected. Please verify you have selected a mode");
         }
-        left_conf_text.
     }
 
     private void StartApproxMode()
@@ -317,6 +316,6 @@ public class GameController : MonoBehaviour
     {
         float current_scale = looking_at_circle.collider.gameObject.transform.localScale.x;
         float first_scale = last_target.previous_scales[0].x;
-        return ((first_scale - current_scale) / first_scale) * 100;
+        return 100-(((first_scale - current_scale) / first_scale) * 100);
     }
 }

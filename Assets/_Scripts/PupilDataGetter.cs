@@ -12,13 +12,18 @@ public class PupilDataGetter
     public float left_confidence;
     public float right_confidence;
     public string current_topic;
-    public Vector3 norm_pos;
+    public Vector2 norm_pos;
     public float pupil_angle;
     public Vector3 pupil_axes;
     public Vector3 pupil_center;
     #endregion
 
     private List<string> topics;
+    private Vector2 fix_norm_pos;
+    private float fix_dispersion;
+    private float fix_duration;
+    private float fix_base_data;
+    private float fix_confidence;
 
     public PupilDataGetter()
     {
@@ -130,6 +135,18 @@ public class PupilDataGetter
                 {
                     case "topic":
                         current_topic = PupilTools.StringFromDictionary(dictionary, item.Key);
+                        break;
+                    case "norm_pos":
+                        fix_norm_pos = PupilTools.VectorFromDictionary(dictionary, item.Key);
+                        break;
+                    case "dispersion":
+                        fix_dispersion = PupilTools.FloatFromDictionary(dictionary, item.Key);
+                        break;
+                    case "duration":
+                        fix_duration = PupilTools.FloatFromDictionary(dictionary, item.Key);
+                        break;
+                    case "confidence":
+                        fix_confidence = PupilTools.FloatFromDictionary(dictionary, item.Key);
                         break;
                     default:
                         break;
