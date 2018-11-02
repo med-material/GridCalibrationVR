@@ -168,7 +168,7 @@ public class TargetCirle
 
     internal void ReduceScale()
     {
-        circle.transform.localScale *= 0.95f;
+        circle.transform.localScale *= 0.97f;
         dot.transform.localScale = new Vector3(0.0175f/circle.transform.localScale.x,1.0f,0.021f/circle.transform.localScale.z);
         previous_scale = circle.transform.localScale;
         previous_scales.Add(previous_scale);
