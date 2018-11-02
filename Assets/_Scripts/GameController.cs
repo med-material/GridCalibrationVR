@@ -8,41 +8,45 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
+    # region public_value
+    public GridController gridController;
+    public GameObject wall;
+    public List<TargetCirle> targets;
+    public TargetCirle last_target = null;
+    public HeatMap heatMap;
+    public bool is_started = false;
+    public float choosenTime;
+    public float travel_time = -1.0f;
+    public string choosenMode = "";
+
+    # endregion
+
+    # region private_value
     private Camera dedicatedCapture;
     private Vector3 gazeToWorld;
     private float CENTER_X_L;
     private float CENTER_Y_C;
     private float CENTER_X_R;
     private float CENTER_Y_T;
-    public GridController gridController;
-    public GameObject wall;
-    public List<TargetCirle> targets;
     private float wall_width = 1;
     private float wall_height = 1;
     private static System.Random rand = new System.Random();
     private int last_index;
     private int target_index;
     private float timeLeft;
-    public TargetCirle last_target = null;
-    public HeatMap heatMap;
     private RaycastHit looking_at_circle;
     private RaycastHit looking_at_circle_before;
     private float target_timer;
     private float heat_timer;
     private bool calib_end = false;
     private bool only_one = true;
-    public bool is_started = false;
     private Color success_color = new Color(0.07f, 0.8f, 0.07f, 1);
-    public float choosenTime;
-    public float travel_time = -1.0f;
-    public string choosenMode = "";
-    private TextMesh left_conf_text;
-    private TextMesh right_conf_text;
+
+    #endregion
 
     # region log value
     private PupilDataGetter pupilDataGetter;
     private LoggerBehavior logger;
-    private Vector3 norm_pos;
     #endregion
 
     void Start()
@@ -52,34 +56,14 @@ public class GameController : MonoBehaviour
         ResetTimer();
 
         dedicatedCapture = Camera.main;
-
-        // Create const value for x, y min and max
-        CENTER_X_L = wall_width / 3;
-        CENTER_Y_C = wall_height / 3;
-        CENTER_X_R = wall_width - wall_width / 3;
-        CENTER_Y_T = wall_height - wall_height / 3;
-
-        // Create the targets
-        targets = new List<TargetCirle>();
-        targets.Add(new TargetCirle(0, CENTER_X_L, 0, CENTER_Y_C));
-        targets.Add(new TargetCirle(CENTER_X_L, CENTER_X_R, 0, CENTER_Y_C));
-        targets.Add(new TargetCirle(CENTER_X_R, wall_width, 0, CENTER_Y_C));
-        targets.Add(new TargetCirle(0, CENTER_X_L, CENTER_Y_C, CENTER_Y_T));
-        targets.Add(new TargetCirle(CENTER_X_L, CENTER_X_R, CENTER_Y_C, CENTER_Y_T));
-        targets.Add(new TargetCirle(CENTER_X_R, wall_width, CENTER_Y_C, CENTER_Y_T));
-        targets.Add(new TargetCirle(0, CENTER_X_L, CENTER_Y_T, wall_height));
-        targets.Add(new TargetCirle(CENTER_X_L, CENTER_X_R, CENTER_Y_T, wall_height));
-        targets.Add(new TargetCirle(CENTER_X_R, wall_width, CENTER_Y_T, wall_height));
-
         logger = GetComponent<LoggerBehavior>();
 
+        CreateCalculValue();
+        CreateTargets();
 
         //heatMap
         heatMap = new HeatMap(0, 0, 0);
         //heatMap.setActive(false);
-
-        left_conf_text = GameObject.Find("LeftConf").GetComponent<TextMesh>();
-        right_conf_text = GameObject.Find("RightConf").GetComponent<TextMesh>();
 
     }
 
@@ -103,10 +87,31 @@ public class GameController : MonoBehaviour
                 StartShrinkMode();
             else print("No mode is selected. Please verify you have selected a mode");
         }
-        left_conf_text.text = pupilDataGetter.left_confidence.ToString("F4");
-        right_conf_text.text = pupilDataGetter.right_confidence.ToString("F4");
     }
 
+    private void CreateTargets()
+    {
+        // Create the targets
+        targets = new List<TargetCirle>();
+        targets.Add(new TargetCirle(0, CENTER_X_L, 0, CENTER_Y_C));
+        targets.Add(new TargetCirle(CENTER_X_L, CENTER_X_R, 0, CENTER_Y_C));
+        targets.Add(new TargetCirle(CENTER_X_R, wall_width, 0, CENTER_Y_C));
+        targets.Add(new TargetCirle(0, CENTER_X_L, CENTER_Y_C, CENTER_Y_T));
+        targets.Add(new TargetCirle(CENTER_X_L, CENTER_X_R, CENTER_Y_C, CENTER_Y_T));
+        targets.Add(new TargetCirle(CENTER_X_R, wall_width, CENTER_Y_C, CENTER_Y_T));
+        targets.Add(new TargetCirle(0, CENTER_X_L, CENTER_Y_T, wall_height));
+        targets.Add(new TargetCirle(CENTER_X_L, CENTER_X_R, CENTER_Y_T, wall_height));
+        targets.Add(new TargetCirle(CENTER_X_R, wall_width, CENTER_Y_T, wall_height));
+    }
+
+    private void CreateCalculValue()
+    {
+        // Create const value for x, y min and max
+        CENTER_X_L = wall_width / 3;
+        CENTER_Y_C = wall_height / 3;
+        CENTER_X_R = wall_width - wall_width / 3;
+        CENTER_Y_T = wall_height - wall_height / 3;
+    }
     private void StartApproxMode()
     {
         // Check if calibration is ended, delete current target, create each target in centered position
@@ -182,7 +187,7 @@ public class GameController : MonoBehaviour
             // If the target has been fixed
             if (target_timer < 0)
             {
-                print("The target was looked for 300ms");
+                //print("The target was looked for 300ms");
                 timeLeft = -1.0f;
                 last_target.was_looked = true;
                 ResetTargetTimer();
@@ -191,7 +196,7 @@ public class GameController : MonoBehaviour
     }
     private void StartShrinkMode()
     {
-        print(pupilDataGetter.confidence);
+        //print(pupilDataGetter.confidence);
         if (calib_end && only_one)
         {
             print("Calibration test end.");
@@ -233,9 +238,10 @@ public class GameController : MonoBehaviour
             // If the user is looking the target, reduce its scale 
             if (looking_at_circle.collider)
             {
-                Vector3 posCircleHeatMap = new Vector3(looking_at_circle.transform.position.x,looking_at_circle.transform.position.y,looking_at_circle.transform.position.z-0.5f);
+                Vector3 posCircleHeatMap = new Vector3(looking_at_circle.transform.position.x, looking_at_circle.transform.position.y, looking_at_circle.transform.position.z - 0.5f);
                 //Vector3 posCircleHeatMap = looking_at_circle.transform.position;
-                if(heat_timer > 0.2f){
+                if (heat_timer > 0.2f)
+                {
                     heatMap.addCircle(posCircleHeatMap);
                     heat_timer = 0;
                 }
@@ -247,7 +253,7 @@ public class GameController : MonoBehaviour
                     {
                         travel_time = target_timer;
                         //LogData(false);
-                        print("First time entry : " + travel_time);
+                        //print("First time entry : " + travel_time);
                     }
                     last_target.was_looked = true;
                     last_target.ReduceScale();
@@ -280,7 +286,6 @@ public class GameController : MonoBehaviour
         TargetCirle target;
         if (targets.Where(t => !t.calibration_max).ToList().Count <= 1)
         {
-            print("Only one remaining");
             target = targets.Find(t => !t.calibration_max);
         }
         else
@@ -333,6 +338,6 @@ public class GameController : MonoBehaviour
     {
         float current_scale = looking_at_circle.collider.gameObject.transform.localScale.x;
         float first_scale = last_target.previous_scales[0].x;
-        return 100-(((first_scale - current_scale) / first_scale) * 100);
+        return 100 - (((first_scale - current_scale) / first_scale) * 100);
     }
 }

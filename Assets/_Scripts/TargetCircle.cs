@@ -93,7 +93,7 @@ public class TargetCirle
         dot.gameObject.name = "Dot";
         dot.transform.parent = circle.transform;
         dot.transform.localRotation = Quaternion.Euler(0, 0, 0);
-        dot.transform.localScale = new Vector3(0.09f, 1f, 0.09f);
+        dot.transform.localScale = new Vector3(0.07f, 1f, 0.07f);
         dot.transform.localPosition = new Vector3(0f, -1.1f, 0f);
         dot.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f, 1);
 
@@ -168,8 +168,8 @@ public class TargetCirle
 
     internal void ReduceScale()
     {
-        circle.transform.localScale *= 0.995f;
-        dot.transform.localScale = new Vector3(0.0225f/circle.transform.localScale.x,1.0f,0.027f/circle.transform.localScale.z);
+        circle.transform.localScale *= 0.95f;
+        dot.transform.localScale = new Vector3(0.0175f/circle.transform.localScale.x,1.0f,0.021f/circle.transform.localScale.z);
         previous_scale = circle.transform.localScale;
         previous_scales.Add(previous_scale);
     }

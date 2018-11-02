@@ -35,19 +35,16 @@ public class StartHandler : MonoBehaviour
         {
             if (ReferenceEquals(obj.collider.gameObject, startButton))
             {
-                print("Fixing Start button");
                 startLoader.fillAmount =  1.0f - timer;
                 timer -= Time.deltaTime;
             }
             else if (ReferenceEquals(obj.collider.gameObject, approxButton))
             {
-                print("Fixing Approx button");
                 approxLoader.fillAmount = 1.0f - modeTimer*2 ;
                 modeTimer -= Time.deltaTime;
             }
             else if (ReferenceEquals(obj.collider.gameObject, shrinkButton))
             {
-                print("Fixing Shrink button");
                 shrinkLoader.fillAmount = 1.0f - modeTimer*2 ;
                 modeTimer -= Time.deltaTime;
             }
@@ -62,7 +59,6 @@ public class StartHandler : MonoBehaviour
         {
             // Print the timer, the seconds is rounded to have 3,2,1 value like seconds
             countDownText.GetComponent<TextMesh>().text = Math.Ceiling(System.Convert.ToDouble(countDown)).ToString();
-            print(Math.Ceiling(System.Convert.ToDouble(countDown)).ToString());
             countDown -= Time.deltaTime;
             Menu.transform.position += new Vector3(0, 0, -10.0f);
             if (countDown < 0)
