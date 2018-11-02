@@ -196,7 +196,6 @@ public class GameController : MonoBehaviour
     }
     private void StartShrinkMode()
     {
-        //print(pupilDataGetter.confidence);
         if (calib_end && only_one)
         {
             print("Calibration test end.");
@@ -308,7 +307,6 @@ public class GameController : MonoBehaviour
     {
         timeLeft = choosenTime;
     }
-
     private void LogData()
     {
         if (PupilData._2D.GazePosition != Vector2.zero)

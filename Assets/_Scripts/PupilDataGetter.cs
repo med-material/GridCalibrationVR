@@ -39,9 +39,6 @@ public class PupilDataGetter
             {
                 PupilTools.SubscribeTo(topic);
             }
-            //PupilTools.SubscribeTo("gaze");
-            //PupilTools.SubscribeTo("pupil.");
-            //PupilTools.SubscribeTo("fixation"); // TODO verify that the plugin is enabled on Pupil Capture
 
             PupilTools.OnReceiveData += CustomReceiveData;
         }
@@ -54,11 +51,12 @@ public class PupilDataGetter
             PupilTools.UnSubscribeFrom(topic);
         }
         topics.Clear();
-        //PupilTools.UnSubscribeFrom("gaze");
-        //PupilTools.UnSubscribeFrom("pupil.");
-        //PupilTools.UnSubscribeFrom("fixation");
 
         PupilTools.OnReceiveData -= CustomReceiveData;
+    }
+
+    private bool IsGazingAndFixing() {
+        return topics.Contains("fixation") && topics.Contains("gaze");
     }
 
     private void CustomReceiveData(string topic, Dictionary<string, object> dictionary, byte[] thirdFrame = null)
