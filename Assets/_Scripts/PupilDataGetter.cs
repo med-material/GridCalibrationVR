@@ -21,7 +21,7 @@ public class PupilDataGetter
     public Vector2 fix_norm_pos;
     public float fix_dispersion;
     public float fix_duration;
-    public float fix_base_data;
+    public object fix_base_data;
     public float fix_confidence;
     public Vector2 norm_pos_left;
     public Vector2 norm_pos_right;
@@ -39,7 +39,9 @@ public class PupilDataGetter
 
     #endregion
 
-    private PupilDataGetter()
+    private float gaze_timestamp;
+
+    public PupilDataGetter()
     {
         topics = new List<string>();
     }
@@ -59,7 +61,6 @@ public class PupilDataGetter
             {
                 PupilTools.SubscribeTo(topic);
             }
-
             PupilTools.OnReceiveData += CustomReceiveData;
         }
     }
@@ -71,7 +72,6 @@ public class PupilDataGetter
             PupilTools.UnSubscribeFrom(topic);
         }
         topics.Clear();
-
         PupilTools.OnReceiveData -= CustomReceiveData;
     }
 
@@ -79,8 +79,19 @@ public class PupilDataGetter
     {
         return topics.Contains("fixation") && topics.Contains("gaze");
     }
-
     private void CustomReceiveData(string topic, Dictionary<string, object> dictionary, byte[] thirdFrame = null)
+    {
+        GetGazeData(topic, dictionary);
+        GetPupilData(topic, dictionary);
+        GetFixationData(topic, dictionary);
+
+        if (IsGazingAndFixing())
+        {
+
+        }
+    }
+
+    private void GetGazeData(String topic, Dictionary<string, object> dictionary)
     {
         if (topic.StartsWith("gaze"))
         {
@@ -100,6 +111,10 @@ public class PupilDataGetter
                 }
             }
         }
+    }
+
+    private void GetPupilData(String topic, Dictionary<string, object> dictionary)
+    {
         if (topic.StartsWith("pupil"))
         {
             foreach (var item in dictionary)
@@ -161,7 +176,11 @@ public class PupilDataGetter
                 }
             }
         }
-        else if (topic.StartsWith("fixation"))
+    }
+
+    private void GetFixationData(String topic, Dictionary<string, object> dictionary)
+    {
+        if (topic.StartsWith("fixation"))
         {
             foreach (var item in dictionary)
             {
@@ -185,10 +204,7 @@ public class PupilDataGetter
                     default:
                         break;
                         // Other sub-topics :
-                        //norm_pos: Normalized position of the fixation’s centroid
                         //base_data: Gaze data that the fixation is based on
-                        //duration: Exact fixation duration, in milliseconds
-                        //dispersion: Dispersion, in degrees
                 }
             }
         }
