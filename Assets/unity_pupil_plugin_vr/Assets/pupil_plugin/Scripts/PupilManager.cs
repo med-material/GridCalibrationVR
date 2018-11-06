@@ -29,8 +29,7 @@ public class PupilManager : MonoBehaviour
 
     void OnEnable()
     {
-        pupilDataGetter= PupilDataGetter.GetPupilDataGetter();
-        pupilDataGetter.startSubscribe(new List<string> {"pupil."});
+        pupilDataGetter = new PupilDataGetter();
     }
     void ResetCalibrationText()
     {
@@ -58,7 +57,8 @@ public class PupilManager : MonoBehaviour
 
         if (displayEyeImages)
             gameObject.AddComponent<FramePublishing>();
-
+        
+        pupilDataGetter.startSubscribe(new List<string> {"pupil."});
         pupilVisualizer = new PupilVisualizer();
 
         Invoke("ShowCalibrate", 1f);
@@ -158,8 +158,8 @@ public class PupilManager : MonoBehaviour
         if(pupilDataGetter.confidence <= 0.6f) {
             print("Confidence : " + pupilDataGetter.confidence);
         }
-
-        pupilVisualizer.UpdatePupilData(); 
+        if(pupilVisualizer != null)
+            pupilVisualizer.UpdatePupilData(); 
     }
 
    

@@ -39,8 +39,6 @@ public class PupilDataGetter
 
     #endregion
 
-    private float gaze_timestamp;
-
     public PupilDataGetter()
     {
         topics = new List<string>();
@@ -87,7 +85,7 @@ public class PupilDataGetter
 
         if (IsGazingAndFixing())
         {
-
+            
         }
     }
 

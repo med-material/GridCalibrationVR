@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PupilVisualizer
@@ -21,7 +22,37 @@ public class PupilVisualizer
 
     public PupilVisualizer()
     {
-        pupilDataGetter = PupilDataGetter.GetPupilDataGetter();
+        pupilDataGetter = new PupilDataGetter();
+        pupilDataGetter.startSubscribe(new List<string> { "pupil." });
+        UpdateData();
+
+        left_pupil = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        right_pupil = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        left_container = GameObject.Find("LeftEyePupilContainer");
+        right_container = GameObject.Find("RightEyePupilContainer");
+
+        SetPupil(left_pupil, norm_pos_left, diameter_left, rotation_left, left_container.transform);
+        SetPupil(right_pupil, norm_pos_right, diameter_right, rotation_right, right_container.transform);
+    }
+
+    private void SetPupil(GameObject pupil, Vector3 norm_pos, float diameter, Vector3 rotation, Transform container)
+    {
+        pupil.GetComponent<Renderer>().material.color = Color.red;
+        pupil.transform.parent = container;
+        pupil.transform.localPosition = norm_pos;
+        pupil.transform.localRotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
+        pupil.transform.localScale = new Vector3(diameter, 0.1f, diameter);
+    }
+
+    public void UpdatePupilsData()
+    {
+        UpdateData();
+        UpdatePupilData(left_pupil, norm_pos_left, rotation_left, diameter_left);
+        UpdatePupilData(right_pupil, norm_pos_right, rotation_right, diameter_right);
+    }
+
+    public void UpdateData()
+    {
         norm_pos_left = pupilDataGetter.norm_pos_left;
         pupil_center_left = pupilDataGetter.pupil_center_left;
         diameter_left = pupilDataGetter.diameter_left;
@@ -31,39 +62,17 @@ public class PupilVisualizer
         pupil_center_right = pupilDataGetter.pupil_center_right;
         diameter_right = pupilDataGetter.diameter_right;
         rotation_right = pupilDataGetter.rotation_right;
-
-        left_pupil = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        right_pupil = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        left_container = GameObject.Find("LeftEyeContainer");
-        right_container = GameObject.Find("RightEyeContainer");
-
-        SetPupil(left_pupil, pupil_center_left, diameter_left, rotation_left, left_container.transform);
-        SetPupil(right_pupil, pupil_center_right, diameter_right, rotation_right, right_container.transform);
     }
 
-    private void SetPupil(GameObject pupil, Vector3 pupil_center, float diameter, Vector3 rotation, Transform container)
+    private void UpdatePupilData(GameObject pupil, Vector3 norm_pos, Vector3 rotation, float diameter)
     {
-        pupil.GetComponent<Renderer>().material.color = Color.red;
-        pupil.transform.parent = container;
-        pupil.transform.localPosition = pupil_center;
-        pupil.transform.localRotation = Quaternion.Euler(rotation.x + 90, rotation.y, rotation.z);
+        pupil.transform.localPosition = norm_pos;
+        pupil.transform.localRotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
         pupil.transform.localScale = new Vector3(diameter, 0.1f, diameter);
     }
 
-    public void UpdatePupilData()
+    public void DisablePupilData()
     {
-        UpdatePupilsData(left_pupil, pupil_center_left, rotation_left, diameter_left);
-        UpdatePupilsData(right_pupil, pupil_center_right, rotation_right, diameter_right);
-    }
-
-    private void UpdatePupilsData(GameObject pupil, Vector3 pupil_center, Vector3 rotation, float diameter)
-    {
-        pupil.transform.localPosition = pupil_center;
-        pupil.transform.localRotation = Quaternion.Euler(rotation.x + 90, rotation.y, rotation.z);
-        pupil.transform.localScale = new Vector3(diameter, 0.1f, diameter);
-    }
-
-    public void DisablePupilData() {
         left_container.SetActive(false);
         right_container.SetActive(false);
     }
