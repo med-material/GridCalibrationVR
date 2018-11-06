@@ -69,7 +69,7 @@ public class GameController : MonoBehaviour
 
     void OnEnable()
     {
-        pupilDataGetter = new PupilDataGetter();
+        pupilDataGetter = PupilDataGetter.GetPupilDataGetter();
         pupilDataGetter.startSubscribe(new List<string> { "gaze", "pupil.", "fixation" });
     }
 

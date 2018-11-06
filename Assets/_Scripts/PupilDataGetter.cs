@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class PupilDataGetter
 {
+    private static PupilDataGetter instance;
+
     # region public_data
     public float confidence;
     public float left_confidence;
@@ -21,13 +23,31 @@ public class PupilDataGetter
     public float fix_duration;
     public float fix_base_data;
     public float fix_confidence;
+    public Vector2 norm_pos_left;
+    public Vector2 norm_pos_right;
+    public float diameter_right;
+    public float diameter_left;
+    public Vector3 rotation_right;
+    public Vector3 rotation_left;
+    public float pupil_angle_left;
+    public float pupil_angle_right;
+    public Vector3 pupil_center_left;
+    public Vector3 pupil_center_right;
+    public Vector3 pupil_axes_left;
+    public Vector3 pupil_axes_right;
+    public List<string> topics;
+
     #endregion
 
-    private List<string> topics;
-    
-    public PupilDataGetter()
+    private PupilDataGetter()
     {
         topics = new List<string>();
+    }
+
+    public static PupilDataGetter GetPupilDataGetter() {
+        if(instance == null)
+           instance = new PupilDataGetter();
+        return instance;
     }
 
     public void startSubscribe(List<string> topics)
@@ -55,7 +75,8 @@ public class PupilDataGetter
         PupilTools.OnReceiveData -= CustomReceiveData;
     }
 
-    private bool IsGazingAndFixing() {
+    private bool IsGazingAndFixing()
+    {
         return topics.Contains("fixation") && topics.Contains("gaze");
     }
 
@@ -71,6 +92,7 @@ public class PupilDataGetter
                         current_topic = PupilTools.StringFromDictionary(dictionary, item.Key);
                         break;
                     case "confidence":
+                        // TODO get left & right data confidence for the gaze
                         confidence = PupilTools.FloatFromDictionary(dictionary, item.Key);
                         break;
                     default:
@@ -89,16 +111,21 @@ public class PupilDataGetter
                         break;
                     case "confidence":
                         if (topic.StartsWith("pupil.1"))
-                        {
                             left_confidence = PupilTools.FloatFromDictionary(dictionary, item.Key);
-                        }
                         else if (topic.StartsWith("pupil.0"))
-                        {
                             right_confidence = PupilTools.FloatFromDictionary(dictionary, item.Key);
-                        }
                         break;
                     case "norm_pos": // Origin 0,0 at the bottom left and 1,1 at the top right.
-                        norm_pos = PupilTools.VectorFromDictionary(dictionary, item.Key);
+                        if (topic.StartsWith("pupil.1"))
+                            norm_pos_left = PupilTools.VectorFromDictionary(dictionary, item.Key);
+                        else if (topic.StartsWith("pupil.0"))
+                            norm_pos_right = PupilTools.VectorFromDictionary(dictionary, item.Key);
+                        break;
+                    case "diameter":
+                        if (topic.StartsWith("pupil.1"))
+                            diameter_left = PupilTools.FloatFromDictionary(dictionary, item.Key);
+                        else if (topic.StartsWith("pupil.0"))
+                            diameter_right = PupilTools.FloatFromDictionary(dictionary, item.Key);
                         break;
                     case "ellipse":
                         var dictionaryForKey = PupilTools.DictionaryFromDictionary(dictionary, item.Key);
@@ -107,13 +134,22 @@ public class PupilDataGetter
                             switch (pupilEllipse.Key.ToString())
                             {
                                 case "angle":
-                                    pupil_angle = (float)(double)pupilEllipse.Value;
+                                    if (topic.StartsWith("pupil.1"))
+                                        pupil_angle_left = (float)(double)pupilEllipse.Value;
+                                    else if (topic.StartsWith("pupil.0"))
+                                        pupil_angle_right = (float)(double)pupilEllipse.Value;
                                     break;
                                 case "center":
-                                    pupil_center = PupilTools.ObjectToVector(pupilEllipse.Value);
+                                    if (topic.StartsWith("pupil.1"))
+                                        pupil_center_left = PupilTools.ObjectToVector(pupilEllipse.Value);
+                                    else if (topic.StartsWith("pupil.0"))
+                                        pupil_center_right = PupilTools.ObjectToVector(pupilEllipse.Value);
                                     break;
                                 case "axes":
-                                    pupil_axes = PupilTools.ObjectToVector(pupilEllipse.Value);
+                                    if (topic.StartsWith("pupil.1"))
+                                        pupil_axes_left = PupilTools.ObjectToVector(pupilEllipse.Value);
+                                    else if (topic.StartsWith("pupil.0"))
+                                        pupil_axes_right = PupilTools.ObjectToVector(pupilEllipse.Value);
                                     break;
                                 default:
                                     break;
