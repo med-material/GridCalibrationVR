@@ -159,7 +159,7 @@ public class PupilManager : MonoBehaviour
             print("Confidence : " + pupilDataGetter.confidence);
         }
         if(pupilVisualizer != null)
-            pupilVisualizer.UpdatePupilData(); 
+            pupilVisualizer.UpdatePupilsData(); 
     }
 
    

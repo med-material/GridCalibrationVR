@@ -39,9 +39,10 @@ public class PupilVisualizer
     {
         pupil.GetComponent<Renderer>().material.color = Color.red;
         pupil.transform.parent = container;
-        pupil.transform.localPosition = norm_pos;
+        pupil.transform.localPosition = new Vector3(norm_pos.x * 10,0,norm_pos.y * 10);
         pupil.transform.localRotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
-        pupil.transform.localScale = new Vector3(diameter, 0.1f, diameter);
+        //pupil.transform.localScale = new Vector3(diameter/container.transform.parent.GetComponent<Renderer>().bounds.max.x, 0.1f, diameter/container.transform.parent.GetComponent<Renderer>().bounds.max.z);
+        pupil.transform.localScale = new Vector3(2.0f, 0.01f, 2.0f);
     }
 
     public void UpdatePupilsData()
@@ -66,9 +67,10 @@ public class PupilVisualizer
 
     private void UpdatePupilData(GameObject pupil, Vector3 norm_pos, Vector3 rotation, float diameter)
     {
-        pupil.transform.localPosition = norm_pos;
+        pupil.transform.localPosition = new Vector3(norm_pos.x * 10,0,norm_pos.y * 10);
         pupil.transform.localRotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
-        pupil.transform.localScale = new Vector3(diameter, 0.1f, diameter);
+        //pupil.transform.localScale = new Vector3(diameter, 0.1f, diameter);
+        pupil.transform.localScale = new Vector3(2.0f, 0.01f, 2.0f);
     }
 
     public void DisablePupilData()
