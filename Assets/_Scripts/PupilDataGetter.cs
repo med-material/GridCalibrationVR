@@ -73,20 +73,12 @@ public class PupilDataGetter
         PupilTools.OnReceiveData -= CustomReceiveData;
     }
 
-    private bool IsGazingAndFixing()
-    {
-        return topics.Contains("fixation") && topics.Contains("gaze");
-    }
     private void CustomReceiveData(string topic, Dictionary<string, object> dictionary, byte[] thirdFrame = null)
     {
         GetGazeData(topic, dictionary);
         GetPupilData(topic, dictionary);
         GetFixationData(topic, dictionary);
-
-        if (IsGazingAndFixing())
-        {
-            
-        }
+        
     }
 
     private void GetGazeData(String topic, Dictionary<string, object> dictionary)

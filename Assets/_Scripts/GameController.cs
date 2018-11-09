@@ -18,6 +18,7 @@ public class GameController : MonoBehaviour
     public float choosenTime;
     public float travel_time = -1.0f;
     public string choosenMode = "";
+    public string test_name;
 
     # endregion
 
@@ -309,30 +310,18 @@ public class GameController : MonoBehaviour
     }
     private void LogData()
     {
-        if (PupilData._2D.GazePosition != Vector2.zero)
-        {
-            gazeToWorld = dedicatedCapture.ViewportToWorldPoint(new Vector3(PupilData._2D.GazePosition.x, PupilData._2D.GazePosition.y, Camera.main.nearClipPlane));
-        }
-        object tmp;
+        List<object> lst = new List<object>();
+        lst.Add(pupilDataGetter.left_confidence); // confidence value on real time 
+        lst.Add(pupilDataGetter.right_confidence);
+        lst.Add(travel_time);
+        lst.Add(last_target != null ? last_target.circle.transform.position.x : double.NaN);
+        lst.Add(last_target != null ? last_target.circle.transform.position.y : double.NaN);
+        lst.Add(CalculateCircleRadiusPercent());
+        lst.Add(pupilDataGetter.fix_duration);
+        lst.Add(pupilDataGetter.fix_dispersion);
+        lst.Add(pupilDataGetter.fix_confidence);
 
-        tmp = new
-        {
-            a = DateTime.Now,
-            j = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.x : double.NaN,
-            k = PupilData._2D.GazePosition != Vector2.zero ? PupilData._2D.GazePosition.y : double.NaN,
-            l = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN,
-            m = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN,
-            n = pupilDataGetter.left_confidence, // confidence value on real time 
-            nn = pupilDataGetter.right_confidence,
-            o = travel_time,
-            p = last_target != null ? last_target.circle.transform.localPosition.x : double.NaN,
-            q = last_target != null ? last_target.circle.transform.localPosition.y : double.NaN,
-            r = CalculateCircleRadiusPercent(),
-            s = pupilDataGetter.fix_duration,
-            t = pupilDataGetter.fix_dispersion,
-            u = pupilDataGetter.fix_confidence
-        };
-        logger.AddObjToLog(tmp);
+        logger.AddObjToLog(lst);
     }
 
     private float CalculateCircleRadiusPercent()

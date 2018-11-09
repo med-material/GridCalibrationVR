@@ -22,8 +22,8 @@ public class LoggerBehavior : MonoBehaviour
     private Camera dedicatedCapture;
     private GameController gameController;
     public static string sceneName = "_";
-
-    #region Unity Methods
+    public string state;
+    public string test_name;
 
     private void Start()
     {
@@ -61,10 +61,18 @@ public class LoggerBehavior : MonoBehaviour
         _toLog.Add(tmp);
     }
 
-    public void AddObjToLog(object tmp)
+    public void AddObjToLog(List<object> tmp)
     {
-
         DoLog();
+        if (PupilData._2D.GazePosition != Vector2.zero)
+        {
+            gazeToWorld = dedicatedCapture.ViewportToWorldPoint(new Vector3(PupilData._2D.GazePosition.x, PupilData._2D.GazePosition.y, Camera.main.nearClipPlane));
+        }
+        tmp.Insert(0, DateTime.Now);
+        tmp.Insert(1, test_name);
+        tmp.Insert(2, PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN);
+        tmp.Insert(3, PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN);
+
         _toLog.Add(tmp);
     }
 
@@ -85,5 +93,6 @@ public class LoggerBehavior : MonoBehaviour
         _logger.Log(_toLog.ToArray());
         _toLog.Clear();
     }
-    #endregion
+
+
 }
