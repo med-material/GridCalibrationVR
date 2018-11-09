@@ -151,6 +151,7 @@ public class GameController : MonoBehaviour
                     last_target = trgt;
                 }
             }
+
             // Process the target looked at 
             if (looking_at_circle.collider)
             {
@@ -256,7 +257,20 @@ public class GameController : MonoBehaviour
                         //print("First time entry : " + travel_time);
                     }
                     last_target.was_looked = true;
-                    last_target.ReduceScale();
+
+                    //We get the pixels location of the collider
+                    looking_at_circle.transform.GetComponent<CapsuleCollider>().enabled = false;
+                    Renderer rend = looking_at_circle.transform.GetComponent<Renderer>();
+                    MeshCollider meshCollider = looking_at_circle.collider as MeshCollider;
+                    Texture2D tex = rend.material.mainTexture as Texture2D;
+                    Vector2 pixelUV = looking_at_circle.textureCoord;
+                    pixelUV.x *= tex.width;
+                    pixelUV.y *= tex.height;
+
+                    //Depending of the distance from the center of the circle, we reduce or increase the shrinking speed.
+
+                    last_target.reduceSpeed(Vector2.Distance(new Vector2(2,2), pixelUV), 0.048f);
+                    last_target.ReduceScale();                                     
                     looking_at_circle_before = looking_at_circle;
                 }
                 else

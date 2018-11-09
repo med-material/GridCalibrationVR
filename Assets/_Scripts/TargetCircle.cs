@@ -9,6 +9,8 @@ public class TargetCirle
     private Vector3 previous_scale;
     public List<Vector3> previous_scales = new List<Vector3>();
     private List<float> scales_factor = new List<float>();
+    private Material target_material;
+    private Texture2D target_texture;
     private float default_x_max;
     private float default_y_max;
     private float default_x_min;
@@ -25,6 +27,9 @@ public class TargetCirle
     private int calib_failed;
     public bool circle_created;
     private bool missed_four_times_before;
+
+    private float target_shrinking = 0.98f; //The original value was 0.95
+    public float diff;
 
     public TargetCirle(float x_min, float x_max, float y_min, float y_max)
     {
@@ -55,6 +60,13 @@ public class TargetCirle
         dot.transform.localScale = new Vector3(0.09f, 1f, 0.09f);
         dot.transform.localPosition = new Vector3(0f, -1.1f, 0f);
         dot.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f, 1);
+
+        //Add material to the target
+        target_material = (Material)Resources.Load("Target");
+        target_texture = Resources.Load("Square") as Texture2D;
+        circle.AddComponent<MeshCollider>();
+        circle.GetComponent<Renderer>().material = target_material;  
+        circle.GetComponent<Renderer>().material.mainTexture = target_texture;
 
         CalculateScale();
         CalculateOffset();
@@ -96,6 +108,13 @@ public class TargetCirle
         dot.transform.localScale = new Vector3(0.07f, 1f, 0.07f);
         dot.transform.localPosition = new Vector3(0f, -1.1f, 0f);
         dot.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f, 1);
+
+        //Add material to the target
+        target_material = (Material)Resources.Load("Target");
+        target_texture = Resources.Load("Square") as Texture2D;
+        circle.AddComponent<MeshCollider>();
+        circle.GetComponent<Renderer>().material = target_material;
+        circle.GetComponent<Renderer>().material.mainTexture = target_texture;
 
         // Place the circle at the center of the cell, for the end process
         circle.transform.localPosition = new Vector3((x_max + x_min) / 2, (y_max + y_min) / 2, -0.5f);
@@ -168,9 +187,23 @@ public class TargetCirle
 
     internal void ReduceScale()
     {
-        circle.transform.localScale *= 0.95f;
+        circle.transform.localScale *= target_shrinking;
         dot.transform.localScale = new Vector3(0.0175f/circle.transform.localScale.x,1.0f,0.021f/circle.transform.localScale.z);
         previous_scale = circle.transform.localScale;
         previous_scales.Add(previous_scale);
+    }
+
+    internal void reduceSpeed(float dis, float coef)
+    {
+        diff = coef * 2 - (coef * dis);
+
+        if(diff > 0 && diff < 1)
+        {
+            target_shrinking = 0.999f-diff;
+        }
+        else
+        {
+            target_shrinking = 0.99f;
+        }
     }
 }
