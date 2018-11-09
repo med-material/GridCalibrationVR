@@ -11,6 +11,7 @@ public class PupilManager : MonoBehaviour
     GameObject cameraObject;
     Text calibrationText;
     private PupilDataGetter pupilDataGetter;
+    private PupilVisualizer pupilVisualizer;
 
     void Start()
     {
@@ -29,7 +30,6 @@ public class PupilManager : MonoBehaviour
     void OnEnable()
     {
         pupilDataGetter = new PupilDataGetter();
-        pupilDataGetter.startSubscribe(new List<string> {"pupil."});
     }
     void ResetCalibrationText()
     {
@@ -57,6 +57,9 @@ public class PupilManager : MonoBehaviour
 
         if (displayEyeImages)
             gameObject.AddComponent<FramePublishing>();
+        
+        pupilDataGetter.startSubscribe(new List<string> {"pupil."});
+        pupilVisualizer = new PupilVisualizer();
 
         Invoke("ShowCalibrate", 1f);
     }
@@ -155,7 +158,11 @@ public class PupilManager : MonoBehaviour
         if(pupilDataGetter.confidence <= 0.6f) {
             print("Confidence : " + pupilDataGetter.confidence);
         }
+        if(pupilVisualizer != null)
+            pupilVisualizer.UpdatePupilsData(); 
     }
+
+   
 
     void OnDisable()
     {
@@ -164,5 +171,7 @@ public class PupilManager : MonoBehaviour
         PupilTools.OnCalibrationStarted -= OnCalibrationStarted;
         PupilTools.OnCalibrationEnded -= OnCalibrationEnded;
         PupilTools.OnCalibrationFailed -= OnCalibrationFailed;
+
+        pupilVisualizer.DisablePupilData();
     }
 }

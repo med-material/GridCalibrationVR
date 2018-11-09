@@ -197,7 +197,6 @@ public class GameController : MonoBehaviour
     }
     private void StartShrinkMode()
     {
-        //print(pupilDataGetter.confidence);
         if (calib_end && only_one)
         {
             print("Calibration test end.");
@@ -322,7 +321,6 @@ public class GameController : MonoBehaviour
     {
         timeLeft = choosenTime;
     }
-
     private void LogData()
     {
         if (PupilData._2D.GazePosition != Vector2.zero)
@@ -343,7 +341,10 @@ public class GameController : MonoBehaviour
             o = travel_time,
             p = last_target != null ? last_target.circle.transform.localPosition.x : double.NaN,
             q = last_target != null ? last_target.circle.transform.localPosition.y : double.NaN,
-            r = CalculateCircleRadiusPercent()
+            r = CalculateCircleRadiusPercent(),
+            s = pupilDataGetter.fix_duration,
+            t = pupilDataGetter.fix_dispersion,
+            u = pupilDataGetter.fix_confidence
         };
         logger.AddObjToLog(tmp);
     }
