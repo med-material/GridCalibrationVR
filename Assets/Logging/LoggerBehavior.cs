@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using System.Linq;
 
 public class LoggerBehavior : MonoBehaviour
 {
@@ -53,19 +54,31 @@ public class LoggerBehavior : MonoBehaviour
         _toLog.Add(tmp);
     }
 
-    public void AddObjToLog(List<object> tmp)
+    public void AddObjToLog()
     {
         DoLog();
         if (PupilData._2D.GazePosition != Vector2.zero)
         {
             gazeToWorld = dedicatedCapture.ViewportToWorldPoint(new Vector3(PupilData._2D.GazePosition.x, PupilData._2D.GazePosition.y, Camera.main.nearClipPlane));
         }
-        tmp.Insert(0, DateTime.Now);
-        tmp.Insert(1, test_name);
-        tmp.Insert(2, state);
-        tmp.Insert(3, PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN);
-        tmp.Insert(4, PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN);
 
+        var tmp = new
+        {
+            a = DateTime.Now,
+            b = state,
+            c = test_name,
+            d = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN,
+            e = PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN,
+            f = gameController != null ? gameController.pupilDataGetter.left_confidence : float.NaN,
+            g = gameController != null ? gameController.pupilDataGetter.right_confidence : float.NaN,
+            h = gameController != null ? gameController.travel_time : float.NaN,
+            i = gameController != null ? gameController.last_target.circle.transform.position.x : double.NaN,
+            j = gameController != null ? gameController.last_target.circle.transform.position.y : double.NaN,
+            k = gameController != null ? gameController.CalculateCircleRadiusPercent() : float.NaN,
+            l = gameController != null ? gameController.pupilDataGetter.fix_duration : float.NaN,
+            m = gameController != null ? gameController.pupilDataGetter.fix_dispersion : float.NaN,
+            n = gameController != null ? gameController.pupilDataGetter.fix_confidence : float.NaN,
+        };
         _toLog.Add(tmp);
     }
 
@@ -86,6 +99,7 @@ public class LoggerBehavior : MonoBehaviour
         _logger.Log(_toLog.ToArray());
         _toLog.Clear();
     }
+
 
 
 }

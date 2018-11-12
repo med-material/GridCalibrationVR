@@ -163,21 +163,11 @@ public class PupilManager : MonoBehaviour
     {
         if (Input.GetKeyUp(KeyCode.S))
             StartDemo();
-
-        if (pupilDataGetter.confidence <= 0.6f)
-        {
-            print("Confidence : " + pupilDataGetter.confidence);
-        }
         if (pupilVisualizer != null)
             pupilVisualizer.UpdatePupilsData();
 
         if (logging)
-        {
-            List<object> lst = new List<object>();
-            lst.Add(pupilDataGetter.left_confidence); //confidence value on real time 
-            lst.Add(pupilDataGetter.right_confidence);
-            logger.AddObjToLog(lst);
-        }
+            logger.AddObjToLog();
     }
 
     void OnDisable()

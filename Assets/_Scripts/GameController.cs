@@ -46,7 +46,7 @@ public class GameController : MonoBehaviour
     #endregion
 
     # region log value
-    private PupilDataGetter pupilDataGetter;
+    public PupilDataGetter pupilDataGetter;
     private LoggerBehavior logger;
     #endregion
 
@@ -333,10 +333,10 @@ public class GameController : MonoBehaviour
         lst.Add(pupilDataGetter.fix_dispersion);
         lst.Add(pupilDataGetter.fix_confidence);
 
-        logger.AddObjToLog(lst);
+        logger.AddObjToLog();
     }
 
-    private float CalculateCircleRadiusPercent()
+    public float CalculateCircleRadiusPercent()
     {
         float current_scale = looking_at_circle.collider.gameObject.transform.localScale.x;
         float first_scale = last_target.previous_scales[0].x;
