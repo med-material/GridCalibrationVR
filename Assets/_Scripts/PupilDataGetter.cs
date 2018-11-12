@@ -44,9 +44,10 @@ public class PupilDataGetter
         topics = new List<string>();
     }
 
-    public static PupilDataGetter GetPupilDataGetter() {
-        if(instance == null)
-           instance = new PupilDataGetter();
+    public static PupilDataGetter GetPupilDataGetter()
+    {
+        if (instance == null)
+            instance = new PupilDataGetter();
         return instance;
     }
 
@@ -78,7 +79,6 @@ public class PupilDataGetter
         GetGazeData(topic, dictionary);
         GetPupilData(topic, dictionary);
         GetFixationData(topic, dictionary);
-        
     }
 
     private void GetGazeData(String topic, Dictionary<string, object> dictionary)
@@ -91,10 +91,6 @@ public class PupilDataGetter
                 {
                     case "topic":
                         current_topic = PupilTools.StringFromDictionary(dictionary, item.Key);
-                        break;
-                    case "confidence":
-                        // TODO get left & right data confidence for the gaze
-                        confidence = PupilTools.FloatFromDictionary(dictionary, item.Key);
                         break;
                     default:
                         break;

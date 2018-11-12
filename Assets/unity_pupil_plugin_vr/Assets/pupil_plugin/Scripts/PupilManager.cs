@@ -12,7 +12,6 @@ public class PupilManager : MonoBehaviour
     Text calibrationText;
     private PupilDataGetter pupilDataGetter;
     private PupilVisualizer pupilVisualizer;
-    private LoggerBehavior logger;
 
     void Start()
     {
@@ -53,9 +52,6 @@ public class PupilManager : MonoBehaviour
     {
         calibrationText.text = "Success";
         PupilTools.CalibrationMode = calibrationMode;
-
-        logger = GetComponent<LoggerBehavior>();
-        logger.state = "Connection";
 
         InitializeCalibrationPointPreview();
 
@@ -101,9 +97,6 @@ public class PupilManager : MonoBehaviour
         PupilSettings.Instance.currentCamera = cameraObject.GetComponent<Camera>();
         calibrationText.text = "";
 
-        logger.state = "Calibration";
-        logging = true;
-
         if (displayEyeImages)
             GetComponent<FramePublishing>().enabled = false;
 
@@ -114,7 +107,6 @@ public class PupilManager : MonoBehaviour
     void OnCalibrationEnded()
     {
         calibrationText.text = "Calibration ended.";
-        logging = false;
         Invoke("StartDemo", 1f);
     }
 
@@ -129,7 +121,6 @@ public class PupilManager : MonoBehaviour
     public string[] availableScenes;
     public int currentSceneIndex;
     private int loadedSceneIndex = -1;
-    private bool logging;
 
     IEnumerator LoadCurrentScene()
     {
@@ -165,9 +156,6 @@ public class PupilManager : MonoBehaviour
             StartDemo();
         if (pupilVisualizer != null)
             pupilVisualizer.UpdatePupilsData();
-
-        if (logging)
-            logger.AddObjToLog();
     }
 
     void OnDisable()
