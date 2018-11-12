@@ -250,11 +250,9 @@ public class GameController : MonoBehaviour
                 if (looking_at_circle.collider.name == "Cylinder")
                 {
                     LogData();
-                    if (travel_time <= 0.0f) // Attention comparaison float
+                    if (travel_time <= 0.0f)
                     {
                         travel_time = target_timer;
-                        //LogData(false);
-                        //print("First time entry : " + travel_time);
                     }
                     last_target.was_looked = true;
 

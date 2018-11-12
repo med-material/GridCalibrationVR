@@ -1,5 +1,6 @@
 ﻿// originally created by Theo and Kiefer (French interns at AAU Fall 2017) 
 // modified by Bianca
+// Modified by Tanguy
 
 // outcommented parts doesn't work in Pupil Labs Plugin, but is used in another project
 
@@ -10,11 +11,6 @@ using UnityEngine;
 
 public class LoggerBehavior : MonoBehaviour
 {
-
-    #region Public editor fields
-
-    #endregion
-
     private static Logger _logger;
     private static List<object> _toLog;
     private Vector3 gazeToWorld;
@@ -22,17 +18,13 @@ public class LoggerBehavior : MonoBehaviour
     private Camera dedicatedCapture;
     private GameController gameController;
     public static string sceneName = "_";
-    public string state;
+    public string state = "Starting";
     public string test_name;
 
     private void Start()
     {
         _toLog = new List<object>();
         dedicatedCapture = Camera.main;
-    }
-
-    private void Update()
-    {
     }
 
     private void AddToLog()
@@ -70,8 +62,9 @@ public class LoggerBehavior : MonoBehaviour
         }
         tmp.Insert(0, DateTime.Now);
         tmp.Insert(1, test_name);
-        tmp.Insert(2, PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN);
-        tmp.Insert(3, PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN);
+        tmp.Insert(2, state);
+        tmp.Insert(3, PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.x : float.NaN);
+        tmp.Insert(4, PupilData._2D.GazePosition != Vector2.zero ? gazeToWorld.y : float.NaN);
 
         _toLog.Add(tmp);
     }

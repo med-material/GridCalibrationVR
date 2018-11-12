@@ -12,6 +12,7 @@ public class PupilManager : MonoBehaviour
     Text calibrationText;
     private PupilDataGetter pupilDataGetter;
     private PupilVisualizer pupilVisualizer;
+    private LoggerBehavior logger;
 
     void Start()
     {
@@ -53,12 +54,15 @@ public class PupilManager : MonoBehaviour
         calibrationText.text = "Success";
         PupilTools.CalibrationMode = calibrationMode;
 
+        logger = GetComponent<LoggerBehavior>();
+        logger.state = "Connection";
+
         InitializeCalibrationPointPreview();
 
         if (displayEyeImages)
             gameObject.AddComponent<FramePublishing>();
-        
-        pupilDataGetter.startSubscribe(new List<string> {"pupil."});
+
+        pupilDataGetter.startSubscribe(new List<string> { "pupil." });
         pupilVisualizer = new PupilVisualizer();
 
         Invoke("ShowCalibrate", 1f);
@@ -97,6 +101,9 @@ public class PupilManager : MonoBehaviour
         PupilSettings.Instance.currentCamera = cameraObject.GetComponent<Camera>();
         calibrationText.text = "";
 
+        logger.state = "Calibration";
+        logging = true;
+
         if (displayEyeImages)
             GetComponent<FramePublishing>().enabled = false;
 
@@ -107,7 +114,7 @@ public class PupilManager : MonoBehaviour
     void OnCalibrationEnded()
     {
         calibrationText.text = "Calibration ended.";
-
+        logging = false;
         Invoke("StartDemo", 1f);
     }
 
@@ -122,6 +129,8 @@ public class PupilManager : MonoBehaviour
     public string[] availableScenes;
     public int currentSceneIndex;
     private int loadedSceneIndex = -1;
+    private bool logging;
+
     IEnumerator LoadCurrentScene()
     {
         AsyncOperation asyncScene = SceneManager.LoadSceneAsync(availableScenes[currentSceneIndex], LoadSceneMode.Additive);
@@ -155,14 +164,21 @@ public class PupilManager : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.S))
             StartDemo();
 
-        if(pupilDataGetter.confidence <= 0.6f) {
+        if (pupilDataGetter.confidence <= 0.6f)
+        {
             print("Confidence : " + pupilDataGetter.confidence);
         }
-        if(pupilVisualizer != null)
-            pupilVisualizer.UpdatePupilsData(); 
-    }
+        if (pupilVisualizer != null)
+            pupilVisualizer.UpdatePupilsData();
 
-   
+        if (logging)
+        {
+            List<object> lst = new List<object>();
+            lst.Add(pupilDataGetter.left_confidence); //confidence value on real time 
+            lst.Add(pupilDataGetter.right_confidence);
+            logger.AddObjToLog(lst);
+        }
+    }
 
     void OnDisable()
     {

@@ -37,11 +37,19 @@ public class PupilVisualizer
 
     private void SetPupil(GameObject pupil, Vector3 norm_pos, float diameter, Transform container)
     {
-        pupil.GetComponent<Renderer>().material.color = Color.red;
         pupil.transform.parent = container;
-        pupil.transform.localPosition = new Vector3(norm_pos.x * 10,0,norm_pos.y * 10);
-        pupil.transform.localRotation = Quaternion.Euler(0,0,0);
+        SetColorPupil(pupil, norm_pos);
+        pupil.transform.localPosition = new Vector3(norm_pos.x * 10, 0, norm_pos.y * 10);
+        pupil.transform.localRotation = Quaternion.Euler(0, 0, 0);
         pupil.transform.localScale = new Vector3(1.0f, 0.01f, 1.0f);
+    }
+
+    private void SetColorPupil(GameObject pupil, Vector3 norm_pos)
+    {
+        if (norm_pos.x > 0.4f && norm_pos.x < 0.6f && norm_pos.y > 0.4f && norm_pos.y < 0.6f)
+            pupil.GetComponent<Renderer>().material.color = Color.green;
+        else
+            pupil.GetComponent<Renderer>().material.color = Color.red;
     }
 
     public void UpdatePupilsData()
@@ -66,7 +74,7 @@ public class PupilVisualizer
 
     private void UpdatePupilData(GameObject pupil, Vector3 norm_pos, float diameter)
     {
-        pupil.transform.localPosition = new Vector3(norm_pos.x * 10,0,norm_pos.y * 10);
+        pupil.transform.localPosition = new Vector3(norm_pos.x * 10, 0, norm_pos.y * 10);
         pupil.transform.localRotation = Quaternion.Euler(0, 0, 0);
         pupil.transform.localScale = new Vector3(1.0f, 0.01f, 1.0f);
     }
