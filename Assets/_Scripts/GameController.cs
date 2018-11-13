@@ -42,12 +42,14 @@ public class GameController : MonoBehaviour
     private bool calib_end = false;
     private bool only_one = true;
     private Color success_color = new Color(0.07f, 0.8f, 0.07f, 1);
+    private Vector2 pixelUV;
 
     #endregion
 
     # region log value
     public PupilDataGetter pupilDataGetter;
     private LoggerBehavior logger;
+    private UserBehaviour userbhv;
     #endregion
 
     void Start()
@@ -58,6 +60,7 @@ public class GameController : MonoBehaviour
 
         dedicatedCapture = Camera.main;
         logger = GetComponent<LoggerBehavior>();
+        userbhv = GetComponent<UserBehaviour>();
 
         CreateCalculValue();
         CreateTargets();
@@ -257,18 +260,15 @@ public class GameController : MonoBehaviour
                     last_target.was_looked = true;
 
                     //We get the pixels location of the collider
-                    looking_at_circle.transform.GetComponent<CapsuleCollider>().enabled = false;
-                    Renderer rend = looking_at_circle.transform.GetComponent<Renderer>();
-                    MeshCollider meshCollider = looking_at_circle.collider as MeshCollider;
-                    Texture2D tex = rend.material.mainTexture as Texture2D;
-                    Vector2 pixelUV = looking_at_circle.textureCoord;
-                    pixelUV.x *= tex.width;
-                    pixelUV.y *= tex.height;
+                    pixelUV = gridController.getCurrentColliderPosition(looking_at_circle);
 
                     //Depending of the distance from the center of the circle, we reduce or increase the shrinking speed.
+                    //last_target.reduceSpeed(Vector2.Distance(new Vector2(2,2), pixelUV), 0.048f);
 
-                    last_target.reduceSpeed(Vector2.Distance(new Vector2(2,2), pixelUV), 0.048f);
-                    last_target.ReduceScale();                                     
+                    //Depending of the dispersion, we reduce or increase the shrinking speed.
+                    last_target.reduceSpeed(userbhv.getDispersion(), 0.048f);
+
+                    last_target.ReduceScale();                                ///////////////////////////////////////////////      
                     looking_at_circle_before = looking_at_circle;
                 }
                 else
@@ -342,4 +342,5 @@ public class GameController : MonoBehaviour
         float first_scale = last_target.previous_scales[0].x;
         return 100 - (((first_scale - current_scale) / first_scale) * 100);
     }
+
 }
