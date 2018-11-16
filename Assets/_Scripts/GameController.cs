@@ -234,7 +234,7 @@ public class GameController : MonoBehaviour
                     target_timer = 0.0f;
                 }
                 last_target = trgt;
-                ResetTimer();
+                ResetTimer();  
             }
             target_timer += Time.deltaTime;
             // Get the current object looked at by the user
@@ -259,16 +259,13 @@ public class GameController : MonoBehaviour
                     }
                     last_target.was_looked = true;
 
-                    //We get the pixels location of the collider
-                    pixelUV = gridController.getCurrentColliderPosition(looking_at_circle);
-
-                    //Depending of the distance from the center of the circle, we reduce or increase the shrinking speed.
-                    //last_target.reduceSpeed(Vector2.Distance(new Vector2(2,2), pixelUV), 0.048f);
+                    //We get the pixels location of the collider, depending of the distance from the center of the circle, we reduce or increase the shrinking speed.
+                    //pixelUV = gridController.getCurrentColliderPosition(looking_at_circle);
+                    //last_target.reduceSpeed(Vector2.Distance(new Vector2(2,2), pixelUV), 0.048f, 0);
 
                     //Depending of the dispersion, we reduce or increase the shrinking speed.
-                    last_target.reduceSpeed(userbhv.getDispersion(), 0.048f);
-
-                    last_target.ReduceScale();                                ///////////////////////////////////////////////      
+                    last_target.reduceSpeed(userbhv.getDispersion(), 0.038f, 1);
+                    last_target.ReduceScale();  
                     looking_at_circle_before = looking_at_circle;
                 }
                 else

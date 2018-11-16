@@ -29,6 +29,7 @@ public class TargetCirle
     private bool missed_four_times_before;
 
     private float target_shrinking = 0.98f; //The original value was 0.95
+    private float timer = 0;
     public float diff;
 
     public TargetCirle(float x_min, float x_max, float y_min, float y_max)
@@ -193,11 +194,21 @@ public class TargetCirle
         previous_scales.Add(previous_scale);
     }
 
-    internal void reduceSpeed(float dis, float coef)
+    internal void reduceSpeed(float dis, float coef, int mode)
     {
-        diff = coef * 2 - (coef * dis);
 
-        if(diff > 0 && diff < 1)
+        timer += Time.deltaTime;
+        if(dis == 0 && mode == 1 && timer < 0.8f)
+        {
+            diff = 0;
+            target_shrinking = 0.999f;
+        }
+        else
+        {
+            diff = coef * 2 - (coef * dis);
+        }
+
+        if (diff > 0 && diff < 1)
         {
             target_shrinking = 0.999f-diff;
         }
@@ -206,4 +217,5 @@ public class TargetCirle
             target_shrinking = 0.99f;
         }
     }
+
 }
