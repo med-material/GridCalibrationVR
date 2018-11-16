@@ -28,7 +28,7 @@ public class TargetCirle
     public bool circle_created;
     private bool missed_four_times_before;
 
-    private float target_shrinking = 0.98f; //The original value was 0.95
+    private float target_shrinking = 0.999f; //The original value was 0.95
     private float timer = 0;
     public float diff;
 
@@ -201,7 +201,7 @@ public class TargetCirle
         if(dis == 0 && mode == 1 && timer < 0.8f)
         {
             diff = 0;
-            target_shrinking = 0.999f;
+            target_shrinking -= 0.001f;
         }
         else
         {
