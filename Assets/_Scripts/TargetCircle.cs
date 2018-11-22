@@ -9,7 +9,7 @@ public class TargetCirle
     private Vector3 previous_scale;
     public List<Vector3> previous_scales = new List<Vector3>();
     private List<float> scales_factor = new List<float>();
-    private Material target_material;
+    private Material[] target_material = new Material[2];
     private Texture2D target_texture;
     private float default_x_max;
     private float default_y_max;
@@ -30,7 +30,11 @@ public class TargetCirle
 
     private float target_shrinking = 0.999f; //The original value was 0.95
     private float timer = 0;
+    private float highlightWidth = 0;
+
+    private Color newOutlineColor;
     public float diff;
+    public float dispersion = 0;
 
     public TargetCirle(float x_min, float x_max, float y_min, float y_max)
     {
@@ -63,10 +67,11 @@ public class TargetCirle
         dot.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f, 1);
 
         //Add material to the target
-        target_material = (Material)Resources.Load("Target");
+        target_material[0] = (Material)Resources.Load("Target");
+        target_material[1] = (Material)Resources.Load("Outline");
         target_texture = Resources.Load("Square") as Texture2D;
         circle.AddComponent<MeshCollider>();
-        circle.GetComponent<Renderer>().material = target_material;  
+        circle.GetComponent<Renderer>().materials = target_material;  
         circle.GetComponent<Renderer>().material.mainTexture = target_texture;
 
         CalculateScale();
@@ -91,38 +96,6 @@ public class TargetCirle
         }
     }
 
-    internal void CreateTarget(GameObject wall)
-    {
-        // Create the Circle 
-        circle = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        circle_created = true;
-        // Set the Circle as child of the wall
-        circle.transform.parent = wall.transform;
-        circle.transform.localRotation = Quaternion.Euler(90, 0, 0);
-        circle.transform.localScale = previous_scale;
-
-        // Add red dot at the center of the target
-        dot = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        dot.gameObject.name = "Dot";
-        dot.transform.parent = circle.transform;
-        dot.transform.localRotation = Quaternion.Euler(0, 0, 0);
-        dot.transform.localScale = new Vector3(0.07f, 1f, 0.07f);
-        dot.transform.localPosition = new Vector3(0f, -1.1f, 0f);
-        dot.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f, 1);
-
-        //Add material to the target
-        target_material = (Material)Resources.Load("Target");
-        target_texture = Resources.Load("Square") as Texture2D;
-        circle.AddComponent<MeshCollider>();
-        circle.GetComponent<Renderer>().material = target_material;
-        circle.GetComponent<Renderer>().material.mainTexture = target_texture;
-
-        // Place the circle at the center of the cell, for the end process
-        circle.transform.localPosition = new Vector3((x_max + x_min) / 2, (y_max + y_min) / 2, -0.5f);
-        
-        previous_scale = circle.transform.localScale;
-        previous_scales.Add(previous_scale);
-    }
     private void CalculateOffset()
     {
         x_min = default_x_min + circle.transform.localScale.x / 2;
@@ -217,5 +190,20 @@ public class TargetCirle
             target_shrinking = 0.99f;
         }
     }
+
+    internal void outlinePulse()
+    {
+
+        if(highlightWidth < 0.14f)
+        {
+            highlightWidth += 0.01f;
+        }
+        else
+        {
+            highlightWidth = 0;
+        }
+        target_material[1].SetFloat("_OutlineWidth", highlightWidth);
+    }
+
 
 }

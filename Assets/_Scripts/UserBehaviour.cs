@@ -15,7 +15,6 @@ public class UserBehaviour : MonoBehaviour{
     private List<float> distances;
     private bool control = false;
     private bool createCopy = true;
-    private float dispersion = 0;
     private int layerMask;
     private RaycastHit hitLayer;
 
@@ -80,6 +79,11 @@ public class UserBehaviour : MonoBehaviour{
                     distances.Clear();
                 }
 
+                if(gmCtrl.last_target != null)
+                {
+                    gmCtrl.last_target.outlinePulse();
+                }
+
                 Destroy(copy);
                 createCopy = true;
             }
@@ -91,7 +95,7 @@ public class UserBehaviour : MonoBehaviour{
     private void hitDispersion(Vector2 dis1, Vector2 dis2)
     {
         distances.Add(Vector2.Distance(dis1, dis2));
-        dispersion = disMoy(distances);
+        gmCtrl.last_target.dispersion = disMoy(distances);
     }
 
     private float disMoy(List<float> dis)
@@ -115,6 +119,6 @@ public class UserBehaviour : MonoBehaviour{
 
     public float getDispersion()
     {
-        return dispersion;
+        return gmCtrl.last_target.dispersion;
     }
 }
