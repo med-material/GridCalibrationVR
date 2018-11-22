@@ -13,8 +13,8 @@ public class GridController : MonoBehaviour
     private Vector2 gazePointLeft;
     private Vector2 gazePointRight;
     private Vector2 gazePointCenter;
-    public Material shaderMaterial;
     private RaycastHit hit;
+    public Material shaderMaterial;
 
     void Start()
     {
