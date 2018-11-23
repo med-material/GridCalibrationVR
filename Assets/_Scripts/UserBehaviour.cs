@@ -15,6 +15,7 @@ public class UserBehaviour : MonoBehaviour{
     private List<float> distances;
     private bool control = false;
     private bool createCopy = true;
+    private bool hasCirclePulsated = false;
     private int layerMask;
     private RaycastHit hitLayer;
 
@@ -66,6 +67,13 @@ public class UserBehaviour : MonoBehaviour{
                     timer = 0;
                 }
 
+                if (hasCirclePulsated)
+                {
+                    gmCtrl.last_target.highlightWidth = 0;
+                    hasCirclePulsated = false;
+                }
+                gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_center_material[1], 1, 0.1f);
+
             }
             else
             {
@@ -81,7 +89,8 @@ public class UserBehaviour : MonoBehaviour{
 
                 if(gmCtrl.last_target != null && !gmCtrl.last_target.was_looked && !gmCtrl.calib_end)
                 {
-                    gmCtrl.last_target.outlinePulse();
+                    hasCirclePulsated = true;
+                    gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_material[1], 0.14f, 0.01f);
                 }
 
                 Destroy(copy);

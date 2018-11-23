@@ -9,7 +9,9 @@ public class TargetCirle
     private Vector3 previous_scale;
     public List<Vector3> previous_scales = new List<Vector3>();
     private List<float> scales_factor = new List<float>();
-    private Material[] target_material = new Material[2];
+    public Material[] target_material = new Material[2];
+    public Material[] target_center_material = new Material[2];
+    public float highlightWidth = 0;
     private Texture2D target_texture;
     private float default_x_max;
     private float default_y_max;
@@ -30,7 +32,6 @@ public class TargetCirle
 
     private float target_shrinking = 0.999f; //The original value was 0.95
     private float timer = 0;
-    private float highlightWidth = 0;
 
     private Color newOutlineColor;
     public float diff;
@@ -64,11 +65,18 @@ public class TargetCirle
         dot.transform.localRotation = Quaternion.Euler(0, 0, 0);
         dot.transform.localScale = new Vector3(0.09f, 1f, 0.09f);
         dot.transform.localPosition = new Vector3(0f, -1.1f, 0f);
+
+        //Add material to the center of the target
+        target_center_material[0] = (Material)Resources.Load("Red");
+        target_center_material[1] = (Material)Resources.Load("Outline_Red");
+        target_center_material[1].SetFloat("_OutlineWidth", 0);
+        dot.GetComponent<Renderer>().materials = target_center_material;
         dot.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f, 1);
 
         //Add material to the target
         target_material[0] = (Material)Resources.Load("Target");
         target_material[1] = (Material)Resources.Load("Outline");
+        target_material[1].SetFloat("_OutlineWidth", 0);
         target_texture = Resources.Load("Square") as Texture2D;
         circle.AddComponent<MeshCollider>();
         circle.GetComponent<Renderer>().materials = target_material;  
@@ -171,7 +179,7 @@ public class TargetCirle
     {
 
         timer += Time.deltaTime;
-        if(dis == 0 && mode == 1 && timer < 0.8f)
+        if(dis == 0 && mode == 1 && timer < 0.55f)
         {
             diff = 0;
             target_shrinking -= 0.001f;
@@ -191,18 +199,18 @@ public class TargetCirle
         }
     }
 
-    internal void outlinePulse()
+    internal void outlinePulse(Material mat, float max, float step)
     {
 
-        if(highlightWidth < 0.14f)
+        if(highlightWidth < max)
         {
-            highlightWidth += 0.01f;
+            highlightWidth += step;
         }
         else
         {
             highlightWidth = 0;
         }
-        target_material[1].SetFloat("_OutlineWidth", highlightWidth);
+        mat.SetFloat("_OutlineWidth", highlightWidth);
     }
 
 
