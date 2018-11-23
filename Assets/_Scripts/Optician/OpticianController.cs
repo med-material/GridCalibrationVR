@@ -35,6 +35,8 @@ public class OpticianController : MonoBehaviour
     private Vector3 savedFOVTargetpos;
     private Color textColor = new Color(0.6415094f, 0.6415094f, 0.6415094f, 1.0f);
 
+    private bool isSizeOk = false;
+
 
     void Start()
     {
@@ -62,13 +64,10 @@ public class OpticianController : MonoBehaviour
         userHit = gridController.GetCurrentCollider();
 
         if (isFOVCalibEnded)
-        {
             UpdateAcuityCalibration();
-        }
+
         else
-        {
             UpdateMaxFOVCalibration();
-        }
     }
 
     private void UpdateMaxFOVCalibration()
@@ -148,35 +147,66 @@ public class OpticianController : MonoBehaviour
 
     private void UpdateAcuityCalibration()
     {
+        if (Input.GetKeyDown(downArrow) && !isSizeOk)
+        {
+            ReduceCircleSize();
+            SetRandomCircleOrientation();
+        }
+        else if (Input.GetKeyDown(upArrow) && !isSizeOk)
+        {
+            IncreaseCircleSize();
+            SetRandomCircleOrientation();
+        }
+        else if (Input.GetKeyDown(KeyCode.Space)) {
+            isSizeOk = true;
+            explainText.text = "";
+        }
+
         if (!almostCircle.activeSelf)
         {
-            explainText.text = "Press the arrow corresponding to the \n open circle, for exemple right for this one. \n Press the right arrow to start";
+            explainText.text = "Press the up or down arrow to increase or reduce size of the \n circle to the minimum size for wich you can still see "
+            + "the open side of it. \n Press space bar to start";
             explainText.enabled = true;
             explainText.color = textColor;
             almostCircle.SetActive(true);
         }
 
-        if (Input.GetKeyDown(rightArrow) && !isAcuityCalibStarted)
+        if (!isAcuityCalibStarted && isSizeOk && errors == 0)
         {
             isAcuityCalibStarted = true;
-            StartCoroutine("FadeText");
         }
-        if (Input.anyKeyDown && isAcuityCalibStarted)
+        if (Input.anyKeyDown && isAcuityCalibStarted && isSizeOk)
         {
             keyCodeIndex = GetKeyCodeIndexPressed();
             if (rotatIndex == keyCodeIndex) // if the user pressed the good arrow
             {
+                SetRandomEdgePosition();
                 SetRandomCircleOrientation();
-                if (errors > 1)
-                    SetRandomEdgePosition();
             }
-            else if (rotatIndex != keyCodeIndex)
+            else if (rotatIndex != keyCodeIndex && !Input.GetKeyDown(KeyCode.Space))
             {
+                SetRandomEdgePosition();
                 SetRandomCircleOrientation();
+                
                 errors++;
+                if(errors > 0) {
+                    explainText.enabled = true;
+                    explainText.material.color = new Color(0.3f,0.3f,0.3f,1.0f);
+                }
+                explainText.text ="errors :"+ errors.ToString();
                 print("WRONG KEY !" + errors);
             }
         }
+    }
+
+    private void ReduceCircleSize()
+    {
+        almostCircle.transform.localScale *= 0.8f;
+    }
+
+    private void IncreaseCircleSize()
+    {
+        almostCircle.transform.localScale /= 0.8f;
     }
 
     private void SetRandomEdgePosition()
