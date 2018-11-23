@@ -79,7 +79,7 @@ public class UserBehaviour : MonoBehaviour{
                     distances.Clear();
                 }
 
-                if(gmCtrl.last_target != null && !gmCtrl.last_target.was_looked)
+                if(gmCtrl.last_target != null && !gmCtrl.last_target.was_looked && !gmCtrl.calib_end)
                 {
                     gmCtrl.last_target.outlinePulse();
                 }

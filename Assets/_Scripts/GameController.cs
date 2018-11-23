@@ -19,6 +19,7 @@ public class GameController : MonoBehaviour
     public float travel_time = -1.0f;
     public string choosenMode = "";
     public string test_name;
+    public bool calib_end = false;
 
     # endregion
 
@@ -39,7 +40,6 @@ public class GameController : MonoBehaviour
     private RaycastHit looking_at_circle_before;
     private float target_timer;
     private float heat_timer;
-    private bool calib_end = false;
     private bool only_one = true;
     private Color success_color = new Color(0.07f, 0.8f, 0.07f, 1);
     private Vector2 pixelUV;
