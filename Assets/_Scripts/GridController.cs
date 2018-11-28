@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class GridController : MonoBehaviour
 {
-
+    public Camera eyeCamera;
     private Camera sceneCamera;
     private TextMesh positionText;
     private LineRenderer heading;
@@ -14,8 +14,8 @@ public class GridController : MonoBehaviour
     private Vector2 gazePointRight;
     private Vector2 gazePointCenter;
     private RaycastHit hit;
+    private RaycastHit[] hits;
     public Material shaderMaterial;
-
     void Start()
     {
         PupilData.calculateMovingAverage = false;
@@ -30,6 +30,7 @@ public class GridController : MonoBehaviour
         {
             PupilTools.IsGazing = true;
             PupilTools.SubscribeTo("gaze");
+            eyeCamera.gameObject.AddComponent<FramePublishing>();
         }
     }
 
@@ -50,10 +51,12 @@ public class GridController : MonoBehaviour
             heading.SetPosition(0, sceneCamera.transform.position - sceneCamera.transform.up);
 
             Ray ray = sceneCamera.ViewportPointToRay(viewportPoint);
+
+            hits = Physics.RaycastAll(ray);
             if (Physics.Raycast(ray, out hit))
             {
-                heading.SetPosition(1, hit.point);
-                positionText.text = sceneCamera.transform.InverseTransformDirection(hit.point).ToString();
+                heading.SetPosition(1, hits[hits.Length-1].point);
+                positionText.text = sceneCamera.transform.InverseTransformDirection(hits[hits.Length-1].point).ToString();
             }
             else
             {
@@ -67,6 +70,9 @@ public class GridController : MonoBehaviour
         return hit;
     }
 
+    public RaycastHit[] GetCurrentColliders(){
+        return hits;
+    }
     public Vector2 getCurrentColliderPosition(RaycastHit collider)
     {
         if (collider.transform.GetComponent<CapsuleCollider>())

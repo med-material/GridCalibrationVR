@@ -13,7 +13,6 @@ public class GameController : MonoBehaviour
     public GameObject wall;
     public List<TargetCirle> targets;
     public TargetCirle last_target = null;
-    public HeatMap heatMap;
     public bool is_started = false;
     public float choosenTime;
     public float travel_time = -1.0f;
@@ -37,6 +36,7 @@ public class GameController : MonoBehaviour
     private int target_index;
     private float timeLeft;
     private RaycastHit looking_at_circle;
+    private RaycastHit[] lookings;
     private RaycastHit looking_at_circle_before;
     private float target_timer;
     private float heat_timer;
@@ -64,11 +64,6 @@ public class GameController : MonoBehaviour
 
         CreateCalculValue();
         CreateTargets();
-
-        //heatMap
-        heatMap = new HeatMap(0, 0, 0);
-        //heatMap.setActive(false);
-
     }
 
     void OnEnable()
@@ -239,17 +234,19 @@ public class GameController : MonoBehaviour
             target_timer += Time.deltaTime;
             // Get the current object looked at by the user
             looking_at_circle = gridController.GetCurrentCollider();
+            lookings = gridController.GetCurrentColliders();
+
+            for(int i = 0; i < lookings.Length; i++){
+                RaycastHit hit = lookings[i];
+                if(hit.collider.name == "Cylinder"){
+                    looking_at_circle = hit;
+                }
+            }
             // If the user is looking the target, reduce its scale 
             if (looking_at_circle.collider)
             {
-                Vector3 posCircleHeatMap = new Vector3(looking_at_circle.transform.position.x, looking_at_circle.transform.position.y, looking_at_circle.transform.position.z - 0.5f);
+                //Vector3 posCircleHeatMap = new Vector3(looking_at_circle.transform.position.x, looking_at_circle.transform.position.y, looking_at_circle.transform.position.z - 0.5f);
                 //Vector3 posCircleHeatMap = looking_at_circle.transform.position;
-                if (heat_timer > 0.2f)
-                {
-                    heatMap.addCircle(posCircleHeatMap);
-                    heat_timer = 0;
-                }
-                heat_timer += Time.deltaTime;
                 if (looking_at_circle.collider.name == "Cylinder")
                 {
                     LogData();
