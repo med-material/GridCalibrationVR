@@ -28,8 +28,6 @@ public class Heatmap : MonoBehaviour
 	Camera cam;
 	public Camera RenderingCamera;
 	public Camera MaskingCamera;
-
-	private bool startStop;
 	// Use this for initialization
 	void OnEnable () 
 	{
@@ -236,8 +234,9 @@ public class Heatmap : MonoBehaviour
 //			if (Input.GetMouseButton(0) && Physics.Raycast(cam.ScreenPointToRay (Input.mousePosition), out hit, 1f, (int) collisionLayer))
 			if (Physics.Raycast(cam.ViewportPointToRay (gazePosition), out hit, 1f, (int)collisionLayer))
 			{
-				if ( hit.collider.gameObject != gameObject || !startStop)
+				if ( hit.collider.gameObject != gameObject )
 					return;
+
 				if (mode == HeatmapMode.ParticleDebug)
 					Add (hit.point);
 				else
@@ -354,9 +353,5 @@ public class Heatmap : MonoBehaviour
 		}
 
 		_pipe = null;
-	}
-
-	public void SetStartStop(bool startOrStop){
-		this.startStop = startOrStop;
 	}
 }

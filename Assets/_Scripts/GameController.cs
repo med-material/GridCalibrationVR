@@ -10,7 +10,6 @@ public class GameController : MonoBehaviour
 {
     # region public_value
     public GridController gridController;
-    public Heatmap heatmap;
     public GameObject wall;
     public List<TargetCirle> targets;
     public TargetCirle last_target = null;
@@ -62,7 +61,6 @@ public class GameController : MonoBehaviour
         dedicatedCapture = Camera.main;
         logger = GetComponent<LoggerBehavior>();
         userbhv = GetComponent<UserBehaviour>();
-        heatmap.SetStartStop(false);
 
         CreateCalculValue();
         CreateTargets();
@@ -72,7 +70,6 @@ public class GameController : MonoBehaviour
     {
         pupilDataGetter = new PupilDataGetter();
         pupilDataGetter.startSubscribe(new List<string> { "gaze", "pupil.", "fixation" });
-        
     }
 
     void onDisable()
@@ -199,7 +196,6 @@ public class GameController : MonoBehaviour
     }
     private void StartShrinkMode()
     {
-        heatmap.SetStartStop(true);
         if (calib_end && only_one)
         {
             print("Calibration test end.");
@@ -289,7 +285,6 @@ public class GameController : MonoBehaviour
         if (targets.All(trg => trg.calibration_max))
         {
             calib_end = true;
-            heatmap.SetStartStop(false);
             return null;
         }
         // Get a random target in the list
