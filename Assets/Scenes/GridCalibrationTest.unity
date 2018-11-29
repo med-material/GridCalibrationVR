@@ -1331,6 +1331,12 @@ Prefab:
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4f986ff1ece004c4189269ca2891416a, type: 2}
   m_IsPrefabAsset: 0
+--- !u!114 &930277097 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114500642071338986, guid: 4f986ff1ece004c4189269ca2891416a,
+    type: 2}
+  m_PrefabInternal: {fileID: 930277096}
+  m_Script: {fileID: 11500000, guid: 2a4122c235cfd184bacfd0ce44bf7622, type: 3}
 --- !u!1 &977740047
 GameObject:
   m_ObjectHideFlags: 0
@@ -2095,6 +2101,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridController: {fileID: 1915425636}
+  heatmap: {fileID: 930277097}
   wall: {fileID: 339192480}
   is_started: 0
   choosenTime: 1
