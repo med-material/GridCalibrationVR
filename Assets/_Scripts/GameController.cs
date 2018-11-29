@@ -10,6 +10,7 @@ public class GameController : MonoBehaviour
 {
     # region public_value
     public GridController gridController;
+    public Heatmap heatmap;
     public GameObject wall;
     public List<TargetCirle> targets;
     public TargetCirle last_target = null;
@@ -61,6 +62,7 @@ public class GameController : MonoBehaviour
         dedicatedCapture = Camera.main;
         logger = GetComponent<LoggerBehavior>();
         userbhv = GetComponent<UserBehaviour>();
+        heatmap.SetStartStop(false);
 
         CreateCalculValue();
         CreateTargets();
@@ -212,6 +214,7 @@ public class GameController : MonoBehaviour
         }
         else if (only_one)
         {
+            heatmap.SetStartStop(true);
             // Select a random target
             TargetCirle trgt = selectItem();
             // If no more time left and the target has not been looked.
@@ -285,6 +288,7 @@ public class GameController : MonoBehaviour
         if (targets.All(trg => trg.calibration_max))
         {
             calib_end = true;
+            heatmap.SetStartStop(false);
             return null;
         }
         // Get a random target in the list
