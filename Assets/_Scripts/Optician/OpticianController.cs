@@ -80,6 +80,7 @@ public class OpticianController : MonoBehaviour
         userHit = gridController.GetCurrentCollider();
         if (calibrationIsOver)
         {
+            almostCircle.SetActive(false);
             Debug.DrawLine(savedTargetposList[0], savedTargetposList[1], Color.blue, 200);
             Debug.DrawLine(savedTargetposList[1], savedTargetposList[2], Color.blue, 200);
             Debug.DrawLine(savedTargetposList[2], savedTargetposList[3], Color.blue, 200);
@@ -114,7 +115,7 @@ public class OpticianController : MonoBehaviour
                 SaveTargetPosition();
                 FOVTarget.transform.position = savedFOVTargetpos; // reset the target position at center before new direction
                 nbDirectionEnded++;
-                if (nbDirectionEnded == moveDirections.Count)
+                if (nbDirectionEnded == moveDirections.Count -4)
                 {
                     isFOVCalibEnded = true;
                     FOVTarget.SetActive(false);
@@ -379,22 +380,22 @@ public class OpticianController : MonoBehaviour
         {
             if (Input.GetKey(upArrow))
             {
-
+                return 6;
             }
             else if (Input.GetKey(downArrow))
             {
-
+                return 7;
             }
         }
         else if (Input.GetKey(rightArrow))
         {
             if (Input.GetKey(upArrow))
             {
-
+                return 4;
             }
             else if (Input.GetKey(downArrow))
             {
-
+                return 5;
             }
         }
         foreach (KeyCode k in keyCodes)
