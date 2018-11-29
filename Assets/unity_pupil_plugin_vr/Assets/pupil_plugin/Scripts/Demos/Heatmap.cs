@@ -31,7 +31,6 @@ public class Heatmap : MonoBehaviour
 
 	private bool startStop;
 	// Use this for initialization
-	private bool activate = true;
 	void OnEnable () 
 	{
 		if (PupilTools.IsConnected)
@@ -42,7 +41,7 @@ public class Heatmap : MonoBehaviour
 
 		cam = GetComponentInParent<Camera> ();
 
-		//transform.localPosition = Vector3.zero;
+		transform.localPosition = Vector3.zero;
 
 		collisionLayer = (1 << LayerMask.NameToLayer ("HeatmapMesh"));
 
@@ -61,7 +60,7 @@ public class Heatmap : MonoBehaviour
 			particleSystemParameters.startColor = particleColor;
 			particleSystemParameters.startSize = particleSize * 0.05f;
 			particleSystemParameters.startLifetime = removeParticleAfterXSeconds;
-			currentVisualization.gameObject.layer = 10;
+			currentVisualization.gameObject.layer = 0;
 			break;
 		case HeatmapMode.Image:
 			particleSystemParameters.startColor = particleColor;
@@ -71,9 +70,8 @@ public class Heatmap : MonoBehaviour
 			break;
 		default:
 			particleSystemParameters.startColor = particleColor;
-			particleSystemParameters.startSize = particleSize * 0.05f;
-			particleSystemParameters.startLifetime = float.MaxValue;
-			currentVisualization.gameObject.layer = 10;
+			particleSystemParameters.startSize = particleSize * 0.033f;
+			particleSystemParameters.startLifetime = removeParticleAfterXSeconds;
 			break;
 		}
 	}
@@ -112,7 +110,7 @@ public class Heatmap : MonoBehaviour
 			sphereMesh.triangles = sphereMesh.triangles.Reverse ().ToArray ();
 		}
 		gameObject.AddComponent<MeshCollider> ();
-		currentVisualization = GetComponentInChildren<ParticleSystem> (); 
+		currentVisualization = GetComponentInChildren<ParticleSystem> ();
 		visualizations = new List<ParticleSystem> ();
 		visualizations.Add (currentVisualization);
 
@@ -141,7 +139,7 @@ public class Heatmap : MonoBehaviour
 
 	int sphereMeshHeight = 32;
 	int sphereMeshWidth = 32;
-	Vector2 sphereMeshCenterOffset = Vector2.one * 5f;
+	Vector2 sphereMeshCenterOffset = Vector2.one * 0.5f;
 	Mesh GeneratePlaneWithSphereNormals()
 	{
 		Mesh result = new Mesh ();
@@ -228,7 +226,7 @@ public class Heatmap : MonoBehaviour
 
 	void Update () 
 	{
-		//transform.eulerAngles = Vector3.zero;
+		transform.eulerAngles = Vector3.zero;
 
 		if (PupilTools.IsConnected && PupilTools.IsGazing)
 		{
@@ -236,13 +234,12 @@ public class Heatmap : MonoBehaviour
 
 			RaycastHit hit;
 //			if (Input.GetMouseButton(0) && Physics.Raycast(cam.ScreenPointToRay (Input.mousePosition), out hit, 1f, (int) collisionLayer))
-			if (Physics.Raycast(cam.ViewportPointToRay (gazePosition), out hit, 10f, (int)collisionLayer))
+			if (Physics.Raycast(cam.ViewportPointToRay (gazePosition), out hit, 1f, (int)collisionLayer))
 			{
 				if ( hit.collider.gameObject != gameObject || !startStop)
 					return;
-
-				if (mode == HeatmapMode.ParticleDebug || mode == HeatmapMode.Particle)
-					Add (hit.transform.InverseTransformPoint(hit.point));
+				if (mode == HeatmapMode.ParticleDebug)
+					Add (hit.point);
 				else
 					Add (RenderingMeshFilter.transform.localToWorldMatrix.MultiplyPoint3x4 (PositionForUV (Vector2.one - hit.textureCoord) - Vector3.forward * 0.001f));
 			}
@@ -251,16 +248,8 @@ public class Heatmap : MonoBehaviour
 		if ( renderingMaterial != null)
 			cam.RenderToCubemap (Cubemap);
 		
-		if (Input.GetKeyUp (KeyCode.H)){
-			activate = !activate;
-			if(activate){
-				gameObject.transform.localPosition -= new Vector3(0,0,2.0f);
-			}else{
-				gameObject.transform.localPosition += new Vector3(0,0,2.0f);
-			}
-		}
-			
-			//capturing = !capturing;
+		if (Input.GetKeyUp (KeyCode.H))
+			capturing = !capturing;
 	}
 
 	void LateUpdate()
