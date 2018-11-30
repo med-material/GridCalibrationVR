@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class OpticianController : MonoBehaviour
 {
@@ -15,7 +16,6 @@ public class OpticianController : MonoBehaviour
 
     private Renderer FOVTargetRenderer;
     private bool isFOVCalibEnded;
-    private bool isAcuityCalibStarted;
     private KeyCode rightArrow = KeyCode.RightArrow;
     private KeyCode leftArrow = KeyCode.LeftArrow;
     private KeyCode upArrow = KeyCode.UpArrow;
@@ -36,12 +36,15 @@ public class OpticianController : MonoBehaviour
     private List<Vector3> savedTargetposList;
     private Color textColor = new Color(0.6415094f, 0.6415094f, 0.6415094f, 1.0f);
     private bool isSizeOk = false;
+    private bool isConfirmingPosition = false;
     private string mode = "auto";
     private bool hasTargetMoved = false;
     private bool isCircleSet = false;
     private bool changePos = false;
     private int currentTargetIndex = 0;
     private bool calibrationIsOver;
+    private Material lineMaterial;
+    private float offSetTimer = 0;
 
     void Start()
     {
@@ -50,8 +53,8 @@ public class OpticianController : MonoBehaviour
         l_rotation = new List<int> { 0, -90, 180, 90 }; // Right, Down, Left, Up
         keyCodes = new List<KeyCode> { rightArrow, downArrow, leftArrow, upArrow }; // have to stay same order than rotation list !!
         savedTargetposList = new List<Vector3>();
-        //// FOV SETUP
 
+        //// FOV SETUP
         savedFOVTargetpos = FOVTarget.transform.position;
         FOVEdgePoints = new List<Vector3>();
         moveDirections = new List<string> { "right", "down", "left", "up", "right-up", "right-down", "left-up", "left-down" };
@@ -73,6 +76,40 @@ public class OpticianController : MonoBehaviour
         explainText.color = textColor;
         nbDirectionEnded = 0;
         moveDirection = moveDirections[nbDirectionEnded];
+
+        if (!lineMaterial)
+        {
+            lineMaterial = new Material(Shader.Find("Custom/GizmoShader"));
+            lineMaterial.hideFlags = HideFlags.HideAndDontSave;
+            lineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
+        }
+    }
+
+    void OnPostRender()
+    {
+        if (calibrationIsOver)
+        {
+            almostCircle.SetActive(false);
+            DrawLines(savedTargetposList, Color.blue);
+        }
+        if (isFOVCalibEnded)
+        {
+            DrawLines(FOVEdgePoints, Color.red);
+        }
+    }
+
+    // To show the lines in the editor
+    void OnDrawGizmos()
+    {
+        if (calibrationIsOver)
+        {
+            almostCircle.SetActive(false);
+            DrawLines(savedTargetposList, Color.blue);
+        }
+        if (isFOVCalibEnded)
+        {
+            DrawLines(FOVEdgePoints, Color.red);
+        }
     }
 
     void Update()
@@ -81,26 +118,41 @@ public class OpticianController : MonoBehaviour
         if (calibrationIsOver)
         {
             almostCircle.SetActive(false);
-            Debug.DrawLine(savedTargetposList[0], savedTargetposList[1], Color.blue, 200);
-            Debug.DrawLine(savedTargetposList[1], savedTargetposList[2], Color.blue, 200);
-            Debug.DrawLine(savedTargetposList[2], savedTargetposList[3], Color.blue, 200);
-            Debug.DrawLine(savedTargetposList[3], savedTargetposList[4], Color.blue, 200);
-            Debug.DrawLine(savedTargetposList[4], savedTargetposList[5], Color.blue, 200);
-            Debug.DrawLine(savedTargetposList[5], savedTargetposList[6], Color.blue, 200);
-            Debug.DrawLine(savedTargetposList[6], savedTargetposList[7], Color.blue, 200);
-            Debug.DrawLine(savedTargetposList[7], savedTargetposList[0], Color.blue, 200);
-            print("Calibration is over !");
         }
         else
         {
             if (isFOVCalibEnded)
                 UpdateAcuityCalibration();
-            else if (mode == "auto")
-                UpdateMaxFOVCalibrationAuto();
             else
-                UpdateMaxFOVCalibration();
-            // The method UpdateMaxFOVCalibration use the gaze and suppose the calibration is good. Most of the time it is not.
-            // Use the other method to detect the user max FOV.
+                UpdateMaxFOVCalibrationAuto();
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Scene scene = SceneManager.GetActiveScene();
+            SceneManager.LoadScene(scene.name);
+        }
+    }
+
+    private void DrawLines(List<Vector3> point_list, Color line_color)
+    {
+        foreach (Vector3 t in point_list)
+        {
+            GL.Begin(GL.LINES);
+            lineMaterial.SetPass(0);
+            GL.Color(line_color);
+            if (t.Equals(point_list.Last())) // if this is the last point, link to the first one to close the area
+            {
+                GL.Vertex3(t.x, t.y, t.z);
+                GL.Vertex3(point_list[0].x, point_list[0].y, point_list[0].z);
+            }
+            else
+            {
+                Vector3 next_t = point_list[point_list.IndexOf(t) + 1];
+                GL.Vertex3(t.x, t.y, t.z);
+                GL.Vertex3(next_t.x, next_t.y, next_t.z);
+            }
+
+            GL.End();
         }
 
     }
@@ -115,7 +167,7 @@ public class OpticianController : MonoBehaviour
                 SaveTargetPosition();
                 FOVTarget.transform.position = savedFOVTargetpos; // reset the target position at center before new direction
                 nbDirectionEnded++;
-                if (nbDirectionEnded == moveDirections.Count -4)
+                if (nbDirectionEnded == moveDirections.Count - 4)
                 {
                     isFOVCalibEnded = true;
                     FOVTarget.SetActive(false);
@@ -134,32 +186,6 @@ public class OpticianController : MonoBehaviour
             MoveTarget();
         }
 
-    }
-
-    private void UpdateMaxFOVCalibration()
-    {
-        // while timer is under x seconds and the user is looking at the target
-        if (System.Object.ReferenceEquals(userHit.collider.gameObject, FOVTarget) && FOVTimer > 0f)
-            MoveTarget();
-        else if (System.Object.ReferenceEquals(userHit.collider.gameObject, FOVTarget))
-            FOVTimer -= Time.deltaTime;
-        else if (FOVTimer > 0)
-            FOVTimer -= Time.deltaTime;
-        else if (FOVTimer < 0)
-        {
-            SaveTargetPosition();
-            FOVTarget.transform.position = savedFOVTargetpos; // reset the target position at center before new direction
-            ResetFOVTimer();
-            // timer is ended, go to next direction
-            nbDirectionEnded++;
-            if (nbDirectionEnded == moveDirections.Count)
-            {
-                isFOVCalibEnded = true;
-                FOVTarget.SetActive(false);
-            }
-            else
-                moveDirection = moveDirections[nbDirectionEnded];
-        }
     }
 
     private void ResetFOVTimer()
@@ -251,26 +277,36 @@ public class OpticianController : MonoBehaviour
 
         if (!isSizeOk)
         {
-            if (Input.GetKeyDown(downArrow))
+            if (Input.GetKeyDown(downArrow) && !isConfirmingPosition)
             {
                 ReduceCircleSize();
                 SetRandomCircleOrientation();
             }
-            else if (Input.GetKeyDown(upArrow))
+            else if (Input.GetKeyDown(upArrow) && !isConfirmingPosition)
             {
                 IncreaseCircleSize();
                 SetRandomCircleOrientation();
             }
             else if (Input.GetKeyDown(KeyCode.Space))
             {
-                isSizeOk = true;
-                explainText.text = "";
+                isConfirmingPosition = !isConfirmingPosition;
+            }
+            else if (isConfirmingPosition)
+            {
+                keyCodeIndex = GetKeyCodeIndexPressed();
+                if (keyCodeIndex == rotatIndex)
+                {
+                    isSizeOk = true;
+                    explainText.text = "";
+                }
             }
         }
-        else // Size is set by user
+        else // Size is well set by user
         {
+            offSetTimer += Time.deltaTime;
             if (!isCircleSet)
             {
+                offSetTimer = 0;
                 SetTargetPosition(); // Set the target position
                 isCircleSet = true;
             }
@@ -280,7 +316,8 @@ public class OpticianController : MonoBehaviour
                 if (keyCodeIndex != -1) // move the target in the field of view of the user
                 {
                     moveDirection = moveDirections[keyCodeIndex]; // set the direction corresponding to the user input
-                    MoveTarget();
+                    if (offSetTimer > 0.1f) // avoid the circle to move just after spawning, getting the input from the previous circle
+                        MoveTarget();
                 }
                 if (Input.GetKeyDown(KeyCode.Space)) // confirm the target is visible
                 {
@@ -299,12 +336,12 @@ public class OpticianController : MonoBehaviour
                     if (currentTargetIndex + 1 == FOVEdgePoints.Count)
                     {
                         calibrationIsOver = true;
-                        return;
                     }
                     else
                     {
                         currentTargetIndex++;
                     }
+                    return;
                 }
                 else if (rotatIndex != keyCodeIndex)
                 {
@@ -337,15 +374,6 @@ public class OpticianController : MonoBehaviour
         if (FOVEdgePoints.Count == 0)
         {
             CalculateAllPos();
-            //CalculateAllPos(); // Use this for better corner FOV 
-            Debug.DrawLine(FOVEdgePoints[0], FOVEdgePoints[1], Color.red, 200);
-            Debug.DrawLine(FOVEdgePoints[1], FOVEdgePoints[2], Color.red, 200);
-            Debug.DrawLine(FOVEdgePoints[2], FOVEdgePoints[3], Color.red, 200);
-            Debug.DrawLine(FOVEdgePoints[3], FOVEdgePoints[4], Color.red, 200);
-            Debug.DrawLine(FOVEdgePoints[4], FOVEdgePoints[5], Color.red, 200);
-            Debug.DrawLine(FOVEdgePoints[5], FOVEdgePoints[6], Color.red, 200);
-            Debug.DrawLine(FOVEdgePoints[6], FOVEdgePoints[7], Color.red, 200);
-            Debug.DrawLine(FOVEdgePoints[7], FOVEdgePoints[0], Color.red, 200);
         }
 
         //CalculateRandomPos();
@@ -365,13 +393,13 @@ public class OpticianController : MonoBehaviour
     private void CalculateAllPos()
     {
         FOVEdgePoints.Add(new Vector3(FOVPoints[0].x, FOVPoints[1].y, FOVPoints[0].z)); // Bottom right edge point
-        FOVEdgePoints.Add(FOVPoints[1]);
         FOVEdgePoints.Add(new Vector3(FOVPoints[2].x, FOVPoints[1].y, FOVPoints[0].z)); // Bottom left edge point
-        FOVEdgePoints.Add(FOVPoints[2]);
+        FOVEdgePoints.Insert(1, (FOVEdgePoints[1] + (FOVEdgePoints[0] - FOVEdgePoints[1]) / 2)); // Bottom middle point
         FOVEdgePoints.Add(new Vector3(FOVPoints[2].x, FOVPoints[3].y, FOVPoints[0].z)); // Top left edge point
-        FOVEdgePoints.Add(FOVPoints[3]);
+        FOVEdgePoints.Insert(3, (FOVEdgePoints[3] + (FOVEdgePoints[2] - FOVEdgePoints[3]) / 2)); // Middle Right point
         FOVEdgePoints.Add(new Vector3(FOVPoints[0].x, FOVPoints[3].y, FOVPoints[0].z)); // Top right edge point
-        FOVEdgePoints.Add(FOVPoints[0]);
+        FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top middle point
+        FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right middle point
     }
 
     private int GetKeyCodeIndexPressed()
@@ -425,18 +453,4 @@ public class OpticianController : MonoBehaviour
         } while (temp_index == previous_index);
         return temp_index;
     }
-
-    private void CalculateRandomPos()
-    {
-        int rand_index = GetRandomIndex(FOVEdgePoints, -1);
-        int rand_index_2 = GetRandomIndex(FOVEdgePoints, rand_index);
-        float rand_x = UnityEngine.Random.Range(FOVEdgePoints[rand_index].x, FOVEdgePoints[rand_index_2].x);
-        print("X : " + rand_x);
-        float rand_y = UnityEngine.Random.Range(FOVEdgePoints[rand_index].y, FOVEdgePoints[rand_index_2].y);
-        print("Y : " + rand_y);
-        Vector3 randPos = new Vector3(rand_x - almostCircle.transform.localScale.x, rand_y - almostCircle.transform.localScale.y, FOVEdgePoints[rand_index].z);
-        almostCircle.transform.position = randPos;
-    }
-
-
 }

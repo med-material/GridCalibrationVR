@@ -113,6 +113,7 @@ public class GameController : MonoBehaviour
         CENTER_X_R = wall_width - wall_width / 3;
         CENTER_Y_T = wall_height - wall_height / 3;
     }
+    
     private void StartApproxMode()
     {
         // Check if calibration is ended, delete current target, create each target in centered position
