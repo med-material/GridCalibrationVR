@@ -233,11 +233,11 @@ public class Heatmap : MonoBehaviour
             activate = !activate;
             if (activate)
             {
-                gameObject.transform.localPosition -= new Vector3(0, 0, 2.0f);
+                gameObject.transform.localPosition -= new Vector3(0, 0, 2.5f);
             }
             else
             {
-                gameObject.transform.localPosition += new Vector3(0, 0, 2.0f);
+                gameObject.transform.localPosition += new Vector3(0, 0, 2.5f);
             }
         }
 		
