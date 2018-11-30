@@ -204,28 +204,28 @@ public class OpticianController : MonoBehaviour
         switch (moveDirection)
         {
             case "left":
-                direction = new Vector3(-0.01f, 0.0f, 0.0f);
+                direction = new Vector3(-0.009f, 0.0f, 0.0f);
                 break;
             case "down":
-                direction = new Vector3(0.0f, -0.01f, 0.0f);
+                direction = new Vector3(0.0f, -0.009f, 0.0f);
                 break;
             case "right":
-                direction = new Vector3(0.01f, 0.0f, 0.0f);
+                direction = new Vector3(0.009f, 0.0f, 0.0f);
                 break;
             case "up":
-                direction = new Vector3(0.0f, 0.01f, 0.0f);
+                direction = new Vector3(0.0f, 0.009f, 0.0f);
                 break;
             case "right-up":
-                direction = new Vector3(0.01f, 0.01f, 0.0f);
+                direction = new Vector3(0.009f, 0.009f, 0.0f);
                 break;
             case "left-up":
-                direction = new Vector3(-0.01f, 0.01f, 0.0f);
+                direction = new Vector3(-0.009f, 0.009f, 0.0f);
                 break;
             case "right-down":
-                direction = new Vector3(0.01f, -0.01f, 0.0f);
+                direction = new Vector3(0.009f, -0.009f, 0.0f);
                 break;
             case "left-down":
-                direction = new Vector3(-0.01f, -0.01f, 0.0f);
+                direction = new Vector3(-0.009f, -0.009f, 0.0f);
                 break;
             default:
                 break;
@@ -250,17 +250,22 @@ public class OpticianController : MonoBehaviour
         if (isFOVCalibEnded)
         {
             almostCircle.transform.position += vector;
-            if (savedTargetposList.Count - 1 == currentTargetIndex)
-            {
-                savedTargetposList[currentTargetIndex] = almostCircle.transform.position;
-            }
-            else
-            {
-                savedTargetposList.Insert(currentTargetIndex, almostCircle.transform.position);
-            }
+            //SavePos();
         }
         else
             FOVTarget.transform.position += vector;
+    }
+
+    private void SavePos()
+    {
+        if (savedTargetposList.Count - 1 == currentTargetIndex)
+        {
+            savedTargetposList[currentTargetIndex] = almostCircle.transform.position;
+        }
+        else
+        {
+            savedTargetposList.Insert(currentTargetIndex, almostCircle.transform.position);
+        }
     }
 
     private void UpdateAcuityCalibration()
@@ -320,6 +325,7 @@ public class OpticianController : MonoBehaviour
                 }
                 if (Input.GetKeyDown(KeyCode.Space)) // confirm the target is visible
                 {
+                    SavePos();
                     hasTargetMoved = true;
                 }
             }
@@ -335,6 +341,7 @@ public class OpticianController : MonoBehaviour
                     if (currentTargetIndex + 1 == FOVEdgePoints.Count)
                     {
                         calibrationIsOver = true;
+                        //OnPostRender();
                     }
                     else
                     {
