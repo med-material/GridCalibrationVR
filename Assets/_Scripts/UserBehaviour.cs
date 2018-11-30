@@ -108,7 +108,11 @@ public class UserBehaviour : MonoBehaviour{
                     gmCtrl.last_target.highlightWidth = 0;
                     hasCirclePulsated = false;
                 }
-                gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_center_material[1], 1, 0.1f);
+
+                if (!gmCtrl.calib_end)
+                {
+                    gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_center_material[1], 1, 0.1f);
+                }
 
             }
             else
