@@ -398,7 +398,7 @@ public class OpticianController : MonoBehaviour
         FOVEdgePoints.Insert(3, (FOVEdgePoints[3] + (FOVEdgePoints[2] - FOVEdgePoints[3]) / 2)); // Bottom Left point // GOOD
         FOVEdgePoints.Add(FOVPoints[3]); // Top point
         FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top left point // GOOD
-        FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right right point // GOOD
+        FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point // GOOD
     }
 
     private int GetKeyCodeIndexPressed()
