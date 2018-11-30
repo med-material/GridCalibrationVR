@@ -84,7 +84,6 @@ public class OpticianController : MonoBehaviour
             lineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
         }
     }
-
     void OnPostRender()
     {
         if (calibrationIsOver)
@@ -392,14 +391,14 @@ public class OpticianController : MonoBehaviour
 
     private void CalculateAllPos()
     {
-        FOVEdgePoints.Add(new Vector3(FOVPoints[0].x, FOVPoints[1].y, FOVPoints[0].z)); // Bottom right edge point
-        FOVEdgePoints.Add(new Vector3(FOVPoints[2].x, FOVPoints[1].y, FOVPoints[0].z)); // Bottom left edge point
-        FOVEdgePoints.Insert(1, (FOVEdgePoints[1] + (FOVEdgePoints[0] - FOVEdgePoints[1]) / 2)); // Bottom middle point
-        FOVEdgePoints.Add(new Vector3(FOVPoints[2].x, FOVPoints[3].y, FOVPoints[0].z)); // Top left edge point
-        FOVEdgePoints.Insert(3, (FOVEdgePoints[3] + (FOVEdgePoints[2] - FOVEdgePoints[3]) / 2)); // Middle Right point
-        FOVEdgePoints.Add(new Vector3(FOVPoints[0].x, FOVPoints[3].y, FOVPoints[0].z)); // Top right edge point
-        FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top middle point
-        FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right middle point
+        FOVEdgePoints.Add(FOVPoints[0]); // right point
+        FOVEdgePoints.Add(FOVPoints[1]); // bottom point
+        FOVEdgePoints.Insert(1, (FOVEdgePoints[1] + (FOVEdgePoints[0] - FOVEdgePoints[1]) / 2)); // Bottom right point // GOOD
+        FOVEdgePoints.Add(FOVPoints[2]); // left point
+        FOVEdgePoints.Insert(3, (FOVEdgePoints[3] + (FOVEdgePoints[2] - FOVEdgePoints[3]) / 2)); // Bottom Left point // GOOD
+        FOVEdgePoints.Add(FOVPoints[3]); // Top point
+        FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top left point // GOOD
+        FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right right point // GOOD
     }
 
     private int GetKeyCodeIndexPressed()
