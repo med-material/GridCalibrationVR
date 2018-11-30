@@ -44,6 +44,10 @@ public class GameController : MonoBehaviour
     private Color success_color = new Color(0.07f, 0.8f, 0.07f, 1);
     private Vector2 pixelUV;
 
+    private Vector3 prevPos;
+
+    private float distraction;
+
     #endregion
 
     # region log value
@@ -230,6 +234,15 @@ public class GameController : MonoBehaviour
                 if (!trgt.circle_created)
                 {
                     trgt.CreateTarget(wall, true);
+                    if(last_target != null)
+                    {
+                        prevPos = last_target.circle.transform.localPosition;
+
+                            distraction = getDistraction(userbhv.totalGazePointsDistance, Vector3.Distance(prevPos, trgt.circle.transform.localPosition));
+                            print("DISTRACTION :" + distraction);
+                        
+                        print("Premier cercle : "+ last_target.circle.transform.localPosition + " Nouveau cercle "+ trgt.circle.transform.localPosition + " Distance avec le cercle précèdent " + Vector3.Distance(prevPos, trgt.circle.transform.localPosition));
+                    }
                     travel_time = 0.0f;
                     target_timer = 0.0f;
                 }
@@ -338,6 +351,16 @@ public class GameController : MonoBehaviour
         float current_scale = looking_at_circle.collider.gameObject.transform.localScale.x;
         float first_scale = last_target.previous_scales[0].x;
         return 100 - (((first_scale - current_scale) / first_scale) * 100);
+    }
+
+    public float getDistanceBetweenCircle(Vector3 pos1, Vector3 pos2)
+    {
+        return Vector3.Distance(pos1, pos2);
+    }
+
+    public float getDistraction(float dis1, float dis2)
+    {
+        return dis1 - dis2;
     }
 
 }

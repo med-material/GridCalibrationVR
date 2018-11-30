@@ -12,19 +12,32 @@ public class UserBehaviour : MonoBehaviour{
     private Vector2 pixelUV;
     private Vector2 prevPixelUV;
     private List<Vector2> hitpoints;
+
+    private List<Vector3> gazePointsCoord;
+    private List<float> gazePointsDistance;
+    private Vector3 currentGazePointCoord;
+    public float totalGazePointsDistance;
+
     private List<float> distances;
+    private List<float> gazePoint;
     private bool control = false;
     private bool createCopy = true;
     private bool hasCirclePulsated = false;
     private int layerMask;
     private RaycastHit hitLayer;
+    public int touchCount = 0;
 
     private float timer = 0;
 
-	// Use this for initialization
-	void Start () {
+    private bool touchOnce = false;
+    private TargetCirle prevTarg = null;
+
+    // Use this for initialization
+    void Start () {
         hitpoints = new List<Vector2>();
         distances = new List<float>();
+        gazePointsCoord = new List<Vector3>();
+        gazePointsDistance = new List<float>();
         gmCtrl = GetComponent<GameController>();
         layerMask = LayerMask.GetMask("Copy");
     }
@@ -36,6 +49,29 @@ public class UserBehaviour : MonoBehaviour{
         {
             if (grCtrl.GetCurrentCollider().collider.name == "Cylinder")
             {
+
+                if(prevTarg == null || !System.Object.ReferenceEquals(prevTarg, gmCtrl.last_target))
+                {
+                    prevTarg = gmCtrl.last_target;
+                    touchOnce = false;
+                }
+
+                if (!touchOnce)
+                {
+
+                    if (touchCount < 2)
+                    {
+                        touchCount++;
+                    }
+                    else
+                    {
+                        touchCount = 1;
+                    }
+
+                    print("Je touche : " + touchCount);
+                    touchOnce = true;
+                }
+
 
                 if (createCopy)
                 {
@@ -77,6 +113,8 @@ public class UserBehaviour : MonoBehaviour{
             }
             else
             {
+                touchCount = 0;
+
                 if (hitpoints != null)
                 {
                     hitpoints.Clear();
@@ -97,6 +135,20 @@ public class UserBehaviour : MonoBehaviour{
                 createCopy = true;
             }
 
+            if(touchCount > 0 && touchCount < 3)
+            {
+                if (Physics.Raycast(grCtrl.transform.position, Vector3.forward, out hitLayer, 10000, layerMask, QueryTriggerInteraction.Ignore))
+                {
+                    logGazePointCoord(hitLayer);
+                }
+            }
+            else
+            {
+                if (gazePointsDistance.Count < 3)
+                {
+                    totalGazePointsDistance = getTotalGazePointsDistance(gazePointsDistance);
+                }
+            }
         }
     }
 
@@ -126,8 +178,30 @@ public class UserBehaviour : MonoBehaviour{
         copy.GetComponent<Renderer>().enabled = false;
     }
 
+    private void logGazePointCoord(RaycastHit collider)
+    {
+        if(gazePointsCoord.Count > 1)
+        {
+            gazePointsDistance.Add(Vector3.Distance(gazePointsCoord[gazePointsCoord.Count - 1], collider.transform.localPosition));
+        }
+
+        gazePointsCoord.Add(collider.transform.localPosition);
+    }
+
+    private float getTotalGazePointsDistance(List<float> gz)
+    {
+        float sum = 0;
+        foreach (float d in gz)
+        {
+            sum += d;
+        }
+
+        return sum;
+    }
+
     public float getDispersion()
     {
         return gmCtrl.last_target.dispersion;
     }
+
 }
