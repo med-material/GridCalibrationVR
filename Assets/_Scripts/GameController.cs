@@ -117,7 +117,7 @@ public class GameController : MonoBehaviour
         CENTER_X_R = wall_width - wall_width / 3;
         CENTER_Y_T = wall_height - wall_height / 3;
     }
-    
+
     private void StartApproxMode()
     {
         // Check if calibration is ended, delete current target, create each target in centered position
@@ -201,6 +201,7 @@ public class GameController : MonoBehaviour
             }
         }
     }
+
     private void StartShrinkMode()
     {
         if (calib_end && only_one)
@@ -233,29 +234,31 @@ public class GameController : MonoBehaviour
                 if (!trgt.circle_created)
                 {
                     trgt.CreateTarget(wall, true);
-                    if(last_target != null)
+                    if (last_target != null)
                     {
                         prevPos = last_target.circle.transform.localPosition;
 
-                            distraction = getDistraction(userbhv.totalGazePointsDistance, Vector3.Distance(prevPos, trgt.circle.transform.localPosition));
-                            print("DISTRACTION :" + distraction);
-                        
-                        print("Premier cercle : "+ last_target.circle.transform.localPosition + " Nouveau cercle "+ trgt.circle.transform.localPosition + " Distance avec le cercle précèdent " + Vector3.Distance(prevPos, trgt.circle.transform.localPosition));
+                        distraction = getDistraction(userbhv.totalGazePointsDistance, Vector3.Distance(prevPos, trgt.circle.transform.localPosition));
+                        print("DISTRACTION :" + distraction);
+
+                        print("Premier cercle : " + last_target.circle.transform.localPosition + " Nouveau cercle " + trgt.circle.transform.localPosition + " Distance avec le cercle précèdent " + Vector3.Distance(prevPos, trgt.circle.transform.localPosition));
                     }
                     travel_time = 0.0f;
                     target_timer = 0.0f;
                 }
                 last_target = trgt;
-                ResetTimer();  
+                ResetTimer();
             }
             target_timer += Time.deltaTime;
             // Get the current object looked at by the user
             looking_at_circle = gridController.GetCurrentCollider();
             lookings = gridController.GetCurrentColliders();
 
-            for(int i = 0; i < lookings.Length; i++){
+            for (int i = 0; i < lookings.Length; i++)
+            {
                 RaycastHit hit = lookings[i];
-                if(hit.collider.name == "Cylinder"){
+                if (hit.collider.name == "Cylinder")
+                {
                     looking_at_circle = hit;
                 }
             }
@@ -279,7 +282,7 @@ public class GameController : MonoBehaviour
 
                     //Depending of the dispersion, we reduce or increase the shrinking speed.
                     last_target.reduceSpeed(userbhv.getDispersion(), 0.038f, 1);
-                    last_target.ReduceScale();  
+                    last_target.ReduceScale();
                     looking_at_circle_before = looking_at_circle;
                 }
                 else

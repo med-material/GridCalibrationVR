@@ -14,7 +14,7 @@ public class OpticianController : MonoBehaviour
     public GameObject FOVTarget;
     public GridController gridController;
     public List<Vector3> FOVPointsLocal;
-    public Transform OpticianPlane;
+    public Transform OperatorPlane;
 
     private Renderer FOVTargetRenderer;
     private bool isFOVCalibEnded;
@@ -39,7 +39,6 @@ public class OpticianController : MonoBehaviour
     private Color textColor = new Color(0.6415094f, 0.6415094f, 0.6415094f, 1.0f);
     private bool isSizeOk = false;
     private bool isConfirmingPosition = false;
-    private string mode = "auto";
     private bool hasTargetMoved = false;
     private bool isCircleSet = false;
     private bool changePos = false;
@@ -48,14 +47,20 @@ public class OpticianController : MonoBehaviour
     private Material lineMaterial;
     private float offSetTimer = 0;
     private LineRenderer lineRenderer;
+    private LineRenderer lineRendererAcuity;
 
     void Start()
     {
         // GENERAL SETUP
         lineRenderer = GetComponent<LineRenderer>();
-        //lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
         lineRenderer.widthMultiplier = 0.02f;
+        lineRenderer.gameObject.layer = 11; // 11 = OperatorUI
 
+        lineRendererAcuity = OperatorPlane.GetComponent<LineRenderer>();
+        lineRendererAcuity.material = new Material(Shader.Find("Sprites/Default"));
+        lineRendererAcuity.widthMultiplier = 0.02f;
+        lineRendererAcuity.gameObject.layer = 11; // 11 = OperatorUI
         //// ACUITY SETUP 
         l_rotation = new List<int> { 0, -90, 180, 90 }; // Right, Down, Left, Up
         keyCodes = new List<KeyCode> { rightArrow, downArrow, leftArrow, upArrow }; // have to stay same order than rotation list !!
@@ -68,19 +73,12 @@ public class OpticianController : MonoBehaviour
         FOVPoints = new List<Vector3>();
         FOVPointsLocal = new List<Vector3>();
         FOVTargetRenderer = FOVTarget.GetComponent<Renderer>();
-        if (mode == "auto")
-        {
-            FOVTargetRenderer.material.color = Color.red;
-            explainText.text = "Please fix the red centered dot \n Press space bar when the target is out of \n your field of view."
-                + "\n Press space bar to start.";
-            FOVTimer = 0;
-        }
-        else
-        {
-            FOVTargetRenderer.material.color = Color.black;
-            explainText.text = "Please look at the target while it moves \n to determine your max FOV";
-            ResetFOVTimer();
-        }
+
+        FOVTargetRenderer.material.color = Color.red;
+        explainText.text = "Press space bar when the target is out of \n your field of view."
+            + "\n Press space bar to start.";
+        FOVTimer = 0;
+
         explainText.color = textColor;
         nbDirectionEnded = 0;
         moveDirection = moveDirections[nbDirectionEnded];
@@ -93,21 +91,22 @@ public class OpticianController : MonoBehaviour
         }
     }
 
-
-    private void DrawTestLocal()
+    // Draw the user FOV and acuity FOV to the operator
+    private void DrawFOV(LineRenderer lrender, List<Vector3> pos_list, Color color)
     {
-        lineRenderer.positionCount = FOVPointsLocal.Count;
-        lineRenderer.SetPositions(FOVPointsLocal.ToArray());
-        lineRenderer.loop = true;
+        lrender.startColor = color;
+        lrender.endColor = color;
+        lrender.positionCount = pos_list.Count;
+        lrender.SetPositions(pos_list.ToArray());
+        lrender.loop = true;
     }
 
-    // To show the lines in the editor
-    
     void Update()
     {
         userHit = gridController.GetCurrentCollider();
         if (calibrationIsOver)
         {
+            DrawFOV(lineRendererAcuity, savedTargetposList, Color.red);
             almostCircle.SetActive(false);
         }
         else
@@ -115,7 +114,7 @@ public class OpticianController : MonoBehaviour
             if (isFOVCalibEnded)
                 UpdateAcuityCalibration();
             else
-                UpdateMaxFOVCalibrationAuto();
+                UpdateMaxFOVCalibration();
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
@@ -124,30 +123,7 @@ public class OpticianController : MonoBehaviour
         }
     }
 
-    private void DrawLines(List<Vector3> point_list, Color line_color)
-    {
-        foreach (Vector3 t in point_list)
-        {
-            GL.Begin(GL.LINES);
-            lineMaterial.SetPass(0);
-            GL.Color(line_color);
-            if (t.Equals(point_list.Last())) // if this is the last point, link to the first one to close the area
-            {
-                GL.Vertex3(t.x, t.y, t.z);
-                GL.Vertex3(point_list[0].x, point_list[0].y, point_list[0].z);
-            }
-            else
-            {
-                Vector3 next_t = point_list[point_list.IndexOf(t) + 1];
-                GL.Vertex3(t.x, t.y, t.z);
-                GL.Vertex3(next_t.x, next_t.y, next_t.z);
-            }
-
-            GL.End();
-        }
-    }
-
-    private void UpdateMaxFOVCalibrationAuto()
+    private void UpdateMaxFOVCalibration()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -160,7 +136,7 @@ public class OpticianController : MonoBehaviour
                 if (nbDirectionEnded == moveDirections.Count - 4)
                 {
                     isFOVCalibEnded = true;
-                    DrawTestLocal();
+                    DrawFOV(lineRenderer, FOVPointsLocal, Color.blue);
                     FOVTarget.SetActive(false);
                 }
                 else
@@ -170,19 +146,13 @@ public class OpticianController : MonoBehaviour
             {
                 FOVTimer = Time.deltaTime;
             }
-
         }
         if (FOVTimer != 0)
         {
             MoveTarget();
         }
-
     }
 
-    private void ResetFOVTimer()
-    {
-        FOVTimer = 3.0f;
-    }
     private void SaveTargetPosition()
     {
         FOVPoints.Add(FOVTarget.transform.position);
@@ -253,11 +223,11 @@ public class OpticianController : MonoBehaviour
     {
         if (savedTargetposList.Count - 1 == currentTargetIndex)
         {
-            savedTargetposList[currentTargetIndex] = almostCircle.transform.position;
+            savedTargetposList[currentTargetIndex] = almostCircle.transform.localPosition;
         }
         else
         {
-            savedTargetposList.Insert(currentTargetIndex, almostCircle.transform.position);
+            savedTargetposList.Insert(currentTargetIndex, almostCircle.transform.localPosition);
         }
     }
 
@@ -393,12 +363,12 @@ public class OpticianController : MonoBehaviour
     {
         FOVEdgePoints.Add(FOVPoints[0]); // right point
         FOVEdgePoints.Add(FOVPoints[1]); // bottom point
-        FOVEdgePoints.Insert(1, (FOVEdgePoints[1] + (FOVEdgePoints[0] - FOVEdgePoints[1]) / 2)); // Bottom right point // GOOD
+        FOVEdgePoints.Insert(1, (FOVEdgePoints[1] + (FOVEdgePoints[0] - FOVEdgePoints[1]) / 2)); // Bottom right point
         FOVEdgePoints.Add(FOVPoints[2]); // left point
-        FOVEdgePoints.Insert(3, (FOVEdgePoints[3] + (FOVEdgePoints[2] - FOVEdgePoints[3]) / 2)); // Bottom Left point // GOOD
+        FOVEdgePoints.Insert(3, (FOVEdgePoints[3] + (FOVEdgePoints[2] - FOVEdgePoints[3]) / 2)); // Bottom Left point 
         FOVEdgePoints.Add(FOVPoints[3]); // Top point
-        FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top left point // GOOD
-        FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point // GOOD
+        FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top left point 
+        FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point
     }
 
     private int GetKeyCodeIndexPressed()
