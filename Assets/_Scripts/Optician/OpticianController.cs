@@ -13,6 +13,8 @@ public class OpticianController : MonoBehaviour
     public Text explainText;
     public GameObject FOVTarget;
     public GridController gridController;
+    public List<Vector3> FOVPointsLocal;
+    public Transform OpticianPlane;
 
     private Renderer FOVTargetRenderer;
     private bool isFOVCalibEnded;
@@ -45,9 +47,14 @@ public class OpticianController : MonoBehaviour
     private bool calibrationIsOver;
     private Material lineMaterial;
     private float offSetTimer = 0;
+    private LineRenderer lineRenderer;
 
     void Start()
     {
+        // GENERAL SETUP
+        lineRenderer = GetComponent<LineRenderer>();
+        //lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        lineRenderer.widthMultiplier = 0.02f;
 
         //// ACUITY SETUP 
         l_rotation = new List<int> { 0, -90, 180, 90 }; // Right, Down, Left, Up
@@ -59,6 +66,7 @@ public class OpticianController : MonoBehaviour
         FOVEdgePoints = new List<Vector3>();
         moveDirections = new List<string> { "right", "down", "left", "up", "right-up", "right-down", "left-up", "left-down" };
         FOVPoints = new List<Vector3>();
+        FOVPointsLocal = new List<Vector3>();
         FOVTargetRenderer = FOVTarget.GetComponent<Renderer>();
         if (mode == "auto")
         {
@@ -84,33 +92,17 @@ public class OpticianController : MonoBehaviour
             lineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
         }
     }
-    void OnPostRender()
+
+
+    private void DrawTestLocal()
     {
-        if (calibrationIsOver)
-        {
-            almostCircle.SetActive(false);
-            DrawLines(savedTargetposList, Color.blue);
-        }
-        if (isFOVCalibEnded)
-        {
-            DrawLines(FOVEdgePoints, Color.red);
-        }
+        lineRenderer.positionCount = FOVPointsLocal.Count;
+        lineRenderer.SetPositions(FOVPointsLocal.ToArray());
+        lineRenderer.loop = true;
     }
 
     // To show the lines in the editor
-    void OnDrawGizmos()
-    {
-        if (calibrationIsOver)
-        {
-            almostCircle.SetActive(false);
-            DrawLines(savedTargetposList, Color.blue);
-        }
-        if (isFOVCalibEnded)
-        {
-            DrawLines(FOVEdgePoints, Color.red);
-        }
-    }
-
+    
     void Update()
     {
         userHit = gridController.GetCurrentCollider();
@@ -153,7 +145,6 @@ public class OpticianController : MonoBehaviour
 
             GL.End();
         }
-
     }
 
     private void UpdateMaxFOVCalibrationAuto()
@@ -169,6 +160,7 @@ public class OpticianController : MonoBehaviour
                 if (nbDirectionEnded == moveDirections.Count - 4)
                 {
                     isFOVCalibEnded = true;
+                    DrawTestLocal();
                     FOVTarget.SetActive(false);
                 }
                 else
@@ -194,6 +186,7 @@ public class OpticianController : MonoBehaviour
     private void SaveTargetPosition()
     {
         FOVPoints.Add(FOVTarget.transform.position);
+        FOVPointsLocal.Add(FOVTarget.transform.localPosition);
     }
 
     private void MoveTarget()
@@ -204,28 +197,28 @@ public class OpticianController : MonoBehaviour
         switch (moveDirection)
         {
             case "left":
-                direction = new Vector3(-0.01f, 0.0f, 0.0f);
+                direction = new Vector3(-0.009f, 0.0f, 0.0f);
                 break;
             case "down":
-                direction = new Vector3(0.0f, -0.01f, 0.0f);
+                direction = new Vector3(0.0f, -0.009f, 0.0f);
                 break;
             case "right":
-                direction = new Vector3(0.01f, 0.0f, 0.0f);
+                direction = new Vector3(0.009f, 0.0f, 0.0f);
                 break;
             case "up":
-                direction = new Vector3(0.0f, 0.01f, 0.0f);
+                direction = new Vector3(0.0f, 0.009f, 0.0f);
                 break;
             case "right-up":
-                direction = new Vector3(0.01f, 0.01f, 0.0f);
+                direction = new Vector3(0.009f, 0.009f, 0.0f);
                 break;
             case "left-up":
-                direction = new Vector3(-0.01f, 0.01f, 0.0f);
+                direction = new Vector3(-0.009f, 0.009f, 0.0f);
                 break;
             case "right-down":
-                direction = new Vector3(0.01f, -0.01f, 0.0f);
+                direction = new Vector3(0.009f, -0.009f, 0.0f);
                 break;
             case "left-down":
-                direction = new Vector3(-0.01f, -0.01f, 0.0f);
+                direction = new Vector3(-0.009f, -0.009f, 0.0f);
                 break;
             default:
                 break;
@@ -250,17 +243,22 @@ public class OpticianController : MonoBehaviour
         if (isFOVCalibEnded)
         {
             almostCircle.transform.position += vector;
-            if (savedTargetposList.Count - 1 == currentTargetIndex)
-            {
-                savedTargetposList[currentTargetIndex] = almostCircle.transform.position;
-            }
-            else
-            {
-                savedTargetposList.Insert(currentTargetIndex, almostCircle.transform.position);
-            }
+            //SavePos();
         }
         else
             FOVTarget.transform.position += vector;
+    }
+
+    private void SavePos()
+    {
+        if (savedTargetposList.Count - 1 == currentTargetIndex)
+        {
+            savedTargetposList[currentTargetIndex] = almostCircle.transform.position;
+        }
+        else
+        {
+            savedTargetposList.Insert(currentTargetIndex, almostCircle.transform.position);
+        }
     }
 
     private void UpdateAcuityCalibration()
@@ -320,6 +318,7 @@ public class OpticianController : MonoBehaviour
                 }
                 if (Input.GetKeyDown(KeyCode.Space)) // confirm the target is visible
                 {
+                    SavePos();
                     hasTargetMoved = true;
                 }
             }
@@ -335,6 +334,7 @@ public class OpticianController : MonoBehaviour
                     if (currentTargetIndex + 1 == FOVEdgePoints.Count)
                     {
                         calibrationIsOver = true;
+                        //OnPostRender();
                     }
                     else
                     {
