@@ -7,6 +7,7 @@ using UnityEditor.VersionControl;
 public class TargetCirle
 {
     private Vector3 previous_scale;
+    private Vector3 scale_to_reach = new Vector3(0.25f, 0.01f, 0.3f);
     public List<Vector3> previous_scales = new List<Vector3>();
     private List<float> scales_factor = new List<float>();
     public Material[] target_material = new Material[2];
@@ -43,11 +44,11 @@ public class TargetCirle
         default_x_max = x_max;
         default_y_min = y_min;
         default_y_max = y_max;
-        previous_scale = new Vector3(0.25f, 0.01f, 0.3f);
+        previous_scale = scale_to_reach;
         calib_failed = 0;
         ResetScale();
     }
-    internal void CreateTarget(GameObject wall, bool centered)
+    internal void CreateTarget(GameObject wall, bool centered, bool mode)
     {
         l_looked.Add(was_looked);
         // Create the Circle 
@@ -56,7 +57,15 @@ public class TargetCirle
         // Set the Circle as child of the wall
         circle.transform.parent = wall.transform;
         circle.transform.localRotation = Quaternion.Euler(90, 0, 0);
-        circle.transform.localScale = previous_scale;
+
+        if (mode)
+        {
+            circle.transform.localScale = new Vector3(2, circle.transform.localScale.y, 2.409f);
+        }
+        else
+        {
+            circle.transform.localScale = previous_scale;
+        }
 
         // Add red dot at the center of the target
         dot = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
@@ -79,6 +88,7 @@ public class TargetCirle
         target_material[1].SetFloat("_OutlineWidth", 0);
         target_texture = Resources.Load("Square") as Texture2D;
         circle.AddComponent<MeshCollider>();
+        circle.GetComponent<CapsuleCollider>().enabled = false;
         circle.GetComponent<Renderer>().materials = target_material;  
         circle.GetComponent<Renderer>().material.mainTexture = target_texture;
 
@@ -169,10 +179,11 @@ public class TargetCirle
 
     internal void ReduceScale()
     {
-        circle.transform.localScale *= target_shrinking;
-        dot.transform.localScale = new Vector3(0.0175f/circle.transform.localScale.x,1.0f,0.021f/circle.transform.localScale.z);
-        previous_scale = circle.transform.localScale;
-        previous_scales.Add(previous_scale);
+
+            circle.transform.localScale *= target_shrinking;
+            dot.transform.localScale = new Vector3(0.0175f / circle.transform.localScale.x, 1.0f, 0.021f / circle.transform.localScale.z);
+            previous_scale = circle.transform.localScale;
+            previous_scales.Add(previous_scale);
     }
 
     internal void reduceSpeed(float dis, float coef, int mode)
@@ -213,5 +224,24 @@ public class TargetCirle
         mat.SetFloat("_OutlineWidth", highlightWidth);
     }
 
+    internal bool bigCircleMode()
+    {
 
+        if (circle.transform.localScale.x * 0.98f > scale_to_reach.x)
+        {
+            circle.transform.localScale *= 0.98f;
+            return false;
+        }
+        else
+        {
+            circle.transform.localScale = scale_to_reach;
+            return true;
+        }
+
+    }
+
+    internal void movingCircleMode()
+    {
+
+    }
 }

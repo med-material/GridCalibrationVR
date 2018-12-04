@@ -47,7 +47,7 @@ public class UserBehaviour : MonoBehaviour{
     {
         if (grCtrl.GetCurrentCollider().collider)
         {
-            if (grCtrl.GetCurrentCollider().collider.name == "Cylinder")
+            if (grCtrl.GetCurrentCollider().collider.name == "Cylinder" && gmCtrl.canDetectCircle)
             {
 
                 if(prevTarg == null || !System.Object.ReferenceEquals(prevTarg, gmCtrl.last_target))
@@ -111,7 +111,7 @@ public class UserBehaviour : MonoBehaviour{
 
                 if (!gmCtrl.calib_end)
                 {
-                    gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_center_material[1], 1, 0.1f);
+                    //gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_center_material[1], 1, 0.1f);
                 }
 
             }
@@ -132,7 +132,7 @@ public class UserBehaviour : MonoBehaviour{
                 if(gmCtrl.last_target != null && !gmCtrl.last_target.was_looked && !gmCtrl.calib_end)
                 {
                     hasCirclePulsated = true;
-                    gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_material[1], 0.14f, 0.01f);
+                    //gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_material[1], 0.14f, 0.01f);
                 }
 
                 Destroy(copy);
