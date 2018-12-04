@@ -67,7 +67,7 @@ public class OpticianController : MonoBehaviour
         savedTargetposList = new List<Vector3>();
 
         //// FOV SETUP
-        savedFOVTargetpos = FOVTarget.transform.position;
+        savedFOVTargetpos = FOVTarget.transform.localPosition;
         FOVEdgePoints = new List<Vector3>();
         moveDirections = new List<string> { "right", "down", "left", "up", "right-up", "right-down", "left-up", "left-down" };
         FOVPoints = new List<Vector3>();
@@ -97,6 +97,7 @@ public class OpticianController : MonoBehaviour
         lrender.startColor = color;
         lrender.endColor = color;
         lrender.positionCount = pos_list.Count;
+        pos_list.ForEach(s => s.z = -3.0f);
         lrender.SetPositions(pos_list.ToArray());
         lrender.loop = true;
     }
@@ -131,7 +132,7 @@ public class OpticianController : MonoBehaviour
             {
                 // Save the target position, set the next direction to come.
                 SaveTargetPosition();
-                FOVTarget.transform.position = savedFOVTargetpos; // reset the target position at center before new direction
+                FOVTarget.transform.localPosition = savedFOVTargetpos; // reset the target position at center before new direction
                 nbDirectionEnded++;
                 if (nbDirectionEnded == moveDirections.Count - 4)
                 {
