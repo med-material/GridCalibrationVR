@@ -97,8 +97,15 @@ public class OpticianController : MonoBehaviour
         lrender.startColor = color;
         lrender.endColor = color;
         lrender.positionCount = pos_list.Count;
-        pos_list.ForEach(s => s.z = -3.0f);
-        lrender.SetPositions(pos_list.ToArray());
+        Vector3 pos;
+        List<Vector3> temp_pos_list = new List<Vector3>();
+        for (int index = 0; index < pos_list.Count; ++index)
+        {
+            pos = pos_list.ToArray()[index];
+            pos.z = -3.0f;
+            temp_pos_list.Add(pos);
+        }
+        lrender.SetPositions(temp_pos_list.ToArray());
         lrender.loop = true;
     }
 
@@ -214,10 +221,13 @@ public class OpticianController : MonoBehaviour
         if (isFOVCalibEnded)
         {
             almostCircle.transform.position += vector;
-            //SavePos();
+            almostCircle.transform.localPosition = new Vector3(almostCircle.transform.localPosition.x, almostCircle.transform.localPosition.y, -3.0f);
         }
         else
+        {
             FOVTarget.transform.position += vector;
+            FOVTarget.transform.localPosition = new Vector3(FOVTarget.transform.localPosition.x, FOVTarget.transform.localPosition.y, -3.0f);
+        }
     }
 
     private void SavePos()
@@ -350,14 +360,24 @@ public class OpticianController : MonoBehaviour
         if (changePos)
         {
             SetRandomCircleOrientation();
-            almostCircle.transform.position = FOVEdgePoints[currentTargetIndex];
+            SetPos();
             // set the new pos
         }
         else
-        {
-            almostCircle.transform.position = FOVEdgePoints[currentTargetIndex];
-            // set the same previous pos
-        }
+            SetPos();
+        // set the same previous pos
+    }
+
+    private void SetPos()
+    {
+        almostCircle.transform.position = FOVEdgePoints[currentTargetIndex];
+        Vector3 pt = almostCircle.transform.localPosition;
+        if (pt.x == 0)
+            pt.y = pt.y > 0 ? pt.y - 0.04f : pt.y + 0.04f;
+        else if (pt.y == 0)
+            pt.x = pt.x > 0 ? pt.x - 0.04f : pt.x + 0.04f;
+        pt.z = -3.0f;
+        almostCircle.transform.localPosition = pt;
     }
 
     private void CalculateAllPos()
