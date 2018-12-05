@@ -48,6 +48,10 @@ public class GameController : MonoBehaviour
     private Vector3 prevPos;
 
     private float distraction;
+    private bool chooseCircleMode = true;
+    private bool wait = true;
+
+    public bool canDetectCircle = false;
 
     #endregion
 
@@ -130,7 +134,7 @@ public class GameController : MonoBehaviour
                 {
                     t.DestroyTarget();
                 }
-                t.CreateTarget(wall, true);
+                t.CreateTarget(wall, true, chooseCircleMode);
             });
             only_one = false;
         }
@@ -152,7 +156,7 @@ public class GameController : MonoBehaviour
                 TargetCirle trgt = selectItem();
                 if (trgt != null)
                 {
-                    trgt.CreateTarget(wall, false);
+                    trgt.CreateTarget(wall, false, chooseCircleMode);
                     //print(trgt.circle.transform.localScale.ToString("F5"));
                     last_target = trgt;
                 }
@@ -161,7 +165,7 @@ public class GameController : MonoBehaviour
             // Process the target looked at 
             if (looking_at_circle.collider)
             {
-                if (looking_at_circle.collider.name == "Cylinder")
+                if (looking_at_circle.collider.name == "Cylinder" && canDetectCircle)
                 {
                     if (looking_at_circle_before.collider)
                     {
@@ -213,7 +217,7 @@ public class GameController : MonoBehaviour
                 {
                     t.DestroyTarget();
                 }
-                t.CreateTarget(wall, true);
+                t.CreateTarget(wall, true, chooseCircleMode);
             });
             //heatMap.setActive(true);
             only_one = false;
@@ -224,8 +228,9 @@ public class GameController : MonoBehaviour
             // Select a random target
             TargetCirle trgt = selectItem();
             // If no more time left and the target has not been looked.
-            if (timeLeft < 0)
+            if (timeLeft < 0 || wait)
             {
+                wait = false;
                 if (last_target != null)
                 {
                     last_target.DestroyTarget();
@@ -233,8 +238,10 @@ public class GameController : MonoBehaviour
                 // If the target is not created, create it
                 if (!trgt.circle_created)
                 {
-                    trgt.CreateTarget(wall, true);
-                    if (last_target != null)
+
+                    trgt.CreateTarget(wall, true, chooseCircleMode);
+
+                    if (last_target != null && canDetectCircle)
                     {
                         prevPos = last_target.circle.transform.localPosition;
 
@@ -249,6 +256,28 @@ public class GameController : MonoBehaviour
                 last_target = trgt;
                 ResetTimer();
             }
+            // Choose the Circle Mode
+            if (trgt.circle_created)
+            {
+                if (chooseCircleMode)
+                {
+                    print("JE VAIS PEUT ETRE REDUIRE LE CERCLE");
+
+                    if (trgt.bigCircleMode())
+                    {
+                        canDetectCircle = true;
+                    }
+                    else
+                    {
+                        canDetectCircle = false;
+                    }
+                }
+                else
+                {
+                    trgt.movingCircleMode();
+                }
+            }
+
             target_timer += Time.deltaTime;
             // Get the current object looked at by the user
             looking_at_circle = gridController.GetCurrentCollider();
@@ -257,9 +286,12 @@ public class GameController : MonoBehaviour
             for (int i = 0; i < lookings.Length; i++)
             {
                 RaycastHit hit = lookings[i];
-                if (hit.collider.name == "Cylinder")
+                if (hit.collider)
                 {
-                    looking_at_circle = hit;
+                    if (hit.collider.name == "Cylinder" && canDetectCircle)
+                    {
+                        looking_at_circle = hit;
+                    }
                 }
             }
             // If the user is looking the target, reduce its scale 
@@ -267,27 +299,31 @@ public class GameController : MonoBehaviour
             {
                 //Vector3 posCircleHeatMap = new Vector3(looking_at_circle.transform.position.x, looking_at_circle.transform.position.y, looking_at_circle.transform.position.z - 0.5f);
                 //Vector3 posCircleHeatMap = looking_at_circle.transform.position;
-                if (looking_at_circle.collider.name == "Cylinder")
+                if (canDetectCircle)
                 {
-                    LogData();
-                    if (travel_time <= 0.0f)
+                    if (looking_at_circle.collider.name == "Cylinder")
                     {
-                        travel_time = target_timer;
+                        LogData();
+                        if (travel_time <= 0.0f)
+                        {
+                            travel_time = target_timer;
+                        }
+                        last_target.was_looked = true;
+
+                        //We get the pixels location of the collider, depending of the distance from the center of the circle, we reduce or increase the shrinking speed.
+                        //pixelUV = gridController.getCurrentColliderPosition(looking_at_circle);
+                        //last_target.reduceSpeed(Vector2.Distance(new Vector2(2,2), pixelUV), 0.048f, 0);
+
+                        //Depending of the dispersion, we reduce or increase the shrinking speed.
+                        last_target.reduceSpeed(userbhv.getDispersion(), 0.038f, 1);
+                        print("JE REDUIS LE CERCLE " + canDetectCircle);
+                        last_target.ReduceScale();
+                        looking_at_circle_before = looking_at_circle;
                     }
-                    last_target.was_looked = true;
-
-                    //We get the pixels location of the collider, depending of the distance from the center of the circle, we reduce or increase the shrinking speed.
-                    //pixelUV = gridController.getCurrentColliderPosition(looking_at_circle);
-                    //last_target.reduceSpeed(Vector2.Distance(new Vector2(2,2), pixelUV), 0.048f, 0);
-
-                    //Depending of the dispersion, we reduce or increase the shrinking speed.
-                    last_target.reduceSpeed(userbhv.getDispersion(), 0.038f, 1);
-                    last_target.ReduceScale();
-                    looking_at_circle_before = looking_at_circle;
-                }
-                else
-                {
-                    timeLeft -= Time.deltaTime;
+                    else
+                    {
+                        timeLeft -= Time.deltaTime;
+                    }
                 }
                 if (last_target != null)
                 {
