@@ -48,8 +48,9 @@ public class GameController : MonoBehaviour
     private Vector3 prevPos;
 
     private float distraction;
-    private bool chooseCircleMode = true;
+    private bool chooseCircleMode = false;
     private bool wait = true;
+    private Vector3 savedScale;
 
     public bool canDetectCircle = false;
 
@@ -233,13 +234,30 @@ public class GameController : MonoBehaviour
                 wait = false;
                 if (last_target != null)
                 {
+                    if (!chooseCircleMode)
+                    {
+                        savedScale = last_target.circle.transform.localScale;
+                    }
                     last_target.DestroyTarget();
                 }
                 // If the target is not created, create it
                 if (!trgt.circle_created)
                 {
-
-                    trgt.CreateTarget(wall, true, chooseCircleMode);
+                    if (!chooseCircleMode)
+                    {
+                        if (savedScale != null)
+                        {
+                            trgt.CreateTarget(wall, true, chooseCircleMode, savedScale);
+                        }
+                        else
+                        {
+                            trgt.CreateTarget(wall, true, chooseCircleMode);
+                        }
+                    }
+                    else
+                    {
+                        trgt.CreateTarget(wall, true, chooseCircleMode);
+                    }
 
                     if (last_target != null && canDetectCircle)
                     {
@@ -256,25 +274,24 @@ public class GameController : MonoBehaviour
                 last_target = trgt;
                 ResetTimer();
             }
+
             // Choose the Circle Mode
             if (trgt.circle_created)
             {
                 if (chooseCircleMode)
                 {
-                    print("JE VAIS PEUT ETRE REDUIRE LE CERCLE");
-
-                    if (trgt.bigCircleMode())
-                    {
-                        canDetectCircle = true;
-                    }
-                    else
-                    {
-                        canDetectCircle = false;
-                    }
+                    canDetectCircle = trgt.bigCircleMode();
                 }
                 else
                 {
-                    trgt.movingCircleMode();
+                    if(savedScale != null)
+                    {
+                        canDetectCircle = trgt.movingCircleMode(savedScale);
+                    }
+                    else
+                    {
+                        canDetectCircle = true;
+                    }
                 }
             }
 

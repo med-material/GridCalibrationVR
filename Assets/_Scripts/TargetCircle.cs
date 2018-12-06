@@ -33,6 +33,7 @@ public class TargetCirle
 
     private float target_shrinking = 0.999f; //The original value was 0.95
     private float timer = 0;
+    private int countMovingCircle = 0;
 
     private Color newOutlineColor;
     public float diff;
@@ -48,7 +49,7 @@ public class TargetCirle
         calib_failed = 0;
         ResetScale();
     }
-    internal void CreateTarget(GameObject wall, bool centered, bool mode)
+    internal void CreateTarget(GameObject wall, bool centered, bool mode, Vector3 scale = default(Vector3))
     {
         l_looked.Add(was_looked);
         // Create the Circle 
@@ -58,13 +59,18 @@ public class TargetCirle
         circle.transform.parent = wall.transform;
         circle.transform.localRotation = Quaternion.Euler(90, 0, 0);
 
+        if(scale == Vector3.zero)
+        {
+            scale = previous_scale;
+        }
+
         if (mode)
         {
             circle.transform.localScale = new Vector3(2, circle.transform.localScale.y, 2.409f);
         }
         else
         {
-            circle.transform.localScale = previous_scale;
+            circle.transform.localScale = scale;
         }
 
         // Add red dot at the center of the target
@@ -240,8 +246,36 @@ public class TargetCirle
 
     }
 
-    internal void movingCircleMode()
+    internal bool movingCircleMode(Vector3 saved)
     {
 
+        if(circle.transform.localScale.x == scale_to_reach.x)
+        {
+            return true;
+        }
+        else
+        {
+            countMovingCircle++;
+
+            if (countMovingCircle == 1)
+            {
+                circle.transform.localScale = saved;
+                return false;
+            }
+            else
+            {
+                if (circle.transform.localScale.x * 1.02f < scale_to_reach.x)
+                {
+                    circle.transform.localScale *= 1.02f;
+                    return false;
+                }
+                else
+                {
+                    circle.transform.localScale = scale_to_reach;
+                    return true;
+                }
+            }
+        }
+        
     }
 }
