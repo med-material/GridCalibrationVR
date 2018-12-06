@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-
+using Valve.VR;
 public class OpticianController : MonoBehaviour
 {
 
@@ -15,6 +15,8 @@ public class OpticianController : MonoBehaviour
     public GridController gridController;
     public List<Vector3> FOVPointsLocal;
     public Transform OperatorPlane;
+    public PointingSystem pointingSystem;
+    public bool handlerMode = false;
 
     private Renderer FOVTargetRenderer;
     private bool isFOVCalibEnded;
@@ -61,6 +63,8 @@ public class OpticianController : MonoBehaviour
         lineRendererAcuity.material = new Material(Shader.Find("Sprites/Default"));
         lineRendererAcuity.widthMultiplier = 0.02f;
         lineRendererAcuity.gameObject.layer = 11; // 11 = OperatorUI
+
+
         //// ACUITY SETUP 
         l_rotation = new List<int> { 0, -90, 180, 90 }; // Right, Down, Left, Up
         keyCodes = new List<KeyCode> { rightArrow, downArrow, leftArrow, upArrow }; // have to stay same order than rotation list !!
@@ -122,7 +126,23 @@ public class OpticianController : MonoBehaviour
             if (isFOVCalibEnded)
                 UpdateAcuityCalibration();
             else
-                UpdateMaxFOVCalibration();
+            {
+                if (pointingSystem.start)
+                {
+                    if (pointingSystem.isCalibEnded)
+                    {
+                        isFOVCalibEnded = true;
+                        DrawFOV(lineRenderer, pointingSystem.handPoints, Color.blue);
+                        FOVTarget.SetActive(false);
+                    }
+                }
+                else
+                {
+                    UpdateMaxFOVCalibration();
+                }
+
+            }
+
         }
         if (Input.GetKeyDown(KeyCode.R))
         {

@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
+using Valve.VR;
 
 public class PointingSystem : MonoBehaviour
 {
@@ -10,17 +12,23 @@ public class PointingSystem : MonoBehaviour
         ZAxis
     }
 
+    public GameObject StartButton;
     public Color color;
     public float thickness = 0.002f;
-    public AxisType facingAxis = AxisType.XAxis;
+    public AxisType facingAxis = AxisType.ZAxis;
     public float length = 100f;
     public bool showCursor = true;
+    public bool isCalibEnded = false;
+    public Text explainText;
+
     internal Vector3 handPoint;
     internal List<Vector3> handPoints;
+    internal bool start;
 
     GameObject holder;
     GameObject pointer;
     GameObject cursor;
+    RaycastHit hitObject;
 
     Vector3 cursorScale = new Vector3(0.05f, 0.05f, 0.05f);
     float contactDistance = 0f;
@@ -53,7 +61,7 @@ public class PointingSystem : MonoBehaviour
     }
 
     // Use this for initialization
-    void Start()
+    void SetupPointingSystem()
     {
         Material newMaterial = new Material(Shader.Find("Unlit/Color"));
         newMaterial.SetColor("_Color", color);
@@ -82,9 +90,36 @@ public class PointingSystem : MonoBehaviour
             cursor.layer = 2;
         }
 
+        explainText.text = "Place point with the controler \n with the back button at the \n limit of your FOV";
+
         handPoints = new List<Vector3>();
 
         SetPointerTransform(length, thickness);
+    }
+
+    void OnEnable()
+    {
+        Debug.Log("Testing connection for devices");
+        SteamVR_Events.DeviceConnected.Listen(OnDeviceConnected);
+    }
+
+    // A SteamVR device got connected/disconnected
+    private void OnDeviceConnected(int index, bool connected)
+    {
+        if (connected)
+        {
+            if (OpenVR.System != null)
+            {
+                //lets figure what type of device got connected
+                ETrackedDeviceClass deviceClass = OpenVR.System.GetTrackedDeviceClass((uint)index);
+                if (deviceClass == ETrackedDeviceClass.Controller)
+                {
+                    Debug.Log("Controller got connected at index:" + index);
+                    start = true;
+                    SetupPointingSystem();
+                }
+            }
+        }
     }
 
     float GetBeamLength(bool bHit, RaycastHit hit)
@@ -120,21 +155,38 @@ public class PointingSystem : MonoBehaviour
             actualLength = length;
         }
 
-        return actualLength; ;
+        return actualLength;
     }
 
     void Update()
     {
-        Ray raycast = new Ray(transform.position, transform.forward);
+        if (start)
+        {
+            Ray raycast = new Ray(transform.position, transform.forward);
 
-        RaycastHit hitObject;
-        bool rayHit = Physics.Raycast(raycast, out hitObject);
+            bool rayHit = Physics.Raycast(raycast, out hitObject);
+            if (SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any))
+            {
+                AddPoint();
+            }
+            float beamLength = GetBeamLength(rayHit, hitObject);
+            SetPointerTransform(beamLength, thickness);
+            if (SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any))
+            {
+                if (GameObject.ReferenceEquals(hitObject.collider.gameObject, StartButton))
+                {
+                    isCalibEnded = true;
+                }
+            }
+        }
+    }
+
+    private void AddPoint()
+    {
         if (hitObject.collider != null)
         {
             handPoint = hitObject.collider.transform.worldToLocalMatrix.MultiplyPoint3x4(hitObject.point);
             handPoints.Add(handPoint);
         }
-        float beamLength = GetBeamLength(rayHit, hitObject);
-        SetPointerTransform(beamLength, thickness);
     }
 }
