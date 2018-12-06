@@ -95,6 +95,38 @@ public class OpticianController : MonoBehaviour
         }
     }
 
+
+    void OnEnable()
+    {
+        Debug.Log("Testing connection for devices");
+        SteamVR_Events.DeviceConnected.Listen(OnDeviceConnected);
+    }
+
+    // A SteamVR device got connected/disconnected
+    private void OnDeviceConnected(int index, bool connected)
+    {
+        if (connected)
+        {
+            if (OpenVR.System != null)
+            {
+                //lets figure what type of device got connected
+                ETrackedDeviceClass deviceClass = OpenVR.System.GetTrackedDeviceClass((uint)index);
+                if (deviceClass == ETrackedDeviceClass.Controller)
+                {
+                    Debug.Log("Controller got connected at index:" + index);
+
+                    if (!pointingSystem.start)
+                    {
+                        pointingSystem.start = true;
+                        FOVTarget.SetActive(false);
+                        pointingSystem.SetupPointingSystem();
+                    }
+                }
+
+            }
+        }
+    }
+
     // Draw the user FOV and acuity FOV to the operator
     private void DrawFOV(LineRenderer lrender, List<Vector3> pos_list, Color color)
     {

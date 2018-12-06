@@ -61,8 +61,9 @@ public class PointingSystem : MonoBehaviour
     }
 
     // Use this for initialization
-    void SetupPointingSystem()
+    internal void SetupPointingSystem()
     {
+        StartButton.SetActive(true);
         Material newMaterial = new Material(Shader.Find("Unlit/Color"));
         newMaterial.SetColor("_Color", color);
 
@@ -97,30 +98,6 @@ public class PointingSystem : MonoBehaviour
         SetPointerTransform(length, thickness);
     }
 
-    void OnEnable()
-    {
-        Debug.Log("Testing connection for devices");
-        SteamVR_Events.DeviceConnected.Listen(OnDeviceConnected);
-    }
-
-    // A SteamVR device got connected/disconnected
-    private void OnDeviceConnected(int index, bool connected)
-    {
-        if (connected)
-        {
-            if (OpenVR.System != null)
-            {
-                //lets figure what type of device got connected
-                ETrackedDeviceClass deviceClass = OpenVR.System.GetTrackedDeviceClass((uint)index);
-                if (deviceClass == ETrackedDeviceClass.Controller)
-                {
-                    Debug.Log("Controller got connected at index:" + index);
-                    start = true;
-                    SetupPointingSystem();
-                }
-            }
-        }
-    }
 
     float GetBeamLength(bool bHit, RaycastHit hit)
     {
@@ -165,7 +142,7 @@ public class PointingSystem : MonoBehaviour
             Ray raycast = new Ray(transform.position, transform.forward);
 
             bool rayHit = Physics.Raycast(raycast, out hitObject);
-            if (SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any))
+            if (SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any) && !GameObject.ReferenceEquals(hitObject.collider.gameObject, StartButton))
             {
                 AddPoint();
             }
@@ -175,6 +152,7 @@ public class PointingSystem : MonoBehaviour
             {
                 if (GameObject.ReferenceEquals(hitObject.collider.gameObject, StartButton))
                 {
+                    StartButton.SetActive(false);
                     isCalibEnded = true;
                 }
             }
