@@ -34,6 +34,8 @@ public class TargetCirle
     private float target_shrinking = 0.999f; //The original value was 0.95
     private float timer = 0;
     private int countMovingCircle = 0;
+    private bool isSizeOk = false;
+    private bool isPositionOk = false;
 
     private Color newOutlineColor;
     public float diff;
@@ -61,7 +63,7 @@ public class TargetCirle
 
         if(scale == Vector3.zero)
         {
-            scale = previous_scale;
+            scale = scale_to_reach;
         }
 
         if (mode)

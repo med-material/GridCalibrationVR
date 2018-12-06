@@ -245,7 +245,7 @@ public class GameController : MonoBehaviour
                 {
                     if (!chooseCircleMode)
                     {
-                        if (savedScale != null)
+                        if (savedScale != Vector3.zero)
                         {
                             trgt.CreateTarget(wall, true, chooseCircleMode, savedScale);
                         }
@@ -276,17 +276,21 @@ public class GameController : MonoBehaviour
             }
 
             // Choose the Circle Mode
-            if (trgt.circle_created)
+            if (last_target.circle_created)
             {
                 if (chooseCircleMode)
                 {
-                    canDetectCircle = trgt.bigCircleMode();
+                    canDetectCircle = last_target.bigCircleMode();
                 }
                 else
                 {
-                    if(savedScale != null)
+                    if(savedScale != Vector3.zero)
                     {
-                        canDetectCircle = trgt.movingCircleMode(savedScale);
+                        canDetectCircle = last_target.movingCircleMode(savedScale);
+                        if(canDetectCircle == true)
+                        {
+                            savedScale = Vector3.zero;
+                        }
                     }
                     else
                     {
