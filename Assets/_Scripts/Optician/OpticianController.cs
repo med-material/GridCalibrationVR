@@ -18,6 +18,9 @@ public class OpticianController : MonoBehaviour
     public PointingSystem pointingSystem;
     public bool handlerMode = false;
 
+    public SteamVR_Action_Vector2 touchPadAction;
+    public SteamVR_Action_Boolean touchPadActionClick;
+
     private Renderer FOVTargetRenderer;
     private bool isFOVCalibEnded;
     private KeyCode rightArrow = KeyCode.RightArrow;
@@ -152,6 +155,7 @@ public class OpticianController : MonoBehaviour
         {
             DrawFOV(lineRendererAcuity, savedTargetposList, Color.red);
             almostCircle.SetActive(false);
+            explainText.text = "Calibration is over";
         }
         else
         {
@@ -180,12 +184,13 @@ public class OpticianController : MonoBehaviour
         {
             Scene scene = SceneManager.GetActiveScene();
             SceneManager.LoadScene(scene.name);
+            // FIXME: Restart system
         }
     }
 
     private void UpdateMaxFOVCalibration()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any))
         {
             if (FOVTimer != 0) // If the space bar has been pressed and is wasn't to start the game.
             {
@@ -296,6 +301,9 @@ public class OpticianController : MonoBehaviour
 
     private void UpdateAcuityCalibration()
     {
+        bool touchPadClick = touchPadActionClick.GetStateDown(SteamVR_Input_Sources.Any);
+        Vector2 touchPadValue = touchPadAction.GetAxis(SteamVR_Input_Sources.Any);
+
         if (!almostCircle.activeSelf)
         {
             explainText.text = "Press the up or down arrow to increase or reduce size of the \n circle to the minimum size for wich you can still see "
@@ -307,17 +315,17 @@ public class OpticianController : MonoBehaviour
 
         if (!isSizeOk)
         {
-            if (Input.GetKeyDown(downArrow) && !isConfirmingPosition)
+            if ((Input.GetKeyDown(downArrow) || (touchPadClick && touchPadValue.y < -0.5)) && !isConfirmingPosition)
             {
                 ReduceCircleSize();
                 SetRandomCircleOrientation();
             }
-            else if (Input.GetKeyDown(upArrow) && !isConfirmingPosition)
+            else if ((Input.GetKeyDown(upArrow) || (touchPadClick && touchPadValue.y > 0.5)) && !isConfirmingPosition)
             {
                 IncreaseCircleSize();
                 SetRandomCircleOrientation();
             }
-            else if (Input.GetKeyDown(KeyCode.Space))
+            else if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any))
             {
                 isConfirmingPosition = !isConfirmingPosition;
             }
@@ -349,7 +357,7 @@ public class OpticianController : MonoBehaviour
                     if (offSetTimer > 0.1f) // avoid the circle to move just after spawning, getting the input from the previous circle
                         MoveTarget();
                 }
-                if (Input.GetKeyDown(KeyCode.Space)) // confirm the target is visible
+                if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any)) // confirm the target is visible
                 {
                     SavePos();
                     hasTargetMoved = true;
@@ -496,34 +504,39 @@ public class OpticianController : MonoBehaviour
         FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top left point 
         FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point
 
-        // TODO : Test it tomorrow morning.
+
     }
 
     private void SetPosFromPointing()
     {
-
-
+        //almostCircle.transform.localPosition = FOVEdgePoints[currentTargetIndex];
+        Vector3 pt = FOVEdgePoints[currentTargetIndex];
+        pt.z = -3.0f;
+        almostCircle.transform.localPosition = pt;
     }
     private int GetKeyCodeIndexPressed()
     {
-        if (Input.GetKey(leftArrow))
+        bool touchPadClick = touchPadActionClick.GetStateDown(SteamVR_Input_Sources.Any);
+        Vector2 touchPadValue = touchPadAction.GetAxis(SteamVR_Input_Sources.Any);
+
+        if (Input.GetKey(leftArrow) || (touchPadClick && touchPadValue.x < -0.5))
         {
-            if (Input.GetKey(upArrow))
+            if (Input.GetKey(upArrow) || (touchPadClick && touchPadValue.y > 0.5))
             {
                 return 6;
             }
-            else if (Input.GetKey(downArrow))
+            else if (Input.GetKey(downArrow) || (touchPadClick && touchPadValue.y < -0.5))
             {
                 return 7;
             }
         }
-        else if (Input.GetKey(rightArrow))
+        else if (Input.GetKey(rightArrow) || (touchPadClick && touchPadValue.x > 0.5))
         {
-            if (Input.GetKey(upArrow))
+            if (Input.GetKey(upArrow) || (touchPadClick && touchPadValue.y > 0.5))
             {
                 return 4;
             }
-            else if (Input.GetKey(downArrow))
+            else if (Input.GetKey(downArrow) || (touchPadClick && touchPadValue.y < -0.5))
             {
                 return 5;
             }
@@ -534,6 +547,15 @@ public class OpticianController : MonoBehaviour
             {
                 return keyCodes.IndexOf(k);
             }
+            //FIXME: while the trackpad is still pressed, continue to move.
+            if (touchPadClick && touchPadValue.x > 0.5)
+                return 0;
+            if (touchPadClick && touchPadValue.y < -0.5)
+                return 1;
+            if (touchPadClick && touchPadValue.x < -0.5)
+                return 2;
+            if (touchPadClick && touchPadValue.y > 0.5)
+                return 3;
         }
         return -1;
     }
