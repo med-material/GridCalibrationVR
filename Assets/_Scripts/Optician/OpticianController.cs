@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-
+using Valve.VR;
 public class OpticianController : MonoBehaviour
 {
 
@@ -15,6 +15,8 @@ public class OpticianController : MonoBehaviour
     public GridController gridController;
     public List<Vector3> FOVPointsLocal;
     public Transform OperatorPlane;
+    public PointingSystem pointingSystem;
+    public bool handlerMode = false;
 
     private Renderer FOVTargetRenderer;
     private bool isFOVCalibEnded;
@@ -61,6 +63,8 @@ public class OpticianController : MonoBehaviour
         lineRendererAcuity.material = new Material(Shader.Find("Sprites/Default"));
         lineRendererAcuity.widthMultiplier = 0.02f;
         lineRendererAcuity.gameObject.layer = 11; // 11 = OperatorUI
+
+
         //// ACUITY SETUP 
         l_rotation = new List<int> { 0, -90, 180, 90 }; // Right, Down, Left, Up
         keyCodes = new List<KeyCode> { rightArrow, downArrow, leftArrow, upArrow }; // have to stay same order than rotation list !!
@@ -91,14 +95,53 @@ public class OpticianController : MonoBehaviour
         }
     }
 
+
+    void OnEnable()
+    {
+        Debug.Log("Testing connection for devices");
+        SteamVR_Events.DeviceConnected.Listen(OnDeviceConnected);
+    }
+
+    // A SteamVR device got connected/disconnected
+    private void OnDeviceConnected(int index, bool connected)
+    {
+        if (connected)
+        {
+            if (OpenVR.System != null)
+            {
+                //lets figure what type of device got connected
+                ETrackedDeviceClass deviceClass = OpenVR.System.GetTrackedDeviceClass((uint)index);
+                if (deviceClass == ETrackedDeviceClass.Controller)
+                {
+                    Debug.Log("Controller got connected at index:" + index);
+
+                    if (!pointingSystem.start)
+                    {
+                        pointingSystem.start = true;
+                        FOVTarget.SetActive(false);
+                        pointingSystem.SetupPointingSystem();
+                    }
+                }
+
+            }
+        }
+    }
+
     // Draw the user FOV and acuity FOV to the operator
     private void DrawFOV(LineRenderer lrender, List<Vector3> pos_list, Color color)
     {
         lrender.startColor = color;
         lrender.endColor = color;
         lrender.positionCount = pos_list.Count;
-        pos_list.ForEach(s => s.z = -3.0f);
-        lrender.SetPositions(pos_list.ToArray());
+        Vector3 pos;
+        List<Vector3> temp_pos_list = new List<Vector3>();
+        for (int index = 0; index < pos_list.Count; ++index)
+        {
+            pos = pos_list.ToArray()[index];
+            pos.z = -3.0f;
+            temp_pos_list.Add(pos);
+        }
+        lrender.SetPositions(temp_pos_list.ToArray());
         lrender.loop = true;
     }
 
@@ -115,7 +158,23 @@ public class OpticianController : MonoBehaviour
             if (isFOVCalibEnded)
                 UpdateAcuityCalibration();
             else
-                UpdateMaxFOVCalibration();
+            {
+                if (pointingSystem.start)
+                {
+                    if (pointingSystem.isCalibEnded)
+                    {
+                        isFOVCalibEnded = true;
+                        DrawFOV(lineRenderer, pointingSystem.handPoints, Color.blue);
+                        FOVTarget.SetActive(false);
+                    }
+                }
+                else
+                {
+                    UpdateMaxFOVCalibration();
+                }
+
+            }
+
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
@@ -214,10 +273,13 @@ public class OpticianController : MonoBehaviour
         if (isFOVCalibEnded)
         {
             almostCircle.transform.position += vector;
-            //SavePos();
+            almostCircle.transform.localPosition = new Vector3(almostCircle.transform.localPosition.x, almostCircle.transform.localPosition.y, -3.0f);
         }
         else
+        {
             FOVTarget.transform.position += vector;
+            FOVTarget.transform.localPosition = new Vector3(FOVTarget.transform.localPosition.x, FOVTarget.transform.localPosition.y, -3.0f);
+        }
     }
 
     private void SavePos()
@@ -341,23 +403,40 @@ public class OpticianController : MonoBehaviour
     private void SetTargetPosition()
     {
         //FOVPoints
-        if (FOVEdgePoints.Count == 0)
+        if (!pointingSystem.start)
         {
-            CalculateAllPos();
-        }
+            if (FOVEdgePoints.Count == 0)
+                CalculateAllPos();
 
-        //CalculateRandomPos();
-        if (changePos)
-        {
-            SetRandomCircleOrientation();
-            almostCircle.transform.position = FOVEdgePoints[currentTargetIndex];
-            // set the new pos
+            if (changePos)
+
+                SetRandomCircleOrientation();
+
+            SetPos();
         }
-        else
+        else if (pointingSystem.start)
         {
-            almostCircle.transform.position = FOVEdgePoints[currentTargetIndex];
-            // set the same previous pos
+            if (FOVEdgePoints.Count == 0)
+                CalculateAllPosFromPointing();
+
+            if (changePos)
+                SetRandomCircleOrientation();
+
+            SetPosFromPointing();
+
         }
+    }
+
+    private void SetPos()
+    {
+        almostCircle.transform.position = FOVEdgePoints[currentTargetIndex];
+        Vector3 pt = almostCircle.transform.localPosition;
+        if (pt.x == 0)
+            pt.y = pt.y > 0 ? pt.y - 0.04f : pt.y + 0.04f;
+        else if (pt.y == 0)
+            pt.x = pt.x > 0 ? pt.x - 0.04f : pt.x + 0.04f;
+        pt.z = -3.0f;
+        almostCircle.transform.localPosition = pt;
     }
 
     private void CalculateAllPos()
@@ -372,6 +451,59 @@ public class OpticianController : MonoBehaviour
         FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point
     }
 
+    private void CalculateAllPosFromPointing()
+    {
+        // Calculate position for the target position from the point the user placed
+
+        int index_left;
+        Vector3 pt_left = new Vector3();
+        int index_right;
+        Vector3 pt_right = new Vector3();
+        int index_top;
+        Vector3 pt_top = new Vector3();
+        int index_down;
+        Vector3 pt_down = new Vector3();
+
+        foreach (var pt in pointingSystem.handPoints)
+        {
+            if (pt.x > pt_right.x)
+            {
+                pt_right = pt;
+                index_right = pointingSystem.handPoints.IndexOf(pt);
+            }
+            if (pt.x < pt_left.x)
+            {
+                pt_left = pt;
+                index_left = pointingSystem.handPoints.IndexOf(pt);
+            }
+            if (pt.y > pt_top.y)
+            {
+                pt_top = pt;
+                index_top = pointingSystem.handPoints.IndexOf(pt);
+            }
+            if (pt.y < pt_down.y)
+            {
+                pt_down = pt;
+                index_down = pointingSystem.handPoints.IndexOf(pt);
+            }
+        }
+        FOVEdgePoints.Add(pt_right);
+        FOVEdgePoints.Add(pt_down);
+        FOVEdgePoints.Insert(1, (FOVEdgePoints[1] + (FOVEdgePoints[0] - FOVEdgePoints[1]) / 2)); // Bottom right point
+        FOVEdgePoints.Add(pt_left);
+        FOVEdgePoints.Insert(3, (FOVEdgePoints[3] + (FOVEdgePoints[2] - FOVEdgePoints[3]) / 2)); // Bottom Left point 
+        FOVEdgePoints.Add(pt_top);
+        FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top left point 
+        FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point
+
+        // TODO : Test it tomorrow morning.
+    }
+
+    private void SetPosFromPointing()
+    {
+
+
+    }
     private int GetKeyCodeIndexPressed()
     {
         if (Input.GetKey(leftArrow))
