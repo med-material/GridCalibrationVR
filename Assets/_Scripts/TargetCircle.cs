@@ -39,6 +39,7 @@ public class TargetCirle
     private bool startReGrowthCircle = true;
     private bool isSizeOk = false;
     private bool isPositionOk = false;
+    private bool isCirleGoodSize = false;
 
     private Color newOutlineColor;
     public float diff;
@@ -54,7 +55,7 @@ public class TargetCirle
         calib_failed = 0;
         ResetScale();
     }
-    internal void CreateTarget(GameObject wall, bool centered, bool mode, Vector3 scale = default(Vector3))
+    internal void CreateTarget(GameObject wall, bool centered, int mode, bool endGame, Vector3 scale = default(Vector3))
     {
         l_looked.Add(was_looked);
         // Create the Circle 
@@ -64,19 +65,27 @@ public class TargetCirle
         circle.transform.parent = wall.transform;
         circle.transform.localRotation = Quaternion.Euler(90, 0, 0);
 
-        if(scale == Vector3.zero)
+        if (!endGame)
         {
-            scale = scale_to_reach;
-        }
+            if (scale == Vector3.zero)
+            {
+                scale = scale_to_reach;
+            }
 
-        if (mode)
-        {
-            circle.transform.localScale = new Vector3(2, circle.transform.localScale.y, 2.409f);
+            if (mode == 1)
+            {
+                circle.transform.localScale = new Vector3(1.400564f, circle.transform.localScale.y, 1.68698f);
+            }
+            else
+            {
+                circle.transform.localScale = scale;
+            }
         }
         else
         {
-            circle.transform.localScale = scale;
+            circle.transform.localScale = previous_scale;
         }
+
 
         // Add red dot at the center of the target
         dot = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
@@ -240,12 +249,17 @@ public class TargetCirle
 
         if (circle.transform.localScale.x * 0.98f > scale_to_reach.x)
         {
-            circle.transform.localScale *= 0.98f;
+            circle.transform.localScale *= 0.965f;
+            isCirleGoodSize = false;
             return false;
         }
         else
         {
-            circle.transform.localScale = scale_to_reach;
+            if (!isCirleGoodSize)
+            {
+                circle.transform.localScale = scale_to_reach;
+                isCirleGoodSize = true;
+            }
             return true;
         }
 

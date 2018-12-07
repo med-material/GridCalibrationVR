@@ -40,13 +40,13 @@ public class StartHandler : MonoBehaviour
             }
             else if (ReferenceEquals(obj.collider.gameObject, approxButton))
             {
-                approxLoader.fillAmount = 1.0f - modeTimer*2 ;
-                modeTimer -= Time.deltaTime;
+                approxLoader.fillAmount = 1.0f - timer*2 ;
+                timer -= Time.deltaTime;
             }
             else if (ReferenceEquals(obj.collider.gameObject, shrinkButton))
             {
-                shrinkLoader.fillAmount = 1.0f - modeTimer*2 ;
-                modeTimer -= Time.deltaTime;
+                shrinkLoader.fillAmount = 1.0f - timer*2 ;
+                timer -= Time.deltaTime;
             }
             else
             {
@@ -70,11 +70,15 @@ public class StartHandler : MonoBehaviour
                 countDownText.SetActive(false);
             }
         }
-        if (modeTimer < 0)
+        if (timer < 0)
         {
             if (ReferenceEquals(obj.collider.gameObject, approxButton))
             {
                 gameController.choosenMode = "approx";
+                shrinkLoader.fillAmount = 0.0f;
+            } else if(ReferenceEquals(obj.collider.gameObject, startButton))
+            {
+                gameController.choosenMode = "normal";
                 shrinkLoader.fillAmount = 0.0f;
             }
             else if (ReferenceEquals(obj.collider.gameObject, shrinkButton))

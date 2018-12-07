@@ -48,7 +48,9 @@ public class GameController : MonoBehaviour
     private Vector3 prevPos;
 
     private float distraction;
-    private bool chooseCircleMode = false;
+
+    //private bool chooseCircleMode = false;
+    public int chooseCircleMode;
     private bool wait = true;
     private Vector3 savedScale, savedPosition;
 
@@ -92,9 +94,20 @@ public class GameController : MonoBehaviour
         if (is_started)
         {
             if (choosenMode == "approx")
-                StartApproxMode();
-            else if (choosenMode == "shrink")
+            {
+                chooseCircleMode = 2;
                 StartShrinkMode();
+            }              
+            else if (choosenMode == "shrink")
+            {
+                chooseCircleMode = 1;
+                StartShrinkMode();
+            }
+            else if (choosenMode == "normal")
+            {
+                chooseCircleMode = 0;
+                StartShrinkMode();
+            }
             else print("No mode is selected. Please verify you have selected a mode");
         }
     }
@@ -123,7 +136,7 @@ public class GameController : MonoBehaviour
         CENTER_Y_T = wall_height - wall_height / 3;
     }
 
-    private void StartApproxMode()
+   /* private void StartApproxMode()
     {
         // Check if calibration is ended, delete current target, create each target in centered position
         if (calib_end && only_one)
@@ -205,7 +218,7 @@ public class GameController : MonoBehaviour
                 ResetTargetTimer();
             }
         }
-    }
+    }*/
 
     private void StartShrinkMode()
     {
@@ -218,7 +231,7 @@ public class GameController : MonoBehaviour
                 {
                     t.DestroyTarget();
                 }
-                t.CreateTarget(wall, true, chooseCircleMode);
+                t.CreateTarget(wall, true, chooseCircleMode, true);
             });
             //heatMap.setActive(true);
             only_one = false;
@@ -234,7 +247,7 @@ public class GameController : MonoBehaviour
                 wait = false;
                 if (last_target != null)
                 {
-                    if (!chooseCircleMode)
+                    if (chooseCircleMode == 2)
                     {
                         savedScale = last_target.circle.transform.localScale;
                         savedPosition = last_target.circle.transform.localPosition;
@@ -244,20 +257,20 @@ public class GameController : MonoBehaviour
                 // If the target is not created, create it
                 if (!trgt.circle_created)
                 {
-                    if (!chooseCircleMode)
+                    if (chooseCircleMode == 2)
                     {
                         if (savedScale != Vector3.zero)
                         {
-                            trgt.CreateTarget(wall, true, chooseCircleMode, savedScale);
+                            trgt.CreateTarget(wall, true, chooseCircleMode, false, savedScale);
                         }
                         else
                         {
-                            trgt.CreateTarget(wall, true, chooseCircleMode);
+                            trgt.CreateTarget(wall, true, chooseCircleMode, false);
                         }
                     }
                     else
                     {
-                        trgt.CreateTarget(wall, true, chooseCircleMode);
+                        trgt.CreateTarget(wall, true, chooseCircleMode, false);
                     }
 
                     if (last_target != null && canDetectCircle)
@@ -279,7 +292,7 @@ public class GameController : MonoBehaviour
             // Choose the Circle Mode
             if (last_target.circle_created)
             {
-                if (chooseCircleMode)
+                if (chooseCircleMode == 1)
                 {
                     canDetectCircle = last_target.bigCircleMode();
                 }

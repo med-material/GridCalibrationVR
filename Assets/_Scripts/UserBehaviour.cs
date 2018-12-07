@@ -109,9 +109,9 @@ public class UserBehaviour : MonoBehaviour{
                     hasCirclePulsated = false;
                 }
 
-                if (!gmCtrl.calib_end)
+                if (!gmCtrl.calib_end && gmCtrl.chooseCircleMode == 0)
                 {
-                    //gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_center_material[1], 1, 0.1f);
+                    gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_center_material[1], 1.5f, 0.2f);
                 }
 
             }
@@ -132,7 +132,10 @@ public class UserBehaviour : MonoBehaviour{
                 if(gmCtrl.last_target != null && !gmCtrl.last_target.was_looked && !gmCtrl.calib_end)
                 {
                     hasCirclePulsated = true;
-                    //gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_material[1], 0.14f, 0.01f);
+                    if(gmCtrl.chooseCircleMode == 0)
+                    {
+                        gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_material[1], 0.14f, 0.03f);
+                    }
                 }
 
                 Destroy(copy);
