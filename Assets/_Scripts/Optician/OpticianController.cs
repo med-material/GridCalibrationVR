@@ -403,21 +403,28 @@ public class OpticianController : MonoBehaviour
     private void SetTargetPosition()
     {
         //FOVPoints
-        if (FOVEdgePoints.Count == 0)
+        if (!pointingSystem.start)
         {
-            CalculateAllPos();
-        }
+            if (FOVEdgePoints.Count == 0)
+                CalculateAllPos();
 
-        //CalculateRandomPos();
-        if (changePos)
-        {
-            SetRandomCircleOrientation();
+            if (changePos)
+
+                SetRandomCircleOrientation();
+
             SetPos();
-            // set the new pos
         }
-        else
-            SetPos();
-        // set the same previous pos
+        else if (pointingSystem.start)
+        {
+            if (FOVEdgePoints.Count == 0)
+                CalculateAllPosFromPointing();
+
+            if (changePos)
+                SetRandomCircleOrientation();
+
+            SetPosFromPointing();
+
+        }
     }
 
     private void SetPos()
@@ -444,6 +451,59 @@ public class OpticianController : MonoBehaviour
         FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point
     }
 
+    private void CalculateAllPosFromPointing()
+    {
+        // Calculate position for the target position from the point the user placed
+
+        int index_left;
+        Vector3 pt_left = new Vector3();
+        int index_right;
+        Vector3 pt_right = new Vector3();
+        int index_top;
+        Vector3 pt_top = new Vector3();
+        int index_down;
+        Vector3 pt_down = new Vector3();
+
+        foreach (var pt in pointingSystem.handPoints)
+        {
+            if (pt.x > pt_right.x)
+            {
+                pt_right = pt;
+                index_right = pointingSystem.handPoints.IndexOf(pt);
+            }
+            if (pt.x < pt_left.x)
+            {
+                pt_left = pt;
+                index_left = pointingSystem.handPoints.IndexOf(pt);
+            }
+            if (pt.y > pt_top.y)
+            {
+                pt_top = pt;
+                index_top = pointingSystem.handPoints.IndexOf(pt);
+            }
+            if (pt.y < pt_down.y)
+            {
+                pt_down = pt;
+                index_down = pointingSystem.handPoints.IndexOf(pt);
+            }
+        }
+        FOVEdgePoints.Add(pt_right);
+        FOVEdgePoints.Add(pt_down);
+        FOVEdgePoints.Insert(1, (FOVEdgePoints[1] + (FOVEdgePoints[0] - FOVEdgePoints[1]) / 2)); // Bottom right point
+        FOVEdgePoints.Add(pt_left);
+        FOVEdgePoints.Insert(3, (FOVEdgePoints[3] + (FOVEdgePoints[2] - FOVEdgePoints[3]) / 2)); // Bottom Left point 
+        FOVEdgePoints.Add(pt_top);
+        FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top left point 
+        FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point
+
+        // TODO : Test it tomorrow morning.
+    }
+
+    private void SetPosFromPointing()
+    {
+
+
+    }
     private int GetKeyCodeIndexPressed()
     {
         if (Input.GetKey(leftArrow))
