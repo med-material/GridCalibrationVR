@@ -50,7 +50,7 @@ public class GameController : MonoBehaviour
     private float distraction;
     private bool chooseCircleMode = false;
     private bool wait = true;
-    private Vector3 savedScale;
+    private Vector3 savedScale, savedPosition;
 
     public bool canDetectCircle = false;
 
@@ -237,6 +237,7 @@ public class GameController : MonoBehaviour
                     if (!chooseCircleMode)
                     {
                         savedScale = last_target.circle.transform.localScale;
+                        savedPosition = last_target.circle.transform.localPosition;
                     }
                     last_target.DestroyTarget();
                 }
@@ -286,10 +287,11 @@ public class GameController : MonoBehaviour
                 {
                     if(savedScale != Vector3.zero)
                     {
-                        canDetectCircle = last_target.movingCircleMode(savedScale);
+                        canDetectCircle = last_target.movingCircleMode(savedScale, savedPosition);
                         if(canDetectCircle == true)
                         {
                             savedScale = Vector3.zero;
+                            savedPosition = Vector3.zero;
                         }
                     }
                     else
@@ -378,7 +380,8 @@ public class GameController : MonoBehaviour
             do
             {
                 target_index = rand.Next(lst_trgt.Count);
-            } while (last_index == target_index);
+                //} while (last_index == target_index);
+            } while (System.Object.ReferenceEquals(last_target, lst_trgt[target_index]));
             last_index = target_index;
             target = lst_trgt[target_index];
         }

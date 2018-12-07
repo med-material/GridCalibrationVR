@@ -7,7 +7,9 @@ using UnityEditor.VersionControl;
 public class TargetCirle
 {
     private Vector3 previous_scale;
+    private float speed = 1.2f;
     private Vector3 scale_to_reach = new Vector3(0.25f, 0.01f, 0.3f);
+    private Vector3 position_to_reach;
     public List<Vector3> previous_scales = new List<Vector3>();
     private List<float> scales_factor = new List<float>();
     public Material[] target_material = new Material[2];
@@ -33,7 +35,8 @@ public class TargetCirle
 
     private float target_shrinking = 0.999f; //The original value was 0.95
     private float timer = 0;
-    private int countMovingCircle = 0;
+    private bool startMovingCircle = true;
+    private bool startReGrowthCircle = true;
     private bool isSizeOk = false;
     private bool isPositionOk = false;
 
@@ -248,35 +251,77 @@ public class TargetCirle
 
     }
 
-    internal bool movingCircleMode(Vector3 saved)
+    internal bool movingCircleMode(Vector3 savedScale, Vector3 savedPosition)
     {
 
-        if(circle.transform.localScale.x == scale_to_reach.x)
+        if (!isPositionOk)
         {
+            if (startMovingCircle)
+            {
+                position_to_reach = circle.transform.localPosition;
+                circle.transform.localPosition = savedPosition;
+                startMovingCircle = false;
+                isPositionOk = false;
+            }
+            else
+            {
+                if (circle.transform.localPosition != position_to_reach)
+                {
+                    float step = 1.2f * Time.deltaTime;
+                    circle.transform.localPosition = Vector3.MoveTowards(circle.transform.localPosition, position_to_reach, step);
+                    isPositionOk = false;
+                }
+                else
+                {
+                    startMovingCircle = true;
+                    isPositionOk = true;
+                }
+            }
+
+        }
+
+        if (!isSizeOk)
+        {
+
+            if (circle.transform.localScale.x == scale_to_reach.x)
+            {
+                isSizeOk = true;
+            }
+            else
+            {
+
+                if (startReGrowthCircle)
+                {
+                    circle.transform.localScale = savedScale;
+                    startReGrowthCircle = false;
+                    isSizeOk = false;
+                }
+                else
+                {
+                    if (circle.transform.localScale.x * 1.02f < scale_to_reach.x)
+                    {
+                        circle.transform.localScale *= 1.02f;
+                        isSizeOk = false;
+                    }
+                    else
+                    {
+                        circle.transform.localScale = scale_to_reach;
+                        startReGrowthCircle = true;
+                        isSizeOk = true;
+                    }
+                }
+            }
+        }
+
+        if(isPositionOk && isSizeOk)
+        {
+            isPositionOk = false;
+            isSizeOk = false;
             return true;
         }
         else
         {
-            countMovingCircle++;
-
-            if (countMovingCircle == 1)
-            {
-                circle.transform.localScale = saved;
-                return false;
-            }
-            else
-            {
-                if (circle.transform.localScale.x * 1.02f < scale_to_reach.x)
-                {
-                    circle.transform.localScale *= 1.02f;
-                    return false;
-                }
-                else
-                {
-                    circle.transform.localScale = scale_to_reach;
-                    return true;
-                }
-            }
+            return false;
         }
         
     }
