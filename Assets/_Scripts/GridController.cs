@@ -14,8 +14,11 @@ public class GridController : MonoBehaviour
     private Vector2 gazePointRight;
     private Vector2 gazePointCenter;
     private RaycastHit hit;
+    private RaycastHit circleHit;
     private RaycastHit[] hits;
     public Material shaderMaterial;
+    LayerMask collisionCircleLayer;
+
     void Start()
     {
         PupilData.calculateMovingAverage = false;
@@ -32,6 +35,7 @@ public class GridController : MonoBehaviour
             PupilTools.SubscribeTo("gaze");
             eyeCamera.gameObject.AddComponent<FramePublishing>();
         }
+        collisionCircleLayer = (1 << LayerMask.NameToLayer("Circle"));
     }
 
     void Update()
@@ -61,7 +65,10 @@ public class GridController : MonoBehaviour
             else
             {
                 heading.SetPosition(1, ray.origin + ray.direction * 50f);
-            }         
+            }
+
+            Physics.Raycast(ray, out circleHit, 10f, collisionCircleLayer);
+     
         }
     }
 
@@ -70,6 +77,9 @@ public class GridController : MonoBehaviour
         return hit;
     }
 
+    public RaycastHit GetCircleCollider(){
+        return circleHit;
+    }
     public RaycastHit[] GetCurrentColliders(){
         return hits;
     }

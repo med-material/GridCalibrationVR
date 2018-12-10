@@ -64,7 +64,7 @@ public class TargetCirle
         // Set the Circle as child of the wall
         circle.transform.parent = wall.transform;
         circle.transform.localRotation = Quaternion.Euler(90, 0, 0);
-
+        circle.layer = 12; // layer Circle
         if (!endGame)
         {
             if (scale == Vector3.zero)
@@ -74,7 +74,7 @@ public class TargetCirle
 
             if (mode == 1)
             {
-                circle.transform.localScale = new Vector3(1.400564f, circle.transform.localScale.y, 1.68698f);
+                circle.transform.localScale = new Vector3(1.048261f, circle.transform.localScale.y, 1.262631f);
             }
             else
             {
@@ -249,7 +249,7 @@ public class TargetCirle
 
         if (circle.transform.localScale.x * 0.98f > scale_to_reach.x)
         {
-            circle.transform.localScale *= 0.965f;
+            circle.transform.localScale *= 0.988f;
             isCirleGoodSize = false;
             return false;
         }
