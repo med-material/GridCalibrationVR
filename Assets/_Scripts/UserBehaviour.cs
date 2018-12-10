@@ -134,7 +134,7 @@ public class UserBehaviour : MonoBehaviour{
                     hasCirclePulsated = true;
                     if(gmCtrl.chooseCircleMode == 0)
                     {
-                        gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_material[1], 0.14f, 0.03f);
+                        gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_material[1], 0.14f, 0.01f);
                     }
                 }
 

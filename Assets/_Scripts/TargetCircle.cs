@@ -249,7 +249,7 @@ public class TargetCirle
 
         if (circle.transform.localScale.x * 0.98f > scale_to_reach.x)
         {
-            circle.transform.localScale *= 0.965f;
+            circle.transform.localScale *= 0.988f;
             isCirleGoodSize = false;
             return false;
         }
