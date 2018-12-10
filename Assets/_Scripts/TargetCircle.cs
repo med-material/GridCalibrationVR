@@ -64,7 +64,7 @@ public class TargetCirle
         // Set the Circle as child of the wall
         circle.transform.parent = wall.transform;
         circle.transform.localRotation = Quaternion.Euler(90, 0, 0);
-
+        circle.layer = 12; // layer Circle
         if (!endGame)
         {
             if (scale == Vector3.zero)

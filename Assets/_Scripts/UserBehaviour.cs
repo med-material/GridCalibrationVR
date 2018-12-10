@@ -45,9 +45,9 @@ public class UserBehaviour : MonoBehaviour{
     // Update is called once per frame
     void Update()
     {
-        if (grCtrl.GetCurrentCollider().collider)
+        if (grCtrl.GetCircleCollider().collider)
         {
-            if (grCtrl.GetCurrentCollider().collider.name == "Cylinder" && gmCtrl.canDetectCircle)
+            if (grCtrl.GetCircleCollider().collider.name == "Cylinder" && gmCtrl.canDetectCircle)
             {
 
                 if(prevTarg == null || !System.Object.ReferenceEquals(prevTarg, gmCtrl.last_target))
