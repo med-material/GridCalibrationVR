@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 4912519848425130}
   - component: {fileID: 212963314379257434}
   m_Layer: 0
-  m_Name: AlmostCircle6px
+  m_Name: LandoltC
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -35,7 +35,7 @@ Transform:
   m_GameObject: {fileID: 1230030597677358}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -1}
-  m_LocalScale: {x: 0.05, y: 0.05, z: 0.01}
+  m_LocalScale: {x: 0.025, y: 0.025, z: 0.01}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -75,7 +75,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 1033538a483456a4dbd74a7364baaa2f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 93dadd1f8eef68943bb087279fdb235c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

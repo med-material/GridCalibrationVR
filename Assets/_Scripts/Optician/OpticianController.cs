@@ -17,7 +17,6 @@ public class OpticianController : MonoBehaviour
     public Transform OperatorPlane;
     public PointingSystem pointingSystem;
     public bool handlerMode = false;
-
     public SteamVR_Action_Vector2 touchPadAction;
     public SteamVR_Action_Boolean touchPadActionClick;
 
@@ -53,6 +52,7 @@ public class OpticianController : MonoBehaviour
     private float offSetTimer = 0;
     private LineRenderer lineRenderer;
     private LineRenderer lineRendererAcuity;
+    private List<float> landolt_factor = new List<float>() { 2.0f, 1.5f, 1.33f, 1.25f, 1.20f, 1.1666667f, 1.1424f, 1.1261213f, 1.11f, 1.5f, 1.332f };
 
     void Start()
     {
