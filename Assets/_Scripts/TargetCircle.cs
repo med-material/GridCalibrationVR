@@ -74,7 +74,7 @@ public class TargetCirle
 
             if (mode == 1)
             {
-                circle.transform.localScale = new Vector3(1.400564f, circle.transform.localScale.y, 1.68698f);
+                circle.transform.localScale = new Vector3(1.048261f, circle.transform.localScale.y, 1.262631f);
             }
             else
             {
