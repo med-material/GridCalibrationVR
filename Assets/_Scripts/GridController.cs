@@ -59,8 +59,8 @@ public class GridController : MonoBehaviour
             hits = Physics.RaycastAll(ray);
             if (Physics.Raycast(ray, out hit))
             {
-                heading.SetPosition(1, hits[hits.Length-1].point);
-                positionText.text = sceneCamera.transform.InverseTransformDirection(hits[hits.Length-1].point).ToString();
+                heading.SetPosition(1, hits[hits.Length - 1].point);
+                positionText.text = sceneCamera.transform.InverseTransformDirection(hits[hits.Length - 1].point).ToString();
             }
             else
             {
@@ -68,7 +68,7 @@ public class GridController : MonoBehaviour
             }
 
             Physics.Raycast(ray, out circleHit, 10f, collisionCircleLayer);
-     
+
         }
     }
 
@@ -77,10 +77,24 @@ public class GridController : MonoBehaviour
         return hit;
     }
 
-    public RaycastHit GetCircleCollider(){
+    public bool IsCollidingByName(GameObject collider_obj)
+    {
+        foreach (RaycastHit h in hits)
+        {
+            if (ReferenceEquals(h.collider.gameObject, collider_obj))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public RaycastHit GetCircleCollider()
+    {
         return circleHit;
     }
-    public RaycastHit[] GetCurrentColliders(){
+    public RaycastHit[] GetCurrentColliders()
+    {
         return hits;
     }
     public Vector2 getCurrentColliderPosition(RaycastHit collider)

@@ -33,17 +33,17 @@ public class StartHandler : MonoBehaviour
         obj = gridController.GetCurrentCollider();
         if (obj.collider && timer > 0)
         {
-            if (ReferenceEquals(obj.collider.gameObject, startButton))
+            if (gridController.IsCollidingByName(startButton))
             {
                 startLoader.fillAmount =  3.0f - timer;
                 timer -= Time.deltaTime;
             }
-            else if (ReferenceEquals(obj.collider.gameObject, approxButton))
+            else if (gridController.IsCollidingByName(approxButton))
             {
                 approxLoader.fillAmount = 3.0f - timer;
                 timer -= Time.deltaTime;
             }
-            else if (ReferenceEquals(obj.collider.gameObject, shrinkButton))
+            else if (gridController.IsCollidingByName(shrinkButton))
             {
                 shrinkLoader.fillAmount = 3.0f - timer;
                 timer -= Time.deltaTime;
@@ -72,16 +72,16 @@ public class StartHandler : MonoBehaviour
         }
         if (timer < 0)
         {
-            if (ReferenceEquals(obj.collider.gameObject, approxButton))
+            if (gridController.IsCollidingByName(approxButton))
             {
                 gameController.choosenMode = "approx";
                 shrinkLoader.fillAmount = 0.0f;
-            } else if(ReferenceEquals(obj.collider.gameObject, startButton))
+            } else if(gridController.IsCollidingByName(startButton))
             {
                 gameController.choosenMode = "normal";
                 shrinkLoader.fillAmount = 0.0f;
             }
-            else if (ReferenceEquals(obj.collider.gameObject, shrinkButton))
+            else if (gridController.IsCollidingByName(shrinkButton))
             {
                 gameController.choosenMode = "shrink";
                 approxLoader.fillAmount = 0.0f;
