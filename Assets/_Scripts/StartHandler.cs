@@ -35,17 +35,17 @@ public class StartHandler : MonoBehaviour
         {
             if (ReferenceEquals(obj.collider.gameObject, startButton))
             {
-                startLoader.fillAmount =  1.0f - timer;
+                startLoader.fillAmount =  3.0f - timer;
                 timer -= Time.deltaTime;
             }
             else if (ReferenceEquals(obj.collider.gameObject, approxButton))
             {
-                approxLoader.fillAmount = 1.0f - timer*2 ;
+                approxLoader.fillAmount = 3.0f - timer;
                 timer -= Time.deltaTime;
             }
             else if (ReferenceEquals(obj.collider.gameObject, shrinkButton))
             {
-                shrinkLoader.fillAmount = 1.0f - timer*2 ;
+                shrinkLoader.fillAmount = 3.0f - timer;
                 timer -= Time.deltaTime;
             }
             else
@@ -90,7 +90,7 @@ public class StartHandler : MonoBehaviour
     }
     private void ResetTimer()
     {
-        timer = 1.0f;
+        timer = 3.0f;
     }
     private void ResetModeTimer()
     {
