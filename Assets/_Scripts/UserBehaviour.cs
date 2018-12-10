@@ -45,116 +45,113 @@ public class UserBehaviour : MonoBehaviour{
     // Update is called once per frame
     void Update()
     {
-        if (grCtrl.GetCircleCollider().collider)
+        if (grCtrl.GetCircleCollider().collider && gmCtrl.canDetectCircle)
         {
-            if (grCtrl.GetCircleCollider().collider.name == "Cylinder" && gmCtrl.canDetectCircle)
+
+            if (prevTarg == null || !System.Object.ReferenceEquals(prevTarg, gmCtrl.last_target))
             {
-
-                if(prevTarg == null || !System.Object.ReferenceEquals(prevTarg, gmCtrl.last_target))
-                {
-                    prevTarg = gmCtrl.last_target;
-                    touchOnce = false;
-                }
-
-                if (!touchOnce)
-                {
-
-                    if (touchCount < 2)
-                    {
-                        touchCount++;
-                    }
-                    else
-                    {
-                        touchCount = 1;
-                    }
-
-                    print("Je touche : " + touchCount);
-                    touchOnce = true;
-                }
-
-
-                if (createCopy)
-                {
-                    copyTarget(gmCtrl.last_target.circle);
-                    createCopy = false;
-                }
-
-          
-                if(GameObject.Find("Copy") != null)
-                {
-                    if (Physics.Raycast(grCtrl.transform.position, Vector3.forward, out hitLayer, 10000, layerMask, QueryTriggerInteraction.Ignore))
-                    {
-                        pixelUV = grCtrl.getCurrentColliderPosition(hitLayer);
-                    }
-                }
-
-                timer += Time.deltaTime;
-                if (timer > 0.1f)
-                {
-                    hitpoints.Add(pixelUV);
-                    if (hitpoints.Count >= 2)
-                    {
-                        if (hitpoints[hitpoints.Count - 2] != hitpoints[hitpoints.Count - 1])
-                        {
-                            hitDispersion(hitpoints[hitpoints.Count - 2], hitpoints[hitpoints.Count - 1]);
-                        }
-
-                    }
-                    timer = 0;
-                }
-
-                if (hasCirclePulsated)
-                {
-                    gmCtrl.last_target.highlightWidth = 0;
-                    hasCirclePulsated = false;
-                }
-
-                if (!gmCtrl.calib_end && gmCtrl.chooseCircleMode == 0)
-                {
-                    gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_center_material[1], 1.5f, 0.2f);
-                }
-
-            }
-            else
-            {
-                touchCount = 0;
-
-                if (hitpoints != null)
-                {
-                    hitpoints.Clear();
-                }
-
-                if (distances != null)
-                {
-                    distances.Clear();
-                }
-
-                if(gmCtrl.last_target != null && !gmCtrl.last_target.was_looked && !gmCtrl.calib_end)
-                {
-                    hasCirclePulsated = true;
-                    if(gmCtrl.chooseCircleMode == 0)
-                    {
-                        gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_material[1], 0.14f, 0.01f);
-                    }
-                }
-
-                Destroy(copy);
-                createCopy = true;
+                prevTarg = gmCtrl.last_target;
+                touchOnce = false;
             }
 
-            if(touchCount > 0 && touchCount < 3)
+            if (!touchOnce)
+            {
+
+                if (touchCount < 2)
+                {
+                    touchCount++;
+                }
+                else
+                {
+                    touchCount = 1;
+                }
+
+                print("Je touche : " + touchCount);
+                touchOnce = true;
+            }
+
+
+            if (createCopy)
+            {
+                copyTarget(gmCtrl.last_target.circle);
+                createCopy = false;
+            }
+
+
+            if (GameObject.Find("Copy") != null)
             {
                 if (Physics.Raycast(grCtrl.transform.position, Vector3.forward, out hitLayer, 10000, layerMask, QueryTriggerInteraction.Ignore))
                 {
-                    logGazePointCoord(hitLayer);
+                    pixelUV = grCtrl.getCurrentColliderPosition(hitLayer);
                 }
             }
-            else
+
+            timer += Time.deltaTime;
+            if (timer > 0.1f)
             {
-                if (gazePointsDistance.Count < 3)
+                hitpoints.Add(pixelUV);
+                if (hitpoints.Count >= 2)
                 {
-                    totalGazePointsDistance = getTotalGazePointsDistance(gazePointsDistance);
+                    if (hitpoints[hitpoints.Count - 2] != hitpoints[hitpoints.Count - 1])
+                    {
+                        hitDispersion(hitpoints[hitpoints.Count - 2], hitpoints[hitpoints.Count - 1]);
+                    }
+
                 }
+                timer = 0;
+            }
+
+            if (hasCirclePulsated)
+            {
+                gmCtrl.last_target.highlightWidth = 0;
+                hasCirclePulsated = false;
+            }
+
+            if (!gmCtrl.calib_end && gmCtrl.chooseCircleMode == 0)
+            {
+                gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_center_material[1], 1.5f, 0.2f);
+            }
+
+        }
+        else
+        {
+            touchCount = 0;
+
+            if (hitpoints != null)
+            {
+                hitpoints.Clear();
+            }
+
+            if (distances != null)
+            {
+                distances.Clear();
+            }
+
+            if (gmCtrl.last_target != null && !gmCtrl.last_target.was_looked && !gmCtrl.calib_end)
+            {
+                hasCirclePulsated = true;
+                if (gmCtrl.chooseCircleMode == 0)
+                {
+                    gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_material[1], 0.14f, 0.01f);
+                }
+            }
+
+            Destroy(copy);
+            createCopy = true;
+        }
+
+        if (touchCount > 0 && touchCount < 3)
+        {
+            if (Physics.Raycast(grCtrl.transform.position, Vector3.forward, out hitLayer, 10000, layerMask, QueryTriggerInteraction.Ignore))
+            {
+                logGazePointCoord(hitLayer);
+            }
+        }
+        else
+        {
+            if (gazePointsDistance.Count < 3)
+            {
+                totalGazePointsDistance = getTotalGazePointsDistance(gazePointsDistance);
             }
         }
     }
