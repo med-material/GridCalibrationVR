@@ -339,4 +339,12 @@ public class TargetCirle
         }
         
     }
+
+    internal int growthSpeed(Vector3 scale, Vector3 pos)
+    {
+        Vector3 diff_scale = circle.transform.localScale - scale;
+        Vector3 distance = Vector3.Distance(pos, circle.transform.localPosition);
+
+        return 0;
+    }
 }
