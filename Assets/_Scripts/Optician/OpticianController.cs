@@ -53,7 +53,7 @@ public class OpticianController : MonoBehaviour
     private LineRenderer lineRenderer;
     private LineRenderer lineRendererAcuity;
     private List<float> landolt_factor = new List<float>() { 2.0f, 1.5f, 1.33f, 1.25f, 1.20f, 1.1666667f, 1.1424f, 1.1261213f, 1.11f, 1.5f, 1.332f };
-
+    private int landolt_current_index = 0;
     void Start()
     {
         // GENERAL SETUP
@@ -392,7 +392,6 @@ public class OpticianController : MonoBehaviour
                         hasTargetMoved = false;
                         changePos = false;
                     }
-
                 }
             }
         }
@@ -400,12 +399,14 @@ public class OpticianController : MonoBehaviour
 
     private void ReduceCircleSize()
     {
-        almostCircle.transform.localScale *= 0.8f;
+        almostCircle.transform.localScale /= landolt_factor[landolt_current_index];
+        landolt_current_index++;
     }
 
     private void IncreaseCircleSize()
     {
-        almostCircle.transform.localScale /= 0.8f;
+        almostCircle.transform.localScale *= landolt_factor[landolt_current_index];
+        landolt_current_index--;
     }
 
     private void SetTargetPosition()
