@@ -9,7 +9,7 @@ using Valve.VR;
 public class OpticianController : MonoBehaviour
 {
 
-    public GameObject almostCircle;
+    public GameObject landoltC;
     public Text explainText;
     public GameObject FOVTarget;
     public GridController gridController;
@@ -154,7 +154,7 @@ public class OpticianController : MonoBehaviour
         if (calibrationIsOver)
         {
             DrawFOV(lineRendererAcuity, savedTargetposList, Color.red);
-            almostCircle.SetActive(false);
+            landoltC.SetActive(false);
             explainText.text = "Calibration is over";
         }
         else
@@ -277,8 +277,8 @@ public class OpticianController : MonoBehaviour
     {
         if (isFOVCalibEnded)
         {
-            almostCircle.transform.position += vector;
-            almostCircle.transform.localPosition = new Vector3(almostCircle.transform.localPosition.x, almostCircle.transform.localPosition.y, -3.0f);
+            landoltC.transform.position += vector;
+            landoltC.transform.localPosition = new Vector3(landoltC.transform.localPosition.x, landoltC.transform.localPosition.y, -3.0f);
         }
         else
         {
@@ -291,11 +291,11 @@ public class OpticianController : MonoBehaviour
     {
         if (savedTargetposList.Count - 1 == currentTargetIndex)
         {
-            savedTargetposList[currentTargetIndex] = almostCircle.transform.localPosition;
+            savedTargetposList[currentTargetIndex] = landoltC.transform.localPosition;
         }
         else
         {
-            savedTargetposList.Insert(currentTargetIndex, almostCircle.transform.localPosition);
+            savedTargetposList.Insert(currentTargetIndex, landoltC.transform.localPosition);
         }
     }
 
@@ -304,13 +304,13 @@ public class OpticianController : MonoBehaviour
         bool touchPadClick = touchPadActionClick.GetStateDown(SteamVR_Input_Sources.Any);
         Vector2 touchPadValue = touchPadAction.GetAxis(SteamVR_Input_Sources.Any);
 
-        if (!almostCircle.activeSelf)
+        if (!landoltC.activeSelf)
         {
             explainText.text = "Press the up or down arrow to increase or reduce size of the \n circle to the minimum size for wich you can still see "
             + "the open side of it. \n Press space bar to start";
             explainText.enabled = true;
             explainText.color = textColor;
-            almostCircle.SetActive(true);
+            landoltC.SetActive(true);
         }
 
         if (!isSizeOk)
@@ -341,71 +341,33 @@ public class OpticianController : MonoBehaviour
         }
         else // Size is well set by user
         {
-            offSetTimer += Time.deltaTime;
-            if (!isCircleSet)
-            {
-                offSetTimer = 0;
-                SetTargetPosition(); // Set the target position
-                isCircleSet = true;
-            }
-            else if (!hasTargetMoved)
-            {
-                keyCodeIndex = GetKeyCodeIndexPressed();
-                if (keyCodeIndex != -1) // move the target in the field of view of the user
-                {
-                    moveDirection = moveDirections[keyCodeIndex]; // set the direction corresponding to the user input
-                    if (offSetTimer > 0.1f) // avoid the circle to move just after spawning, getting the input from the previous circle
-                        MoveTarget();
-                }
-                if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any)) // confirm the target is visible
-                {
-                    SavePos();
-                    hasTargetMoved = true;
-                }
-            }
-            else
-            {
-                keyCodeIndex = GetKeyCodeIndexPressed();
-                if (rotatIndex == keyCodeIndex) // if the user pressed the good arrow
-                {
-                    SaveTargetPosition();
-                    hasTargetMoved = false;
-                    isCircleSet = false;
-                    changePos = true;
-                    if (currentTargetIndex + 1 == FOVEdgePoints.Count)
-                    {
-                        calibrationIsOver = true;
-                        //OnPostRender();
-                    }
-                    else
-                    {
-                        currentTargetIndex++;
-                    }
-                    return;
-                }
-                else if (rotatIndex != keyCodeIndex)
-                {
-                    if (keyCodeIndex != -1)
-                    {
-                        errors++;
-                        isCircleSet = false;
-                        hasTargetMoved = false;
-                        changePos = false;
-                    }
-                }
-            }
+            // TODO: Do all of the next comments
+            // 1. Set the position to center
+            // 2. Move the target slowly to have a smooth poursuit on the current axe
+            // until the FOV limit is reached (automatic/operator with arrow)
+            // 3. press space bar or trigger to stop the movement and change the Landolt C orientation
+            // 4. The patient or operator moves the target closer to the center until the patient can detect the opening direction
+            // 5. ask the patient to press the touchpad in the good direction (add visual help around the Landolt C simulating the touchpad)
+            // if the patient pressed direction is good,
+            //      if was the last axe, then proceed to result, draw the acuity field.
+            //      else set the current axe to the next one and start to step 1.
+            // else go to step 4.
+
+            landoltC.transform.localPosition = landoltC.transform.localPosition != savedFOVTargetpos ? savedFOVTargetpos : landoltC.transform.localPosition; // 1.
+
+            
         }
     }
 
     private void ReduceCircleSize()
     {
-        almostCircle.transform.localScale /= landolt_factor[landolt_current_index];
-        landolt_current_index = landolt_current_index + 1 > landolt_factor.Count + 1 ? landolt_current_index : landolt_current_index + 1;
+        landoltC.transform.localScale /= landolt_factor[landolt_current_index];
+        landolt_current_index = landolt_current_index >= landolt_factor.Count -1 ? landolt_current_index : landolt_current_index + 1;
     }
 
     private void IncreaseCircleSize()
     {
-        almostCircle.transform.localScale *= landolt_factor[landolt_current_index];
+        landoltC.transform.localScale *= landolt_factor[landolt_current_index];
         landolt_current_index = landolt_current_index - 1 > 0 ? landolt_current_index - 1 : landolt_current_index;
     }
 
@@ -438,14 +400,14 @@ public class OpticianController : MonoBehaviour
 
     private void SetPos()
     {
-        almostCircle.transform.position = FOVEdgePoints[currentTargetIndex];
-        Vector3 pt = almostCircle.transform.localPosition;
+        landoltC.transform.position = FOVEdgePoints[currentTargetIndex];
+        Vector3 pt = landoltC.transform.localPosition;
         if (pt.x == 0)
             pt.y = pt.y > 0 ? pt.y - 0.04f : pt.y + 0.04f;
         else if (pt.y == 0)
             pt.x = pt.x > 0 ? pt.x - 0.04f : pt.x + 0.04f;
         pt.z = -3.0f;
-        almostCircle.transform.localPosition = pt;
+        landoltC.transform.localPosition = pt;
     }
 
     private void CalculateAllPos()
@@ -513,7 +475,7 @@ public class OpticianController : MonoBehaviour
         //almostCircle.transform.localPosition = FOVEdgePoints[currentTargetIndex];
         Vector3 pt = FOVEdgePoints[currentTargetIndex];
         pt.z = -3.0f;
-        almostCircle.transform.localPosition = pt;
+        landoltC.transform.localPosition = pt;
     }
     private int GetKeyCodeIndexPressed()
     {
@@ -565,7 +527,7 @@ public class OpticianController : MonoBehaviour
     {
         rotatIndex = GetRandomIndex(l_rotation, rotatIndex);
         int rotat = l_rotation[rotatIndex];
-        almostCircle.transform.localRotation = Quaternion.Euler(0, 0, rotat);
+        landoltC.transform.localRotation = Quaternion.Euler(0, 0, rotat);
     }
 
     private int GetRandomIndex<T>(List<T> lst, int previous_index)
