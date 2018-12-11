@@ -77,7 +77,7 @@ public class GridController : MonoBehaviour
         return hit;
     }
 
-    public bool IsCollidingByName(GameObject collider_obj)
+    public bool IsCollidingWithObj(GameObject collider_obj)
     {
         foreach (RaycastHit h in hits)
         {
