@@ -400,13 +400,13 @@ public class OpticianController : MonoBehaviour
     private void ReduceCircleSize()
     {
         almostCircle.transform.localScale /= landolt_factor[landolt_current_index];
-        landolt_current_index++;
+        landolt_current_index = landolt_current_index + 1 > landolt_factor.Count + 1 ? landolt_current_index : landolt_current_index + 1;
     }
 
     private void IncreaseCircleSize()
     {
         almostCircle.transform.localScale *= landolt_factor[landolt_current_index];
-        landolt_current_index--;
+        landolt_current_index = landolt_current_index - 1 > 0 ? landolt_current_index - 1 : landolt_current_index;
     }
 
     private void SetTargetPosition()
