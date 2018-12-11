@@ -19,13 +19,11 @@ public class StartHandler : MonoBehaviour
     public Image startLoader;
     public GameObject countDownText;
     private float timer;
-    private float modeTimer;
     private float countDown = 3.0f;
 
     void Start()
     {
         ResetTimer();
-        ResetModeTimer();
     }
 
     void Update()
@@ -33,26 +31,25 @@ public class StartHandler : MonoBehaviour
         obj = gridController.GetCurrentCollider();
         if (obj.collider && timer > 0)
         {
-            if (ReferenceEquals(obj.collider.gameObject, startButton))
+            if (gridController.IsCollidingWithObj(startButton))
             {
-                startLoader.fillAmount =  3.0f - timer;
+                startLoader.fillAmount = 2.0f - timer;
                 timer -= Time.deltaTime;
             }
-            else if (ReferenceEquals(obj.collider.gameObject, approxButton))
+            else if (gridController.IsCollidingWithObj(approxButton))
             {
-                approxLoader.fillAmount = 3.0f - timer;
+                approxLoader.fillAmount = 2.0f - timer;
                 timer -= Time.deltaTime;
             }
-            else if (ReferenceEquals(obj.collider.gameObject, shrinkButton))
+            else if (gridController.IsCollidingWithObj(shrinkButton))
             {
-                shrinkLoader.fillAmount = 3.0f - timer;
+                shrinkLoader.fillAmount = 2.0f - timer;
                 timer -= Time.deltaTime;
             }
             else
             {
-                startLoader.fillAmount = 0.0f;
+                ResetFillAmount();
                 ResetTimer();
-                ResetModeTimer();
             }
         }
         if (timer < 0)
@@ -72,28 +69,30 @@ public class StartHandler : MonoBehaviour
         }
         if (timer < 0)
         {
-            if (ReferenceEquals(obj.collider.gameObject, approxButton))
+            ResetFillAmount();
+            if (gridController.IsCollidingWithObj(approxButton))
             {
                 gameController.choosenMode = "approx";
-                shrinkLoader.fillAmount = 0.0f;
-            } else if(ReferenceEquals(obj.collider.gameObject, startButton))
+            }
+            else if (gridController.IsCollidingWithObj(startButton))
             {
                 gameController.choosenMode = "normal";
-                shrinkLoader.fillAmount = 0.0f;
             }
-            else if (ReferenceEquals(obj.collider.gameObject, shrinkButton))
+            else if (gridController.IsCollidingWithObj(shrinkButton))
             {
                 gameController.choosenMode = "shrink";
-                approxLoader.fillAmount = 0.0f;
             }
         }
     }
     private void ResetTimer()
     {
-        timer = 3.0f;
+        timer = 2.0f;
     }
-    private void ResetModeTimer()
+
+    private void ResetFillAmount()
     {
-        modeTimer = 0.5f;
+        startLoader.fillAmount = 0.0f;
+        approxLoader.fillAmount = 0.0f;
+        shrinkLoader.fillAmount = 0.0f;
     }
 }

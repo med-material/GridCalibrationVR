@@ -14,8 +14,11 @@ public class GridController : MonoBehaviour
     private Vector2 gazePointRight;
     private Vector2 gazePointCenter;
     private RaycastHit hit;
+    private RaycastHit circleHit;
     private RaycastHit[] hits;
     public Material shaderMaterial;
+    LayerMask collisionCircleLayer;
+
     void Start()
     {
         PupilData.calculateMovingAverage = false;
@@ -32,6 +35,7 @@ public class GridController : MonoBehaviour
             PupilTools.SubscribeTo("gaze");
             eyeCamera.gameObject.AddComponent<FramePublishing>();
         }
+        collisionCircleLayer = (1 << LayerMask.NameToLayer("Circle"));
     }
 
     void Update()
@@ -55,13 +59,16 @@ public class GridController : MonoBehaviour
             hits = Physics.RaycastAll(ray);
             if (Physics.Raycast(ray, out hit))
             {
-                heading.SetPosition(1, hits[hits.Length-1].point);
-                positionText.text = sceneCamera.transform.InverseTransformDirection(hits[hits.Length-1].point).ToString();
+                heading.SetPosition(1, hits[hits.Length - 1].point);
+                positionText.text = sceneCamera.transform.InverseTransformDirection(hits[hits.Length - 1].point).ToString();
             }
             else
             {
                 heading.SetPosition(1, ray.origin + ray.direction * 50f);
-            }         
+            }
+
+            Physics.Raycast(ray, out circleHit, 10f, collisionCircleLayer);
+
         }
     }
 
@@ -70,7 +77,24 @@ public class GridController : MonoBehaviour
         return hit;
     }
 
-    public RaycastHit[] GetCurrentColliders(){
+    public bool IsCollidingWithObj(GameObject collider_obj)
+    {
+        foreach (RaycastHit h in hits)
+        {
+            if (ReferenceEquals(h.collider.gameObject, collider_obj))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public RaycastHit GetCircleCollider()
+    {
+        return circleHit;
+    }
+    public RaycastHit[] GetCurrentColliders()
+    {
         return hits;
     }
     public Vector2 getCurrentColliderPosition(RaycastHit collider)
