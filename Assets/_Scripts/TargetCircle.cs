@@ -44,6 +44,9 @@ public class TargetCirle
     private Color newOutlineColor;
     public float diff;
     public float dispersion = 0;
+    public float distance = 0;
+    private float timeToGrow = 0;
+    private float distToGrow = 0;
 
     public TargetCirle(float x_min, float x_max, float y_min, float y_max)
     {
@@ -267,7 +270,6 @@ public class TargetCirle
 
     internal bool movingCircleMode(Vector3 savedScale, Vector3 savedPosition)
     {
-
         if (!isPositionOk)
         {
             if (startMovingCircle)
@@ -276,17 +278,22 @@ public class TargetCirle
                 circle.transform.localPosition = savedPosition;
                 startMovingCircle = false;
                 isPositionOk = false;
+                distance = Vector3.Distance(circle.transform.localPosition, position_to_reach);
+                timeToGrow = distance / 1.2f;
             }
             else
             {
+
                 if (circle.transform.localPosition != position_to_reach)
                 {
                     float step = 1.2f * Time.deltaTime;
+                    //circle.transform.position = Vector3.Lerp(circle.transform.localPosition, position_to_reach, t);
                     circle.transform.localPosition = Vector3.MoveTowards(circle.transform.localPosition, position_to_reach, step);
                     isPositionOk = false;
                 }
                 else
                 {
+
                     startMovingCircle = true;
                     isPositionOk = true;
                 }
@@ -309,13 +316,13 @@ public class TargetCirle
                     circle.transform.localScale = savedScale;
                     startReGrowthCircle = false;
                     isSizeOk = false;
+                    distToGrow = Vector3.Distance(circle.transform.localScale, scale_to_reach);
                 }
                 else
                 {
-                    if (circle.transform.localScale.x * 1.02f < scale_to_reach.x)
+                    float step = whatIsTheStep(distToGrow, timeToGrow) * Time.deltaTime;
+                    if (circle.transform.localScale.x * step < scale_to_reach.x)
                     {
-                        //circle.transform.localScale *= 1.02f;
-                        float step = 1.2f * Time.deltaTime;
                         circle.transform.localScale = Vector3.MoveTowards(circle.transform.localScale, scale_to_reach, step);
                         isSizeOk = false;
                     }
@@ -342,33 +349,8 @@ public class TargetCirle
         
     }
 
-    internal int growthSpeed(Vector3 scale, Vector3 pos)
+    internal float whatIsTheStep(float distance, float time)
     {
-        float diff_scale = Vector3.Distance(circle.transform.localScale,scale);
-        float diff_pos = Vector3.Distance(pos, circle.transform.localPosition);
-
-        return 0;
+        return distance / time;
     }
-
-    /*internal Vector3 growth(Vector3 current, Vector3 target, float maxScaleDelta)
-    {
-        Vector3 a = target - current;
-        float magnitude = a.magnitude;
-        if(magnitude <= maxScaleDelta || magnitude == 0f)
-        {
-            return target;
-        }
-        return 
-    }*/
-
-    /*  public static Vector3 MoveTowards(Vector3 current, Vector3 target, float maxDistanceDelta)
-  {
-      Vector3 a = target - current;
-      float magnitude = a.magnitude;
-      if (magnitude <= maxDistanceDelta || magnitude == 0f)
-      {
-          return target;
-      }
-      return current + a / magnitude * maxDistanceDelta;
-  }*/
 }
