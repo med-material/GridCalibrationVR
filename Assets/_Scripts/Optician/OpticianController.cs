@@ -19,6 +19,7 @@ public class OpticianController : MonoBehaviour
     public bool handlerMode = false;
     public SteamVR_Action_Vector2 touchPadAction;
     public SteamVR_Action_Boolean touchPadActionClick;
+    public GameObject radialMenu;
 
     private Renderer FOVTargetRenderer;
     private bool isFOVCalibEnded;
@@ -402,19 +403,20 @@ public class OpticianController : MonoBehaviour
                     {
                         moveDirection = moveDirections[keyCodeIndex];
                         MoveTargetOnAxis();
-                        // TODO: Visual trigger for operator to see if the landolt C has reached max distance.
                     }
                     if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any))
                     {
                         calibStep++;
                         SetRandomLandoltOrientation();
+                        // TODO: Add the radial Menu around the Landolt C
+                        SpawnRadialMenu();
                     }
 
                     break;
                 case 3:
                     // Visual help for patient touchpad touch WIP
                     // get the good direction click corresponding to Landolt C opened side
-
+                    // Function to listen to click, get the index
                     keyCodeIndex = GetDirectionIndexPressed();
                     if (keyCodeIndex == rotatIndex)
                     {
@@ -475,6 +477,12 @@ public class OpticianController : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    private void SpawnRadialMenu() {
+        // Activate the Radial Menu, center it on the landolt C
+        radialMenu.SetActive(true);
+        radialMenu.transform.localPosition = landoltC.transform.localPosition;
     }
 
     private void ReduceCircleSize()

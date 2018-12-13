@@ -58,6 +58,7 @@ public class RMF_RadialMenu : MonoBehaviour
     private int previousActiveIndex = 0; //Used to determine which buttons to unhighlight in lazy selection.
 
     private PointerEventData pointer;
+    private bool hasMoved;
 
     void Awake()
     {
@@ -106,19 +107,20 @@ public class RMF_RadialMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         //If your gamepad uses different horizontal and vertical joystick inputs, change them here!
         //==============================================================================================
         //bool joystickMoved = Input.GetAxis("Horizontal") != 0.0 || Input.GetAxis("Vertical") != 0.0;
         bool joystickMoved = touchPadAction.GetAxis(SteamVR_Input_Sources.Any).x != 0.0 || touchPadAction.GetAxis(SteamVR_Input_Sources.Any).y != 0.0;
         //==============================================================================================
-
+        hasMoved = joystickMoved && !hasMoved ? true : false;
         float rawAngle;
+        float temp_x = touchPadAction.GetAxis(SteamVR_Input_Sources.Any).x;
+        float temp_y = touchPadAction.GetAxis(SteamVR_Input_Sources.Any).y;
 
         if (!useGamepad)
             rawAngle = Mathf.Atan2(Input.mousePosition.y - rt.position.y, Input.mousePosition.x - rt.position.x) * Mathf.Rad2Deg;
         else
-            rawAngle = Mathf.Atan2(touchPadAction.GetAxis(SteamVR_Input_Sources.Any).x, touchPadAction.GetAxis(SteamVR_Input_Sources.Any).y) * Mathf.Rad2Deg;
+            rawAngle = Mathf.Atan2(touchPadAction.GetAxis(SteamVR_Input_Sources.Any).y, touchPadAction.GetAxis(SteamVR_Input_Sources.Any).x) * Mathf.Rad2Deg;
         //rawAngle = Mathf.Atan2(Input.GetAxis("Vertical"), Input.GetAxis("Horizontal")) * Mathf.Rad2Deg;
 
         //If no gamepad, update the angle always. Otherwise, only update it if we've moved the joystick.
@@ -136,7 +138,8 @@ public class RMF_RadialMenu : MonoBehaviour
             if (elements[index] != null)
             {
                 //Select it.
-                selectButton(index);
+                if(hasMoved)
+                    selectButton(index);
 
                 //If we click or press a "submit" button (Button on joystick, enter, or spacebar), then we'll execut the OnClick() function for the button.
                 if (Input.GetMouseButtonDown(0) || touchPadActionClick.GetStateDown(SteamVR_Input_Sources.Any))
@@ -144,13 +147,12 @@ public class RMF_RadialMenu : MonoBehaviour
                     ExecuteEvents.Execute(elements[index].button.gameObject, pointer, ExecuteEvents.submitHandler);
                 }
             }
-
         }
         //Updates the selection follower if we're using one.
         if (useSelectionFollower && selectionFollowerContainer != null)
         {
             if (!useGamepad || joystickMoved)
-                selectionFollowerContainer.rotation = Quaternion.Euler(0, 0, rawAngle + 270);
+                selectionFollowerContainer.eulerAngles = new Vector3(0, 0, rawAngle + 270);
         }
     }
 

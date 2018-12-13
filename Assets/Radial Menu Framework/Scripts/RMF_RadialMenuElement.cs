@@ -50,10 +50,11 @@ public class RMF_RadialMenuElement : MonoBehaviour {
 
     }
 
+
     void Start () {
 
-        rt.rotation = Quaternion.Euler(0, 0, -angleOffset); //Apply rotation determined by the parent radial menu.
-
+        //rt.eulerAngles = new Vector3(0, 0, -angleOffset); //Apply rotation determined by the parent radial menu.
+        
         //If we're using lazy selection, we don't want our normal mouse-over effects interfering, so we turn raycasts off.
         if (parentRM.useLazySelection)
             cg.blocksRaycasts = false;
@@ -83,8 +84,6 @@ public class RMF_RadialMenuElement : MonoBehaviour {
             t.triggers.Add(enter);
             t.triggers.Add(exit);
 
-
-
         }
 
     }
@@ -105,7 +104,6 @@ public class RMF_RadialMenuElement : MonoBehaviour {
         ExecuteEvents.Execute(button.gameObject, p, ExecuteEvents.selectHandler);
         active = true;
         setParentMenuLable(label);
-
     }
 
     //Sets the label of the parent menu. Is set to public so you can call this elsewhere if you need to show a special label for something.
@@ -113,8 +111,6 @@ public class RMF_RadialMenuElement : MonoBehaviour {
 
         if (parentRM.textLabel != null)
             parentRM.textLabel.text = l;
-
-
     }
 
 
@@ -126,16 +122,11 @@ public class RMF_RadialMenuElement : MonoBehaviour {
 
         if (!parentRM.useLazySelection)
             setParentMenuLable(" ");
-
-
     }
 
     //Just a quick little test you can run to ensure things are working properly.
     public void clickMeTest() {
-
         Debug.Log(assignedIndex);
-
-
     }
 
 
