@@ -19,6 +19,7 @@ public class OpticianController : MonoBehaviour
     public bool handlerMode = false;
     public SteamVR_Action_Vector2 touchPadAction;
     public SteamVR_Action_Boolean touchPadActionClick;
+    public GameObject radialMenu;
 
     private Renderer FOVTargetRenderer;
     private bool isFOVCalibEnded;
@@ -377,6 +378,7 @@ public class OpticianController : MonoBehaviour
         else // Size is well set by user
         {
             // TODO: Do all of the next comments
+            // TODO: Add text explication for operator and patient for instruction
             // 1. Set the position to center
             // 2. Move the target slowly to have a smooth poursuit on the current axe
             // until the FOV limit is reached (patient with touchpad/operator with arrow)
@@ -401,23 +403,34 @@ public class OpticianController : MonoBehaviour
                     {
                         moveDirection = moveDirections[keyCodeIndex];
                         MoveTargetOnAxis();
-                        // TODO: Visual trigger for operator to see if the landolt C has reached max distance.
                     }
-                    if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any)) {
+                    if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any))
+                    {
                         calibStep++;
                         SetRandomLandoltOrientation();
+                        // TODO: Add the radial Menu around the Landolt C
+                        SpawnRadialMenu();
                     }
-                        
+
                     break;
                 case 3:
-                    // Visual help for patient touchpad touch
+                    // Visual help for patient touchpad touch WIP
                     // get the good direction click corresponding to Landolt C opened side
-                    if(true) {
-                        
-                        calibStep++;
+                    // Function to listen to click, get the index
+                    keyCodeIndex = GetDirectionIndexPressed();
+                    if (keyCodeIndex == rotatIndex)
+                    {
+                        calibStep++; // the patient pressed the good direction, move to next tt
                     }
                     break;
                 case 4:
+                    if (currentTargetIndex >= FOVEdgePoints.Count - 1)
+                        calibrationIsOver = true;
+                    else
+                    {
+                        currentTargetIndex++;
+                        calibStep = 0;
+                    }
                     break;
             }
 
@@ -466,6 +479,12 @@ public class OpticianController : MonoBehaviour
         }
     }
 
+    private void SpawnRadialMenu() {
+        // Activate the Radial Menu, center it on the landolt C
+        radialMenu.SetActive(true);
+        radialMenu.transform.localPosition = landoltC.transform.localPosition;
+    }
+
     private void ReduceCircleSize()
     {
         landoltC.transform.localScale /= landolt_factor[landolt_current_index];
@@ -487,7 +506,6 @@ public class OpticianController : MonoBehaviour
                 CalculateAllPos();
 
             if (changePos)
-
                 SetRandomLandoltOrientation();
 
             SetPos();
@@ -573,8 +591,6 @@ public class OpticianController : MonoBehaviour
         FOVEdgePoints.Add(pt_top);
         FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top left point 
         FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point
-
-
     }
 
     private void SetPosFromPointing()
