@@ -320,7 +320,7 @@ public class TargetCirle
                 }
                 else
                 {
-                    float step = whatIsTheStep(distToGrow, timeToGrow) * Time.deltaTime;
+                    float step = (distToGrow/timeToGrow) * Time.deltaTime;
                     if (circle.transform.localScale.x * step < scale_to_reach.x)
                     {
                         circle.transform.localScale = Vector3.MoveTowards(circle.transform.localScale, scale_to_reach, step);
@@ -347,10 +347,5 @@ public class TargetCirle
             return false;
         }
         
-    }
-
-    internal float whatIsTheStep(float distance, float time)
-    {
-        return distance / time;
     }
 }
