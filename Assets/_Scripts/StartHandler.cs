@@ -9,6 +9,7 @@ public class StartHandler : MonoBehaviour
 
     public GridController gridController;
     public GameController gameController;
+    private ResetHandler rst;
     private RaycastHit obj;
     public GameObject Menu;
     public GameObject startButton;
@@ -18,16 +19,23 @@ public class StartHandler : MonoBehaviour
     public Image approxLoader;
     public Image startLoader;
     public GameObject countDownText;
-    private float timer;
+    public float timer;
+    public bool isRestarted;
     private float countDown = 3.0f;
 
     void Start()
     {
+        rst = GameObject.Find("SceneController").GetComponent<ResetHandler>();
         ResetTimer();
     }
 
     void Update()
     {
+           if (rst.restart)
+            {
+                timer = -1;
+            }   
+
         obj = gridController.GetCurrentCollider();
         if (obj.collider && timer > 0)
         {
@@ -65,9 +73,14 @@ public class StartHandler : MonoBehaviour
                 ResetTimer();
                 Menu.SetActive(false);
                 countDownText.SetActive(false);
+                if (rst.restart)
+                {
+                    gameController.choosenMode = rst.mode;
+                    rst.restart = false;
+                }               
             }
         }
-        if (timer < 0)
+        if (timer < 0 && !rst.restart)
         {
             ResetFillAmount();
             if (gridController.IsCollidingWithObj(approxButton))
@@ -95,4 +108,5 @@ public class StartHandler : MonoBehaviour
         approxLoader.fillAmount = 0.0f;
         shrinkLoader.fillAmount = 0.0f;
     }
+
 }
