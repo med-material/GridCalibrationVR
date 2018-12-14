@@ -15,6 +15,7 @@ public class OpticianController : MonoBehaviour
     public GridController gridController;
     public List<Vector3> FOVPointsLocal;
     public Transform OperatorPlane;
+    public Transform FovContainer;
     public PointingSystem pointingSystem;
     public bool handlerMode = false;
     public SteamVR_Action_Vector2 touchPadAction;
@@ -56,12 +57,13 @@ public class OpticianController : MonoBehaviour
     private List<float> landolt_factor = new List<float>() { 2.0f, 1.5f, 1.33f, 1.25f, 1.20f, 1.1666667f, 1.1424f, 1.1261213f, 1.11f, 1.5f, 1.332f };
     private int landolt_current_index = 0;
     private List<string> acceptedDirection = new List<string>();
-    private int calibStep;
+    private int calibStep = 1;
+    private List<Vector3> FOVpt;
 
     void Start()
     {
         // GENERAL SETUP
-        lineRenderer = GetComponent<LineRenderer>();
+        lineRenderer = FovContainer.GetComponent<LineRenderer>();
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
         lineRenderer.widthMultiplier = 0.02f;
         lineRenderer.gameObject.layer = 11; // 11 = OperatorUI
@@ -83,6 +85,7 @@ public class OpticianController : MonoBehaviour
         moveDirections = new List<string> { "right", "down", "left", "up", "right-up", "right-down", "left-up", "left-down" };
         FOVPoints = new List<Vector3>();
         FOVPointsLocal = new List<Vector3>();
+        FOVpt = new List<Vector3>();
         FOVTargetRenderer = FOVTarget.GetComponent<Renderer>();
 
         FOVTargetRenderer.material.color = Color.red;
@@ -267,29 +270,44 @@ public class OpticianController : MonoBehaviour
 
     private void MoveTargetOnAxis()
     {
+        Vector3 previous_pos = landoltC.transform.localPosition;
         //"right", "down", "left", "up", "right-up", "right-down", "left-up", "left-down"
         //   0        1      2       3       4            5            6          7
         switch (currentTargetIndex)
         {
-            case 1: // bottom right axe
-            case 5: // top left axe
-                if (keyCodeIndex == 1 || keyCodeIndex == 0 || keyCodeIndex == 5) // bottom, right, bottom-right
-                    keyCodeIndex = 5;
-                else if (keyCodeIndex == 3 || keyCodeIndex == 2 || keyCodeIndex == 6) // top, left, top left
-                    keyCodeIndex = 6;
+            case 1:
+            case 0:
+            case 7:
+                if (keyCodeIndex == 0) // right
+                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], 0.002f);
+                else if (keyCodeIndex == 2) // left
+                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], -0.002f);
                 break;
-            case 3: // bottom left axe
-            case 7: // top right axe
-                if (keyCodeIndex == 1 || keyCodeIndex == 2 || keyCodeIndex == 7) // bottom, left, bottom-left
-                    keyCodeIndex = 7;
-                else if (keyCodeIndex == 3 || keyCodeIndex == 0 || keyCodeIndex == 4) // top, right, top right
-                    keyCodeIndex = 4;
+            case 3:
+            case 4:
+            case 5:
+                if (keyCodeIndex == 2) // left
+                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], 0.002f);
+                else if (keyCodeIndex == 0) // right
+                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], -0.002f);
                 break;
-            default:
+            case 2:
+                if (keyCodeIndex == 1) // bottom
+                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], 0.002f);
+                else if (keyCodeIndex == 3) // top
+                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], -0.002f);
+                break;
+            case 6:
+                if (keyCodeIndex == 3) // top
+                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], 0.002f);
+                else if (keyCodeIndex == 1) // bottom
+                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], -0.002f);
                 break;
         }
-        moveDirection = moveDirections[keyCodeIndex];
-        MoveTarget();
+        float temp = Vector3.Distance(landoltC.transform.localPosition,savedFOVTargetpos);
+        float temp1 = Vector3.Distance(FOVpt[currentTargetIndex], savedFOVTargetpos);
+        if ( temp >= temp1)
+            landoltC.transform.localPosition = previous_pos;
     }
 
     private IEnumerator FadeText()
@@ -309,12 +327,16 @@ public class OpticianController : MonoBehaviour
         if (isFOVCalibEnded)
         {
             Vector3 previous_pos = landoltC.transform.position;
-            landoltC.transform.position += vector;
-            if (landoltC.transform.localPosition.x >= FOVEdgePoints[currentTargetIndex].x && landoltC.transform.localPosition.y >= FOVEdgePoints[currentTargetIndex].y)
+            //landoltC.transform.position += vector;
+            float temp = Vector3.Distance(savedFOVTargetpos, landoltC.transform.localPosition);
+            float temp1 = Vector3.Distance(savedFOVTargetpos, FOVEdgePoints[currentTargetIndex]);
+            Vector3 fovPt = FOVEdgePoints[currentTargetIndex];
+            if (Vector3.Distance(savedFOVTargetpos, landoltC.transform.localPosition) >= Vector3.Distance(savedFOVTargetpos, FOVEdgePoints[currentTargetIndex]))
                 // if the new position is further than the limit FOV, reset the position (block to FOV limit)
                 landoltC.transform.position = previous_pos;
             else
-                landoltC.transform.localPosition = new Vector3(landoltC.transform.localPosition.x, landoltC.transform.localPosition.y, -3.0f);
+                landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, new Vector3(fovPt.x, fovPt.y, -3.0f), 0.01f);
+            //landoltC.transform.localPosition = new Vector3(landoltC.transform.localPosition.x, landoltC.transform.localPosition.y, -3.0f);
         }
         else
         {
@@ -372,6 +394,8 @@ public class OpticianController : MonoBehaviour
                 {
                     isSizeOk = true;
                     explainText.text = "";
+                    if (FOVEdgePoints.Count == 0)
+                        CalculateAllPosFromPointing();
                 }
             }
         }
@@ -399,7 +423,7 @@ public class OpticianController : MonoBehaviour
                     // test if the direction moves the target closer or further from the center
                     keyCodeIndex = GetDirectionIndexPressed();
                     CalculateAcceptedMovingDirection(); // accepted two directions for current axe
-                    if (acceptedDirection.Contains(moveDirections[keyCodeIndex]))
+                    if (keyCodeIndex != -1 && acceptedDirection.Contains(moveDirections[keyCodeIndex]))
                     {
                         moveDirection = moveDirections[keyCodeIndex];
                         MoveTargetOnAxis();
@@ -408,8 +432,7 @@ public class OpticianController : MonoBehaviour
                     {
                         calibStep++;
                         SetRandomLandoltOrientation();
-                        // TODO: Add the radial Menu around the Landolt C
-                        SpawnRadialMenu();
+                        ToggleRadialMenu(); //Add the radial Menu around the Landolt C
                     }
 
                     break;
@@ -429,13 +452,11 @@ public class OpticianController : MonoBehaviour
                     else
                     {
                         currentTargetIndex++;
-                        calibStep = 0;
+                        calibStep = 1;
+                        ToggleRadialMenu(); //remove the radial Menu around the Landolt C
                     }
                     break;
             }
-
-
-
         }
     }
 
@@ -479,9 +500,10 @@ public class OpticianController : MonoBehaviour
         }
     }
 
-    private void SpawnRadialMenu() {
+    private void ToggleRadialMenu()
+    {
         // Activate the Radial Menu, center it on the landolt C
-        radialMenu.SetActive(true);
+        radialMenu.SetActive(!radialMenu.activeSelf);
         radialMenu.transform.localPosition = landoltC.transform.localPosition;
     }
 
@@ -591,6 +613,15 @@ public class OpticianController : MonoBehaviour
         FOVEdgePoints.Add(pt_top);
         FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top left point 
         FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point
+
+        int i = 0;
+        foreach (var item in FOVEdgePoints)
+        {
+            Vector3 pt = FOVEdgePoints[i];
+            pt.z = -3.0f;
+            FOVpt.Add(pt);
+            i++;
+        }
     }
 
     private void SetPosFromPointing()
@@ -598,6 +629,7 @@ public class OpticianController : MonoBehaviour
         //almostCircle.transform.localPosition = FOVEdgePoints[currentTargetIndex];
         Vector3 pt = FOVEdgePoints[currentTargetIndex];
         pt.z = -3.0f;
+        FOVpt.Add(pt);
         landoltC.transform.localPosition = pt;
     }
     private int GetDirectionIndexPressed()
@@ -633,7 +665,6 @@ public class OpticianController : MonoBehaviour
             {
                 return keyCodes.IndexOf(k);
             }
-            //FIXME: while the trackpad is still pressed, continue to move.
             if (touchPadClick && touchPadValue.x > 0.5)
                 return 0;
             if (touchPadClick && touchPadValue.y < -0.5)
