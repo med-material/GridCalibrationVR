@@ -40,7 +40,7 @@ public class TargetCirle
     private bool isSizeOk = false;
     private bool isPositionOk = false;
     private bool isCirleGoodSize = false;
-    public float SPEED_OF_CIRCLE = 1.2f;
+    public float SPEED_OF_CIRCLE = 0.4f;
 
     private Color newOutlineColor;
     public float diff;
@@ -280,7 +280,7 @@ public class TargetCirle
                 startMovingCircle = false;
                 isPositionOk = false;
                 distance = Vector3.Distance(circle.transform.localPosition, position_to_reach);
-                timeToGrow = distance / 1.2f;
+                timeToGrow = distance / SPEED_OF_CIRCLE;
             }
             else
             {
