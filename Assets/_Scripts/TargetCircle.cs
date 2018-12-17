@@ -8,7 +8,7 @@ public class TargetCirle
 {
     private Vector3 previous_scale;
     private float speed = 1.2f;
-    private Vector3 scale_to_reach = new Vector3(0.25f, 0.01f, 0.3f);
+    public Vector3 scale_to_reach = new Vector3(0.25f, 0.01f, 0.3f);
     private Vector3 position_to_reach;
     public List<Vector3> previous_scales = new List<Vector3>();
     private List<float> scales_factor = new List<float>();
@@ -29,7 +29,7 @@ public class TargetCirle
     public bool was_looked;
     private List<bool> l_looked = new List<bool>();
     public bool calibration_max = false;
-    private int calib_failed;
+    public int calib_failed;
     public bool circle_created;
     private bool missed_four_times_before;
 
@@ -40,6 +40,7 @@ public class TargetCirle
     private bool isSizeOk = false;
     private bool isPositionOk = false;
     private bool isCirleGoodSize = false;
+    public float SPEED_OF_CIRCLE = 1.2f;
 
     private Color newOutlineColor;
     public float diff;
@@ -286,7 +287,7 @@ public class TargetCirle
 
                 if (circle.transform.localPosition != position_to_reach)
                 {
-                    float step = 1.2f * Time.deltaTime;
+                    float step = SPEED_OF_CIRCLE * Time.deltaTime;
                     //circle.transform.position = Vector3.Lerp(circle.transform.localPosition, position_to_reach, t);
                     circle.transform.localPosition = Vector3.MoveTowards(circle.transform.localPosition, position_to_reach, step);
                     isPositionOk = false;

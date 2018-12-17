@@ -247,6 +247,10 @@ public class GameController : MonoBehaviour
                 wait = false;
                 if (last_target != null)
                 {
+                    if(last_target.circle.transform.localScale == last_target.scale_to_reach)
+                    {
+                        last_target.calib_failed++;
+                    }
                     if (chooseCircleMode == 2)
                     {
                         savedScale = last_target.circle.transform.localScale;
