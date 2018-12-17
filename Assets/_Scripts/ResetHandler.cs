@@ -32,7 +32,8 @@ public class ResetHandler : MonoBehaviour {
 
             if (gmctrl.is_started)
             {
-                SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Single);
+                SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Additive);
+                SceneManager.UnloadSceneAsync(1);
             }
 
         } else if (Input.GetKeyDown("r")) //Retry the selected mode
@@ -44,8 +45,8 @@ public class ResetHandler : MonoBehaviour {
             if (gmctrl.is_started)
             {
                 mode = gmctrl.choosenMode;
-                SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Single);
-                restart = true;
+                SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Additive);
+                SceneManager.UnloadSceneAsync(1);                restart = true;
             }
         }
 
