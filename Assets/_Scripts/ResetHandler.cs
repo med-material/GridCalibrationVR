@@ -33,9 +33,11 @@ public class ResetHandler : MonoBehaviour {
 
             if (gmctrl.is_started)
             {
-                sceneToDestroy = SceneManager.GetActiveScene();
+                //sceneToDestroy = SceneManager.GetActiveScene();
                 SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Additive);
-                SceneManager.UnloadSceneAsync(sceneToDestroy);
+                SceneManager.UnloadSceneAsync(1);
+                SceneManager.UnloadSceneAsync(2);
+
             }
 
         } else if (Input.GetKeyDown("r")) //Retry the selected mode
@@ -47,9 +49,10 @@ public class ResetHandler : MonoBehaviour {
             if (gmctrl.is_started)
             {
                 mode = gmctrl.choosenMode;
-                sceneToDestroy = SceneManager.GetActiveScene();
+                //sceneToDestroy = SceneManager.GetActiveScene();
                 SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Additive);
-                SceneManager.UnloadSceneAsync(sceneToDestroy);
+                SceneManager.UnloadSceneAsync(1);
+                SceneManager.UnloadSceneAsync(2);
                 restart = true;
             }
         }

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18072857, g: 0.22174108, b: 0.2810852, a: 1}
+  m_IndirectSpecularColor: {r: 0.18072876, g: 0.22174138, b: 0.2810855, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -617,6 +617,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
+  - {fileID: 2100000, guid: 1427fc7085a7a7e4a8b43696124d558b, type: 2}
   - {fileID: 2100000, guid: 1427fc7085a7a7e4a8b43696124d558b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -1710,6 +1711,7 @@ MeshRenderer:
   m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 2100000, guid: 1427fc7085a7a7e4a8b43696124d558b, type: 2}
+  - {fileID: 2100000, guid: 1427fc7085a7a7e4a8b43696124d558b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2157,6 +2159,7 @@ MonoBehaviour:
   choosenMode: start
   test_name: 
   calib_end: 0
+  SPEED_OF_CIRCLE: 0.4
   chooseCircleMode: 0
   canDetectCircle: 0
 --- !u!114 &1803760987
@@ -2540,6 +2543,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
+  - {fileID: 2100000, guid: 1427fc7085a7a7e4a8b43696124d558b, type: 2}
   - {fileID: 2100000, guid: 1427fc7085a7a7e4a8b43696124d558b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0

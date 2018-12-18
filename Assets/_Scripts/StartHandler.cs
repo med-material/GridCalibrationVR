@@ -46,7 +46,7 @@ public class StartHandler : MonoBehaviour
 
             if(currentSelection != null)
             {
-                currentSelection.GetComponent<Renderer>().materials[1] = null;
+                currentSelection.GetComponent<MeshRenderer>().materials[1] = null;
             }
             currentSelection = normal;
             makeItShine(currentSelection);
@@ -56,7 +56,7 @@ public class StartHandler : MonoBehaviour
         {
             if (currentSelection != null)
             {
-                currentSelection.GetComponent<Renderer>().materials[1] = null;
+                currentSelection.GetComponent<MeshRenderer>().materials[1] = null;
             }
             currentSelection = declining;
             makeItShine(currentSelection);
@@ -66,14 +66,14 @@ public class StartHandler : MonoBehaviour
         {
             if (currentSelection != null)
             {
-                currentSelection.GetComponent<Renderer>().materials[1] = null;
+                currentSelection.GetComponent<MeshRenderer>().materials[1] = null;
             }
             currentSelection = moving;
             makeItShine(currentSelection);
             gameController.choosenMode = "approx";
         }
 
-        if (Input.GetKeyDown("return"))
+        if (Input.GetKeyDown("return") && currentSelection != null)
         {
             startCountdown = true;
         }
@@ -155,10 +155,10 @@ public class StartHandler : MonoBehaviour
 
     private void makeItShine(GameObject current)
     {
-        Material[] listMat = new Material[2];
-        listMat[0] = current.GetComponent<Renderer>().material;
-        listMat[1] = (Material)Resources.Load("Shiny");
-        currentSelection.GetComponent<Renderer>().materials = listMat;
+        /*/Material[] listMat = new Material[2];
+        listMat[0] = current.GetComponent<Renderer>().materials[0];
+        listMat[1] = (Material)Resources.Load("Shiny");*/
+        currentSelection.GetComponent<MeshRenderer>().materials[1] = (Material)Resources.Load("Shiny");
     }
 
 }
