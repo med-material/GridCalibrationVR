@@ -40,7 +40,7 @@ public class TargetCirle
     private bool isSizeOk = false;
     private bool isPositionOk = false;
     private bool isCirleGoodSize = false;
-    public float SPEED_OF_CIRCLE = 0.4f;
+    public float SPEED_OF_CIRCLE;
 
     private Color newOutlineColor;
     public float diff;

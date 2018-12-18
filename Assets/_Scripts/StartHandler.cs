@@ -119,6 +119,7 @@ public class StartHandler : MonoBehaviour
                 if (rst.restart)
                 {
                     gameController.choosenMode = rst.mode;
+                    startCountdown = false;
                     rst.restart = false;
                 }               
             }

@@ -20,6 +20,8 @@ public class GameController : MonoBehaviour
     public string choosenMode = "";
     public string test_name;
     public bool calib_end = false;
+    [Range(0.4f, 2f)]
+    public float SPEED_OF_CIRCLE = 0.4f;
 
     # endregion
 
@@ -266,6 +268,7 @@ public class GameController : MonoBehaviour
                         if (savedScale != Vector3.zero)
                         {
                             trgt.CreateTarget(wall, true, chooseCircleMode, false, savedScale);
+                            trgt.SPEED_OF_CIRCLE = SPEED_OF_CIRCLE;
                         }
                         else
                         {
