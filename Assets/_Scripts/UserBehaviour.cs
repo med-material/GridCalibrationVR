@@ -109,7 +109,7 @@ public class UserBehaviour : MonoBehaviour{
 
             if (!gmCtrl.calib_end && gmCtrl.chooseCircleMode == 0)
             {
-                gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_center_material[1], 1.5f, 0.2f);
+                gmCtrl.last_target.outlinePulse(gmCtrl.last_target.target_center_material[1], 1f, 0.1f);
             }
 
         }

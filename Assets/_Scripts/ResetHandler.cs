@@ -8,7 +8,10 @@ public class ResetHandler : MonoBehaviour {
 
     public string mode = "";
     public bool restart = false;
+
+    //public Camera camera;
     private GameController gmctrl;
+    private Scene sceneToDestroy;
 
     void Awake()
     {
@@ -32,11 +35,12 @@ public class ResetHandler : MonoBehaviour {
 
             if (gmctrl.is_started)
             {
+                //camera = gmctrl.dedicatedCapture;
                 SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Additive);
-                SceneManager.UnloadSceneAsync(1);
             }
 
-        } else if (Input.GetKeyDown("r")) //Retry the selected mode
+        }
+        else if (Input.GetKeyDown("r")) //Retry the selected mode
         {
             if (gmctrl == null)
             {
@@ -46,7 +50,7 @@ public class ResetHandler : MonoBehaviour {
             {
                 mode = gmctrl.choosenMode;
                 SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Additive);
-                SceneManager.UnloadSceneAsync(1);                restart = true;
+                restart = true;
             }
         }
 
