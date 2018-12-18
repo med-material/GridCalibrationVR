@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class StartHandler : MonoBehaviour
 {
@@ -28,6 +29,12 @@ public class StartHandler : MonoBehaviour
 
     void Start()
     {
+
+        if(SceneManager.sceneCount > 1)
+        {
+            SceneManager.UnloadSceneAsync("GridCalibrationTest");
+        }
+
         rst = GameObject.Find("SceneController").GetComponent<ResetHandler>();
         normal = GameObject.Find("Start button"); //1
         declining = GameObject.Find("Shrink button"); //2

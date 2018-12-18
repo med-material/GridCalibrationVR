@@ -33,15 +33,11 @@ public class ResetHandler : MonoBehaviour {
 
             if (gmctrl.is_started)
             {
-                //sceneToDestroy = SceneManager.GetActiveScene();
                 SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Additive);
-                SceneManager.UnloadSceneAsync(1);
-                SceneManager.UnloadSceneAsync(1);
-                //SceneManager.UnloadSceneAsync(2);    //ONLY WHEN TESTING WITH PUPIL LAB
-
             }
 
-        } else if (Input.GetKeyDown("r")) //Retry the selected mode
+        }
+        else if (Input.GetKeyDown("r")) //Retry the selected mode
         {
             if (gmctrl == null)
             {
@@ -50,11 +46,7 @@ public class ResetHandler : MonoBehaviour {
             if (gmctrl.is_started)
             {
                 mode = gmctrl.choosenMode;
-                //sceneToDestroy = SceneManager.GetActiveScene();
                 SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Additive);
-                SceneManager.UnloadSceneAsync(1);
-                SceneManager.UnloadSceneAsync(1);
-                //SceneManager.UnloadSceneAsync(2); //ONLY WHEN TESTING WITH PUPIL LAB
                 restart = true;
             }
         }
