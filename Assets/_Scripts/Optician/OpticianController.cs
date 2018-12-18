@@ -132,7 +132,6 @@ public class OpticianController : MonoBehaviour
                         pointingSystem.SetupPointingSystem();
                     }
                 }
-
             }
         }
     }
@@ -183,15 +182,14 @@ public class OpticianController : MonoBehaviour
                 {
                     UpdateMaxFOVCalibration();
                 }
-
             }
-
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
             Scene scene = SceneManager.GetActiveScene();
             SceneManager.LoadScene(scene.name);
             // FIXME: Restart system
+            // TODO: Ask Romain for the solution he implemented
         }
     }
 
@@ -275,39 +273,71 @@ public class OpticianController : MonoBehaviour
         //   0        1      2       3       4            5            6          7
         switch (currentTargetIndex)
         {
-            case 1:
-            case 0:
-            case 7:
-                if (keyCodeIndex == 0) // right
-                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], 0.002f);
-                else if (keyCodeIndex == 2) // left
-                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], -0.002f);
+            case 0:// right
+                if (keyCodeIndex == 0 || keyCodeIndex == 4 || keyCodeIndex == 5)
+                    MoveTowards(1);
+                else if (keyCodeIndex == 2 || keyCodeIndex == 7 || keyCodeIndex == 6)
+                    MoveTowards(-1);
                 break;
-            case 3:
-            case 4:
-            case 5:
-                if (keyCodeIndex == 2) // left
-                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], 0.002f);
-                else if (keyCodeIndex == 0) // right
-                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], -0.002f);
+            case 1: //bottom-right
+                if (keyCodeIndex == 0 || keyCodeIndex == 1 || keyCodeIndex == 5)
+                    MoveTowards(1);
+                else if (keyCodeIndex == 2 || keyCodeIndex == 3 || keyCodeIndex == 6)
+                    MoveTowards(-1);
                 break;
-            case 2:
-                if (keyCodeIndex == 1) // bottom
-                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], 0.002f);
-                else if (keyCodeIndex == 3) // top
-                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], -0.002f);
+            case 2: //bottom
+                if (keyCodeIndex == 1 || keyCodeIndex == 7 || keyCodeIndex == 5)
+                    MoveTowards(1);
+                else if (keyCodeIndex == 4 || keyCodeIndex == 3 || keyCodeIndex == 6)
+                    MoveTowards(-1);
                 break;
-            case 6:
-                if (keyCodeIndex == 3) // top
-                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], 0.002f);
-                else if (keyCodeIndex == 1) // bottom
-                    landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], -0.002f);
+            case 3: //bottom-left
+                if (keyCodeIndex == 2 || keyCodeIndex == 1 || keyCodeIndex == 7)
+                    MoveTowards(1);
+                else if (keyCodeIndex == 0 || keyCodeIndex == 3 || keyCodeIndex == 4)
+                    MoveTowards(-1);
+                break;
+            case 4: //left
+                if (keyCodeIndex == 2 || keyCodeIndex == 7 || keyCodeIndex == 6)
+                    MoveTowards(1);
+                else if (keyCodeIndex == 0 || keyCodeIndex == 4 || keyCodeIndex == 5)
+                    MoveTowards(-1);
+                break;
+            case 5: //top-left
+                if (keyCodeIndex == 3 || keyCodeIndex == 2 || keyCodeIndex == 6)
+                    MoveTowards(1);
+                else if (keyCodeIndex == 1 || keyCodeIndex == 0 || keyCodeIndex == 5)
+                    MoveTowards(-1);
+                break;
+            case 6: //top
+                if (keyCodeIndex == 3 || keyCodeIndex == 4 || keyCodeIndex == 6)
+                    MoveTowards(1);
+                else if (keyCodeIndex == 1 || keyCodeIndex == 7 || keyCodeIndex == 5)
+                    MoveTowards(-1);
+                break;
+            case 7: //top-right
+                if (keyCodeIndex == 3 || keyCodeIndex == 0 || keyCodeIndex == 4)
+                    MoveTowards(1);
+                else if (keyCodeIndex == 1 || keyCodeIndex == 2 || keyCodeIndex == 7)
+                    MoveTowards(-1);
                 break;
         }
-        float temp = Vector3.Distance(landoltC.transform.localPosition,savedFOVTargetpos);
-        float temp1 = Vector3.Distance(FOVpt[currentTargetIndex], savedFOVTargetpos);
-        if ( temp >= temp1)
-            landoltC.transform.localPosition = previous_pos;
+        if (landoltC.transform.localPosition == FOVpt[currentTargetIndex])
+        {
+            Debug.Log("Stopped");
+            bool shouldMove = false;
+        }
+        float temp = Vector3.Distance(landoltC.transform.localPosition, savedFOVTargetpos); // distance between landolt C and the center point
+        float temp1 = Vector3.Distance(FOVpt[currentTargetIndex], savedFOVTargetpos);       // distance between the limit point and the center point TODO: verify value is the same
+
+        if (temp >= temp1)
+            print("Limite 1");
+        //landoltC.transform.localPosition = previous_pos;
+    }
+
+    private void MoveTowards(int mult)
+    {
+        landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], 0.002f * mult);
     }
 
     private IEnumerator FadeText()
