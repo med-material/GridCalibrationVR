@@ -12,6 +12,7 @@ public class StartHandler : MonoBehaviour
     private ResetHandler rst;
     private RaycastHit obj;
     private GameObject normal, declining, moving, currentSelection;
+    private Material[] target_material = new Material[2];
     public GameObject Menu;
     public GameObject startButton;
     public GameObject approxButton;
@@ -155,10 +156,9 @@ public class StartHandler : MonoBehaviour
 
     private void makeItShine(GameObject current)
     {
-        /*/Material[] listMat = new Material[2];
-        listMat[0] = current.GetComponent<Renderer>().materials[0];
-        listMat[1] = (Material)Resources.Load("Shiny");*/
-        currentSelection.GetComponent<MeshRenderer>().materials[1] = (Material)Resources.Load("Shiny");
+        target_material[0] = (Material)Resources.Load("Start button");
+        target_material[1] = (Material)Resources.Load("Shiny");
+        currentSelection.GetComponent<MeshRenderer>().materials = target_material;
     }
 
 }

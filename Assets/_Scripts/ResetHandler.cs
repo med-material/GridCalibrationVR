@@ -36,7 +36,8 @@ public class ResetHandler : MonoBehaviour {
                 //sceneToDestroy = SceneManager.GetActiveScene();
                 SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Additive);
                 SceneManager.UnloadSceneAsync(1);
-                SceneManager.UnloadSceneAsync(2);
+                SceneManager.UnloadSceneAsync(1);
+                //SceneManager.UnloadSceneAsync(2);    //ONLY WHEN TESTING WITH PUPIL LAB
 
             }
 
@@ -52,7 +53,8 @@ public class ResetHandler : MonoBehaviour {
                 //sceneToDestroy = SceneManager.GetActiveScene();
                 SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Additive);
                 SceneManager.UnloadSceneAsync(1);
-                SceneManager.UnloadSceneAsync(2);
+                SceneManager.UnloadSceneAsync(1);
+                //SceneManager.UnloadSceneAsync(2); //ONLY WHEN TESTING WITH PUPIL LAB
                 restart = true;
             }
         }
