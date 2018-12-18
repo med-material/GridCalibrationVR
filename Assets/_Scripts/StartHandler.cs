@@ -30,9 +30,10 @@ public class StartHandler : MonoBehaviour
     void Start()
     {
 
-        if(SceneManager.sceneCount > 1)
+        if(SceneManager.sceneCount > 2)  //PUT TO 1 IF TESTED WITHOUT PUPIL LABS
         {
-            SceneManager.UnloadSceneAsync("GridCalibrationTest");
+            //SceneManager.UnloadSceneAsync("GridCalibrationTest");
+            SceneManager.UnloadSceneAsync(SceneManager.GetSceneAt(SceneManager.sceneCount-2));
         }
 
         rst = GameObject.Find("SceneController").GetComponent<ResetHandler>();

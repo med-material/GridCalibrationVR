@@ -24,8 +24,9 @@ public class LoggerBehavior : MonoBehaviour
     private void Start()
     {
         _toLog = new List<object>();
-        dedicatedCapture = Camera.main;
+        //dedicatedCapture = Camera.main;
         gameController = GetComponent<GameController>();
+        dedicatedCapture = gameController.dedicatedCapture;
     }
 
     private void AddToLog()

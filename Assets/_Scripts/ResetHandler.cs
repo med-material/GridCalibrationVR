@@ -8,6 +8,8 @@ public class ResetHandler : MonoBehaviour {
 
     public string mode = "";
     public bool restart = false;
+
+    //public Camera camera;
     private GameController gmctrl;
     private Scene sceneToDestroy;
 
@@ -33,6 +35,7 @@ public class ResetHandler : MonoBehaviour {
 
             if (gmctrl.is_started)
             {
+                //camera = gmctrl.dedicatedCapture;
                 SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Additive);
             }
 

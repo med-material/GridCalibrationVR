@@ -22,11 +22,13 @@ public class GameController : MonoBehaviour
     public bool calib_end = false;
     [Range(0.4f, 2f)]
     public float SPEED_OF_CIRCLE = 0.4f;
+    public Camera dedicatedCapture;
 
     # endregion
 
     # region private_value
-    private Camera dedicatedCapture;
+
+    private ResetHandler rst;
     private Vector3 gazeToWorld;
     private float CENTER_X_L;
     private float CENTER_Y_C;
@@ -72,7 +74,15 @@ public class GameController : MonoBehaviour
         ResetTargetTimer();
         ResetTimer();
 
-        dedicatedCapture = Camera.main;
+        /* if (rst.restart){
+
+            dedicatedCapture = rst.camera;
+
+        } else{*/
+
+            dedicatedCapture = Camera.main;
+        //}
+        rst = GameObject.Find("SceneController").GetComponent<ResetHandler>();
         logger = GetComponent<LoggerBehavior>();
         userbhv = GetComponent<UserBehaviour>();
         heatmap.SetStartStop(false);
