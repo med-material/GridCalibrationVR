@@ -36,6 +36,7 @@ public class ResetHandler : MonoBehaviour {
             if (gmctrl.is_started)
             {
                 //camera = gmctrl.dedicatedCapture;
+                SceneManager.UnloadSceneAsync("GridCalibrationTest");
                 SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Additive);
             }
 
@@ -49,6 +50,7 @@ public class ResetHandler : MonoBehaviour {
             if (gmctrl.is_started)
             {
                 mode = gmctrl.choosenMode;
+                SceneManager.UnloadSceneAsync("GridCalibrationTest");
                 SceneManager.LoadScene("GridCalibrationTest", LoadSceneMode.Additive);
                 restart = true;
             }
