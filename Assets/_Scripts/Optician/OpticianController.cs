@@ -529,22 +529,44 @@ public class OpticianController : MonoBehaviour
     {
         float mid_dist = tot_dist / 2;
         float local_dist = 0.0f;
-        for (var i = index1; i < index2; i++)
+        int local_index = -1;
+        for (var i = index1; i <= index2; i++)
         {
-            for (double f = 0.0f; f <= 1; f += .1f)
+            local_dist += Vector3.Distance(pointingSystem.handPoints[i], pointingSystem.handPoints[i + 1]);
+            if (local_dist > mid_dist)
             {
-                Vector3 pos = Vector3.Lerp(pointingSystem.handPoints[i], pointingSystem.handPoints[index2], (float)f);
-                float dist = local_dist + Vector3.Distance(pointingSystem.handPoints[i],pos);
-                if (dist >= mid_dist)
-                {
-                    print("At middle point right now !");
-                    return pos;
-                }
+                local_index = i;  // the middle point is between this point[i] and point[i+1]
+                i = 99;
             }
-            local_dist += Vector3.Distance(pointingSystem.handPoints[i],pointingSystem.handPoints[index2]);
         }
+        Vector3 pos = pointingSystem.handPoints[local_index + 1];
+        float time = -0.5f;
+        do
+        {
+            time /= -1.1f; // ntm
+            pos = Vector3.MoveTowards(pos, pointingSystem.handPoints[local_index], time);
+        }
+        while (!NearlyEqual(Vector3.Distance(pos, pointingSystem.handPoints[index1]), Vector3.Distance(pos, pointingSystem.handPoints[index2])));
 
-        return Vector3.negativeInfinity;
+        return pos;
+    }
+
+    // Vector3.MoveTowards
+    public static Vector3 MoveTowards(Vector3 current, Vector3 target, float maxDistanceDelta)
+    {
+        Vector3 a = target - current;
+        float magnitude = a.magnitude;
+        if (magnitude <= maxDistanceDelta || magnitude == 0f)
+        {
+            return target;
+        }
+        return current + a / magnitude * maxDistanceDelta;
+    }
+
+    private bool NearlyEqual(float f1, float f2)
+    {
+        // Equal if they are within 0.01 of each other
+        return Math.Abs(f1 - f2) < 0.01;
     }
 
     private int GetDirectionIndexPressed()
