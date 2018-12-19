@@ -17,7 +17,6 @@ public class OpticianController : MonoBehaviour
     public Transform OperatorPlane;
     public Transform FovContainer;
     public PointingSystem pointingSystem;
-    public bool handlerMode = false;
     public SteamVR_Action_Vector2 touchPadAction;
     public SteamVR_Action_Boolean touchPadActionClick;
     public GameObject radialMenu;
@@ -32,7 +31,6 @@ public class OpticianController : MonoBehaviour
     private List<int> l_rotation;
     private int rotatIndex = 0;
     private int keyCodeIndex;
-    private int errors = 0;
     private float FOVTimer = 0;
     private RaycastHit userHit;
     private List<string> moveDirections;
@@ -44,14 +42,10 @@ public class OpticianController : MonoBehaviour
     private List<Vector3> savedTargetposList;
     private Color textColor = new Color(0.6415094f, 0.6415094f, 0.6415094f, 1.0f);
     private bool isSizeOk = false;
-    private bool isConfirmingPosition = false;
-    private bool hasTargetMoved = false;
-    private bool isCircleSet = false;
-    private bool changePos = false;
+    private bool isConfirmingPosition = false; private bool changePos = false;
     private int currentTargetIndex = 0;
     private bool calibrationIsOver;
     private Material lineMaterial;
-    private float offSetTimer = 0;
     private LineRenderer lineRenderer;
     private LineRenderer lineRendererAcuity;
     private List<float> landolt_factor = new List<float>() { 2.0f, 1.5f, 1.33f, 1.25f, 1.20f, 1.1666667f, 1.1424f, 1.1261213f, 1.11f, 1.5f, 1.332f };
@@ -63,16 +57,15 @@ public class OpticianController : MonoBehaviour
     void Start()
     {
         // GENERAL SETUP
-        lineRenderer = FovContainer.GetComponent<LineRenderer>();
+        lineRenderer = OperatorPlane.GetComponent<LineRenderer>();
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
         lineRenderer.widthMultiplier = 0.02f;
         lineRenderer.gameObject.layer = 11; // 11 = OperatorUI
 
-        lineRendererAcuity = OperatorPlane.GetComponent<LineRenderer>();
+        lineRendererAcuity = FovContainer.GetComponent<LineRenderer>();
         lineRendererAcuity.material = new Material(Shader.Find("Sprites/Default"));
         lineRendererAcuity.widthMultiplier = 0.02f;
         lineRendererAcuity.gameObject.layer = 11; // 11 = OperatorUI
-
 
         //// ACUITY SETUP 
         l_rotation = new List<int> { 0, -90, 180, 90 }; // Right, Down, Left, Up
@@ -159,6 +152,7 @@ public class OpticianController : MonoBehaviour
         userHit = gridController.GetCurrentCollider();
         if (calibrationIsOver)
         {
+            radialMenu.SetActive(false);
             DrawFOV(lineRendererAcuity, savedTargetposList, Color.red);
             landoltC.SetActive(false);
             explainText.text = "Calibration is over";
@@ -180,7 +174,8 @@ public class OpticianController : MonoBehaviour
                 }
                 else
                 {
-                    UpdateMaxFOVCalibration();
+                    // UpdateMaxFOVCalibration();
+                    explainText.text = "Please connect a controller to start.";
                 }
             }
         }
@@ -191,79 +186,6 @@ public class OpticianController : MonoBehaviour
             // FIXME: Restart system
             // TODO: Ask Romain for the solution he implemented
         }
-    }
-
-    private void UpdateMaxFOVCalibration()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any))
-        {
-            if (FOVTimer != 0) // If the space bar has been pressed and is wasn't to start the game.
-            {
-                // Save the target position, set the next direction to come.
-                SaveTargetPosition();
-                FOVTarget.transform.localPosition = savedFOVTargetpos; // reset the target position at center before new direction
-                nbDirectionEnded++;
-                if (nbDirectionEnded == moveDirections.Count - 4)
-                {
-                    isFOVCalibEnded = true;
-                    DrawFOV(lineRenderer, FOVPointsLocal, Color.blue);
-                    FOVTarget.SetActive(false);
-                }
-                else
-                    moveDirection = moveDirections[nbDirectionEnded];
-            }
-            else
-            {
-                FOVTimer = Time.deltaTime;
-            }
-        }
-        if (FOVTimer != 0)
-        {
-            MoveTarget();
-        }
-    }
-
-    private void SaveTargetPosition()
-    {
-        FOVPoints.Add(FOVTarget.transform.position);
-        FOVPointsLocal.Add(FOVTarget.transform.localPosition);
-    }
-
-    private void MoveTarget()
-    {
-        Vector3 direction = new Vector3();
-        if (explainText.isActiveAndEnabled && explainText.color.a == 1.0f)
-            StartCoroutine("FadeText");
-        switch (moveDirection)
-        {
-            case "left":
-                direction = new Vector3(-0.009f, 0.0f, 0.0f);
-                break;
-            case "down":
-                direction = new Vector3(0.0f, -0.009f, 0.0f);
-                break;
-            case "right":
-                direction = new Vector3(0.009f, 0.0f, 0.0f);
-                break;
-            case "up":
-                direction = new Vector3(0.0f, 0.009f, 0.0f);
-                break;
-            case "right-up":
-                direction = new Vector3(0.009f, 0.009f, 0.0f);
-                break;
-            case "left-up":
-                direction = new Vector3(-0.009f, 0.009f, 0.0f);
-                break;
-            case "right-down":
-                direction = new Vector3(0.009f, -0.009f, 0.0f);
-                break;
-            case "left-down":
-                direction = new Vector3(-0.009f, -0.009f, 0.0f);
-                break;
-            default:
-                break;
-        }
-        Move(direction);
     }
 
     private void MoveTargetOnAxis()
@@ -322,16 +244,18 @@ public class OpticianController : MonoBehaviour
                     MoveTowards(-1);
                 break;
         }
+        bool shouldMove = true;
         if (landoltC.transform.localPosition == FOVpt[currentTargetIndex])
         {
             Debug.Log("Stopped");
-            bool shouldMove = false;
+            shouldMove = false;
+
         }
         float temp = Vector3.Distance(landoltC.transform.localPosition, savedFOVTargetpos); // distance between landolt C and the center point
         float temp1 = Vector3.Distance(FOVpt[currentTargetIndex], savedFOVTargetpos);       // distance between the limit point and the center point TODO: verify value is the same
-
+        // FIXME: STOP at the limit
         if (temp >= temp1)
-            print("Limite 1");
+            landoltC.transform.localPosition = previous_pos;
         //landoltC.transform.localPosition = previous_pos;
     }
 
@@ -352,29 +276,6 @@ public class OpticianController : MonoBehaviour
         }
     }
 
-    private void Move(Vector3 vector)
-    {
-        if (isFOVCalibEnded)
-        {
-            Vector3 previous_pos = landoltC.transform.position;
-            //landoltC.transform.position += vector;
-            float temp = Vector3.Distance(savedFOVTargetpos, landoltC.transform.localPosition);
-            float temp1 = Vector3.Distance(savedFOVTargetpos, FOVEdgePoints[currentTargetIndex]);
-            Vector3 fovPt = FOVEdgePoints[currentTargetIndex];
-            if (Vector3.Distance(savedFOVTargetpos, landoltC.transform.localPosition) >= Vector3.Distance(savedFOVTargetpos, FOVEdgePoints[currentTargetIndex]))
-                // if the new position is further than the limit FOV, reset the position (block to FOV limit)
-                landoltC.transform.position = previous_pos;
-            else
-                landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, new Vector3(fovPt.x, fovPt.y, -3.0f), 0.01f);
-            //landoltC.transform.localPosition = new Vector3(landoltC.transform.localPosition.x, landoltC.transform.localPosition.y, -3.0f);
-        }
-        else
-        {
-            FOVTarget.transform.position += vector;
-            FOVTarget.transform.localPosition = new Vector3(FOVTarget.transform.localPosition.x, FOVTarget.transform.localPosition.y, -3.0f);
-        }
-    }
-
     private void SavePos()
     {
         if (savedTargetposList.Count - 1 == currentTargetIndex)
@@ -391,6 +292,8 @@ public class OpticianController : MonoBehaviour
     {
         bool touchPadClick = touchPadActionClick.GetStateDown(SteamVR_Input_Sources.Any);
         Vector2 touchPadValue = touchPadAction.GetAxis(SteamVR_Input_Sources.Any);
+        Button right_button = radialMenu.transform.GetChild(0).GetComponent<RMF_RadialMenu>().elements[0].button;
+        Button left_button = radialMenu.transform.GetChild(0).GetComponent<RMF_RadialMenu>().elements[2].button;
 
         if (!landoltC.activeSelf)
         {
@@ -399,6 +302,9 @@ public class OpticianController : MonoBehaviour
             explainText.enabled = true;
             explainText.color = textColor;
             landoltC.SetActive(true);
+            ToggleRadialMenu();
+            right_button.interactable = false;
+            left_button.interactable = false;
         }
 
         if (!isSizeOk)
@@ -416,6 +322,9 @@ public class OpticianController : MonoBehaviour
             else if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any))
             {
                 isConfirmingPosition = !isConfirmingPosition;
+                right_button.interactable = true;
+                left_button.interactable = true;
+                // Change text to explain this step
             }
             else if (isConfirmingPosition)
             {
@@ -446,14 +355,15 @@ public class OpticianController : MonoBehaviour
             switch (calibStep)
             {
                 case 1:
+                    ToggleRadialMenu(); // remove Radial Menu around landolt C
                     landoltC.transform.localPosition = landoltC.transform.localPosition != savedFOVTargetpos ? savedFOVTargetpos : landoltC.transform.localPosition; // 1.
                     calibStep++;
                     break;
                 case 2:
                     // test if the direction moves the target closer or further from the center
                     keyCodeIndex = GetDirectionIndexPressed();
-                    CalculateAcceptedMovingDirection(); // accepted two directions for current axe
-                    if (keyCodeIndex != -1 && acceptedDirection.Contains(moveDirections[keyCodeIndex]))
+                    // CalculateAcceptedMovingDirection(); // accepted two directions for current axe
+                    if (keyCodeIndex != -1)
                     {
                         moveDirection = moveDirections[keyCodeIndex];
                         MoveTargetOnAxis();
@@ -473,6 +383,7 @@ public class OpticianController : MonoBehaviour
                     keyCodeIndex = GetDirectionIndexPressed();
                     if (keyCodeIndex == rotatIndex)
                     {
+                        SavePos();
                         calibStep++; // the patient pressed the good direction, move to next tt
                     }
                     break;
@@ -483,50 +394,9 @@ public class OpticianController : MonoBehaviour
                     {
                         currentTargetIndex++;
                         calibStep = 1;
-                        ToggleRadialMenu(); //remove the radial Menu around the Landolt C
                     }
                     break;
             }
-        }
-    }
-
-    private void CalculateAcceptedMovingDirection()
-    {
-        //"right", "down", "left", "up", "right-up", "right-down", "left-up", "left-down"
-
-        acceptedDirection.Clear();
-        switch (currentTargetIndex)
-        {
-            case 0:
-            case 4:
-                acceptedDirection.Add("right");
-                acceptedDirection.Add("left");
-                break;
-            case 2:
-            case 6:
-                acceptedDirection.Add("down");
-                acceptedDirection.Add("up");
-                break;
-            case 3:
-            case 7:
-                acceptedDirection.Add("right-up");
-                acceptedDirection.Add("left-down");
-                acceptedDirection.Add("down");
-                acceptedDirection.Add("up");
-                acceptedDirection.Add("right");
-                acceptedDirection.Add("left");
-                break;
-            case 1:
-            case 5:
-                acceptedDirection.Add("right-down");
-                acceptedDirection.Add("left-up");
-                acceptedDirection.Add("down");
-                acceptedDirection.Add("up");
-                acceptedDirection.Add("right");
-                acceptedDirection.Add("left");
-                break;
-            default:
-                break;
         }
     }
 
@@ -549,68 +419,36 @@ public class OpticianController : MonoBehaviour
         landolt_current_index = landolt_current_index - 1 > 0 ? landolt_current_index - 1 : landolt_current_index;
     }
 
-    private void SetTargetPosition()
-    {
-        //FOVPoints
-        if (!pointingSystem.start)
-        {
-            if (FOVEdgePoints.Count == 0)
-                CalculateAllPos();
-
-            if (changePos)
-                SetRandomLandoltOrientation();
-
-            SetPos();
-        }
-        else if (pointingSystem.start)
-        {
-            if (FOVEdgePoints.Count == 0)
-                CalculateAllPosFromPointing();
-
-            if (changePos)
-                SetRandomLandoltOrientation();
-
-            SetPosFromPointing();
-
-        }
-    }
-
-    private void SetPos()
-    {
-        landoltC.transform.position = FOVEdgePoints[currentTargetIndex];
-        Vector3 pt = landoltC.transform.localPosition;
-        if (pt.x == 0)
-            pt.y = pt.y > 0 ? pt.y - 0.04f : pt.y + 0.04f;
-        else if (pt.y == 0)
-            pt.x = pt.x > 0 ? pt.x - 0.04f : pt.x + 0.04f;
-        pt.z = -3.0f;
-        landoltC.transform.localPosition = pt;
-    }
-
-    private void CalculateAllPos()
-    {
-        FOVEdgePoints.Add(FOVPoints[0]); // right point
-        FOVEdgePoints.Add(FOVPoints[1]); // bottom point
-        FOVEdgePoints.Insert(1, (FOVEdgePoints[1] + (FOVEdgePoints[0] - FOVEdgePoints[1]) / 2)); // Bottom right point
-        FOVEdgePoints.Add(FOVPoints[2]); // left point
-        FOVEdgePoints.Insert(3, (FOVEdgePoints[3] + (FOVEdgePoints[2] - FOVEdgePoints[3]) / 2)); // Bottom Left point 
-        FOVEdgePoints.Add(FOVPoints[3]); // Top point
-        FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top left point 
-        FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point
-    }
-
     private void CalculateAllPosFromPointing()
     {
         // Calculate position for the target position from the point the user placed
 
-        int index_left;
+        int index_left = -1;
         Vector3 pt_left = new Vector3();
-        int index_right;
+        int index_right = -1;
         Vector3 pt_right = new Vector3();
-        int index_top;
+        int index_top = -1;
         Vector3 pt_top = new Vector3();
-        int index_down;
+        int index_down = -1;
         Vector3 pt_down = new Vector3();
+
+        foreach (var pt in pointingSystem.handPoints) // Find the point on the right
+        {
+            if (pt.x > pt_right.x)
+            {
+                pt_right = pt;
+                index_right = pointingSystem.handPoints.IndexOf(pt);
+            }
+
+        }
+        if (index_right != 0 && index_right != -1)
+        {
+            pointingSystem.handPoints.AddRange(pointingSystem.handPoints.Take(index_right)); // set the first item list to the right point
+            pointingSystem.handPoints.RemoveRange(0, index_right);
+        }
+
+        pt_right = new Vector3();
+        index_top = -1;
 
         foreach (var pt in pointingSystem.handPoints)
         {
@@ -635,33 +473,80 @@ public class OpticianController : MonoBehaviour
                 index_down = pointingSystem.handPoints.IndexOf(pt);
             }
         }
+
+        float total_distanceRD = GetTotalDistanceBetweenTwoPoint(index_right, index_down);
+        Vector3 midPointRD = GetMidPoint(index_right, index_down, total_distanceRD);
+
+        float total_distanceDL = GetTotalDistanceBetweenTwoPoint(index_down, index_left);
+        Vector3 midPointDL = GetMidPoint(index_down, index_left, total_distanceDL);
+
+        float total_distanceLT = GetTotalDistanceBetweenTwoPoint(index_left, index_top);
+        Vector3 midPointLT = GetMidPoint(index_left, index_top, total_distanceLT);
+
+        float total_distanceTR = GetTotalDistanceBetweenTwoPoint(index_top, pointingSystem.handPoints.Count - 1);
+        Vector3 midPointTR = GetMidPoint(index_top, pointingSystem.handPoints.Count - 1, total_distanceTR);
+
         FOVEdgePoints.Add(pt_right);
+        FOVEdgePoints.Add(midPointRD);
         FOVEdgePoints.Add(pt_down);
-        FOVEdgePoints.Insert(1, (FOVEdgePoints[1] + (FOVEdgePoints[0] - FOVEdgePoints[1]) / 2)); // Bottom right point
+        FOVEdgePoints.Add(midPointDL);
         FOVEdgePoints.Add(pt_left);
-        FOVEdgePoints.Insert(3, (FOVEdgePoints[3] + (FOVEdgePoints[2] - FOVEdgePoints[3]) / 2)); // Bottom Left point 
+        FOVEdgePoints.Add(midPointLT);
         FOVEdgePoints.Add(pt_top);
-        FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top left point 
-        FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point
+        FOVEdgePoints.Add(midPointTR);
+
+
+        // FOVEdgePoints.Add(pt_right);
+        // FOVEdgePoints.Add(pt_down);
+        // FOVEdgePoints.Insert(1, (FOVEdgePoints[1] + (FOVEdgePoints[0] - FOVEdgePoints[1]) / 2)); // Bottom right point
+        // FOVEdgePoints.Add(pt_left);
+        // FOVEdgePoints.Insert(3, (FOVEdgePoints[3] + (FOVEdgePoints[2] - FOVEdgePoints[3]) / 2)); // Bottom Left point 
+        // FOVEdgePoints.Add(pt_top);
+        // FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top left point 
+        // FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point
 
         int i = 0;
         foreach (var item in FOVEdgePoints)
         {
-            Vector3 pt = FOVEdgePoints[i];
+            Vector3 pt = FOVEdgePoints[i]; // CHANGE THIS TO ITEM
             pt.z = -3.0f;
             FOVpt.Add(pt);
             i++;
         }
     }
 
-    private void SetPosFromPointing()
+    private float GetTotalDistanceBetweenTwoPoint(int index1, int index2)
     {
-        //almostCircle.transform.localPosition = FOVEdgePoints[currentTargetIndex];
-        Vector3 pt = FOVEdgePoints[currentTargetIndex];
-        pt.z = -3.0f;
-        FOVpt.Add(pt);
-        landoltC.transform.localPosition = pt;
+        float tot_dist = 0.0f;
+        for (var i = index1; i < index2; i++)
+        {
+            tot_dist += Vector3.Distance(pointingSystem.handPoints[i], pointingSystem.handPoints[index2]);
+        }
+        return tot_dist;
     }
+
+    private Vector3 GetMidPoint(int index1, int index2, float tot_dist)
+    {
+        float mid_dist = tot_dist / 2;
+        float local_dist = 0.0f;
+        for (var i = index1; i < index2; i++)
+        {
+            for (double f = 0.0f; f <= 1; f += .1f)
+            {
+                Vector3 pos = Vector3.Lerp(pointingSystem.handPoints[i], pointingSystem.handPoints[index2], (float)f);
+                float dist = local_dist + Vector3.Distance(pointingSystem.handPoints[i],pos);
+                if (dist >= mid_dist)
+                {
+                    print("At middle point right now !");
+                    return pos;
+                }
+            }
+            local_dist += Vector3.Distance(pointingSystem.handPoints[i],pointingSystem.handPoints[index2]);
+        }
+
+        return Vector3.negativeInfinity;
+    }
+
     private int GetDirectionIndexPressed()
     {
         bool touchPadClick = touchPadActionClick.GetState(SteamVR_Input_Sources.Any);

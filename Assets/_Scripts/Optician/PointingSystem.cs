@@ -18,6 +18,8 @@ public class PointingSystem : MonoBehaviour
     public AxisType facingAxis = AxisType.ZAxis;
     public float length = 100f;
     public bool showCursor = true;
+    
+    [HideInInspector]
     public bool isCalibEnded = false;
     public Text explainText;
 
