@@ -495,6 +495,8 @@ public class OpticianController : MonoBehaviour
         FOVEdgePoints.Add(pt_top);
         FOVEdgePoints.Add(midPointTR);
 
+        DrawFOV(lineRendererAcuity, FOVEdgePoints, Color.red);
+
 
         // FOVEdgePoints.Add(pt_right);
         // FOVEdgePoints.Add(pt_down);
@@ -518,7 +520,7 @@ public class OpticianController : MonoBehaviour
     private float GetTotalDistanceBetweenTwoPoint(int index1, int index2)
     {
         float tot_dist = 0.0f;
-        for (var i = index1; i < index2; i++)
+        for (var i = index1; i <= index2; i++)
         {
             tot_dist += Vector3.Distance(pointingSystem.handPoints[i], pointingSystem.handPoints[index2]);
         }
@@ -527,26 +529,21 @@ public class OpticianController : MonoBehaviour
 
     private Vector3 GetMidPoint(int index1, int index2, float tot_dist)
     {
+        //FIXME: CAMARCHEPA
         float mid_dist = tot_dist / 2;
         float local_dist = 0.0f;
         int local_index = -1;
         for (var i = index1; i <= index2; i++)
         {
             local_dist += Vector3.Distance(pointingSystem.handPoints[i], pointingSystem.handPoints[i + 1]);
-            if (local_dist > mid_dist)
+             if (local_dist >= mid_dist)
             {
                 local_index = i;  // the middle point is between this point[i] and point[i+1]
                 i = 99;
             }
         }
-        Vector3 pos = pointingSystem.handPoints[local_index + 1];
-        float time = -0.5f;
-        do
-        {
-            time /= -1.1f; // ntm
-            pos = Vector3.MoveTowards(pos, pointingSystem.handPoints[local_index], time);
-        }
-        while (!NearlyEqual(Vector3.Distance(pos, pointingSystem.handPoints[index1]), Vector3.Distance(pos, pointingSystem.handPoints[index2])));
+        int ind = local_index ==0 ? 0:local_index-1;
+        Vector3 pos = (pointingSystem.handPoints[ind]+pointingSystem.handPoints[local_index])/2;
 
         return pos;
     }
