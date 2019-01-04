@@ -7,7 +7,7 @@ public class PupilDemo : MonoBehaviour
     void Start()
     {
         PupilTools.OnConnected += StartPupilSubscription;
-        PupilTools.OnDisconnecting += StopPupilSubscription;
+        PupilTools.OnDisconnecting += StopPupilSubscription; 
 
         PupilTools.OnReceiveData += CustomReceiveData;
     }

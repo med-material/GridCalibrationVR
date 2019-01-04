@@ -96,6 +96,8 @@ public class OpticianController : MonoBehaviour
             lineMaterial.hideFlags = HideFlags.HideAndDontSave;
             lineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
         }
+
+        PointingSystem.OnAddPoint += DrawFOVPoint;
     }
 
 
@@ -144,7 +146,11 @@ public class OpticianController : MonoBehaviour
             temp_pos_list.Add(pos);
         }
         lrender.SetPositions(temp_pos_list.ToArray());
-        lrender.loop = true;
+    }
+
+    void DrawFOVPoint() {
+        lineRenderer.positionCount = 0;
+        DrawFOV(lineRenderer, pointingSystem.handPoints, Color.blue);
     }
 
     void Update()
@@ -168,7 +174,8 @@ public class OpticianController : MonoBehaviour
                     if (pointingSystem.isCalibEnded)
                     {
                         isFOVCalibEnded = true;
-                        DrawFOV(lineRenderer, pointingSystem.handPoints, Color.blue);
+                        lineRenderer.loop = true;
+                        // DrawFOV(lineRenderer, pointingSystem.handPoints, Color.blue);
                         FOVTarget.SetActive(false);
                     }
                 }
@@ -184,7 +191,7 @@ public class OpticianController : MonoBehaviour
             Scene scene = SceneManager.GetActiveScene();
             SceneManager.LoadScene(scene.name);
             // FIXME: Restart system
-            // TODO: Ask Romain for the solution he implemented
+            // TODO: Ask Romain for his solution
         }
     }
 
