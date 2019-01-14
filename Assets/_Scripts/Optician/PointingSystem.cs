@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using Valve.VR;
@@ -22,6 +23,7 @@ public class PointingSystem : MonoBehaviour
     [HideInInspector]
     public bool isCalibEnded = false;
     public Text explainText;
+    public delegate void OnAddPointdeleg () ;
 
     internal Vector3 handPoint;
     internal List<Vector3> handPoints;
@@ -35,7 +37,16 @@ public class PointingSystem : MonoBehaviour
     Vector3 cursorScale = new Vector3(0.05f, 0.05f, 0.05f);
     float contactDistance = 0f;
     Transform contactTarget = null;
+    private bool selectAxes;
+    private Text textButton;
 
+    
+	public static event OnAddPointdeleg OnAddPoint;
+
+    void Start() {
+        textButton = StartButton.GetComponentInChildren<Text>();
+        textButton.text = "SET FOV POINTS";
+    }
     void SetPointerTransform(float setLength, float setThicknes)
     {
         //if the additional decimal isn't added then the beam position glitches
@@ -139,7 +150,7 @@ public class PointingSystem : MonoBehaviour
 
     void Update()
     {
-        if (start)
+        if (start && !selectAxes)
         {
             Ray raycast = new Ray(transform.position, transform.forward);
 
@@ -155,9 +166,39 @@ public class PointingSystem : MonoBehaviour
                 if (GameObject.ReferenceEquals(hitObject.collider.gameObject, StartButton))
                 {
                     StartButton.SetActive(false);
-                    isCalibEnded = true;
+                    // isCalibEnded = true;
+                    selectAxes = true;
+                    textButton.text = "SELECT AXES";
                 }
             }
+        }
+        if(selectAxes) {
+            // draw four major axes
+            // let the user select four middle axes
+
+
+        }
+    }
+
+    private void CalculateAxesPoints() {
+        
+        // Calculate position for the target position from the point the user placed
+
+        Vector3 pt_left = new Vector3();
+        Vector3 pt_right = new Vector3();
+        Vector3 pt_top = new Vector3();
+        Vector3 pt_down = new Vector3();
+
+        foreach (var pt in handPoints)
+        {
+            if (pt.x > pt_right.x)
+                pt_right = pt;
+            if (pt.x < pt_left.x)
+                pt_left = pt;
+            if (pt.y > pt_top.y)
+                pt_top = pt;
+            if (pt.y < pt_down.y)
+                pt_down = pt;
         }
     }
 
@@ -167,6 +208,8 @@ public class PointingSystem : MonoBehaviour
         {
             handPoint = hitObject.collider.transform.worldToLocalMatrix.MultiplyPoint3x4(hitObject.point);
             handPoints.Add(handPoint);
+            if(OnAddPoint!= null)
+                OnAddPoint();
         }
     }
 }
