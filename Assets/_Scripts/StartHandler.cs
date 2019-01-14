@@ -30,12 +30,6 @@ public class StartHandler : MonoBehaviour
     void Start()
     {
 
-        /* if(SceneManager.sceneCount > 2)  //PUT TO 1 IF TESTED WITHOUT PUPIL LABS
-        {
-            //SceneManager.UnloadSceneAsync("GridCalibrationTest");
-            SceneManager.UnloadSceneAsync(SceneManager.GetSceneAt(SceneManager.sceneCount-2));
-        }*/
-
         rst = GameObject.Find("SceneController").GetComponent<ResetHandler>();
         normal = GameObject.Find("Start button"); //1
         declining = GameObject.Find("Shrink button"); //2
@@ -86,31 +80,6 @@ public class StartHandler : MonoBehaviour
         {
             startCountdown = true;
         }
-
-            /*obj = gridController.GetCurrentCollider();
-            if (obj.collider && timer > 0)
-            {
-                if (gridController.IsCollidingWithObj(startButton))
-                {
-                    startLoader.fillAmount = 2.0f - timer;
-                    timer -= Time.deltaTime;
-                }
-                else if (gridController.IsCollidingWithObj(approxButton))
-                {
-                    approxLoader.fillAmount = 2.0f - timer;
-                    timer -= Time.deltaTime;
-                }
-                else if (gridController.IsCollidingWithObj(shrinkButton))
-                {
-                    shrinkLoader.fillAmount = 2.0f - timer;
-                    timer -= Time.deltaTime;
-                }
-                else
-                {
-                    ResetFillAmount();
-                    ResetTimer();
-                }
-            }*/
             if (timer < 0 || startCountdown)
         {
             // Print the timer, the seconds is rounded to have 3,2,1 value like seconds
@@ -119,7 +88,6 @@ public class StartHandler : MonoBehaviour
             Menu.transform.position += new Vector3(0, 0, -10.0f);
             if (countDown < 0)
             {
-                print("START");
                 gameController.is_started = true;
                 ResetTimer();
                 Menu.SetActive(false);
@@ -133,22 +101,6 @@ public class StartHandler : MonoBehaviour
                 }               
             }
         }
-        /*if (timer < 0 && !rst.restart)
-        {
-            ResetFillAmount();
-            if (gridController.IsCollidingWithObj(approxButton))
-            {
-                gameController.choosenMode = "approx";
-            }
-            else if (gridController.IsCollidingWithObj(startButton))
-            {
-                gameController.choosenMode = "normal";
-            }
-            else if (gridController.IsCollidingWithObj(shrinkButton))
-            {
-                gameController.choosenMode = "shrink";
-            }
-        }*/
     }
     private void ResetTimer()
     {

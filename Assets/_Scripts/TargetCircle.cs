@@ -172,11 +172,7 @@ public class TargetCirle
                 Vector3 last_good_scale = previous_scales.Reverse<Vector3>().ToList()[l_looked.Reverse<bool>().ToList().FindIndex(l => l)];
                 circle.transform.localScale += (last_good_scale - previous_scale) / 2;
             }
-            // If the last four times the target was looked
-            /**if (l_looked.Reverse<bool>().Take(4).ToList().Where(l => l).ToList().Count == 4)
-            {
-                ResetScale();
-            }*/
+
             // If the last four times the target was NOT looked
             if (l_looked.Reverse<bool>().Take(5).ToList().Where(l => !l).ToList().Count == 5)
             {
@@ -288,7 +284,6 @@ public class TargetCirle
                 if (circle.transform.localPosition != position_to_reach)
                 {
                     float step = SPEED_OF_CIRCLE * Time.deltaTime;
-                    //circle.transform.position = Vector3.Lerp(circle.transform.localPosition, position_to_reach, t);
                     circle.transform.localPosition = Vector3.MoveTowards(circle.transform.localPosition, position_to_reach, step);
                     isPositionOk = false;
                 }

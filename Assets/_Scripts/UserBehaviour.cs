@@ -66,7 +66,6 @@ public class UserBehaviour : MonoBehaviour{
                     touchCount = 1;
                 }
 
-                print("Je touche : " + touchCount);
                 touchOnce = true;
             }
 
