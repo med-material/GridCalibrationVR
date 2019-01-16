@@ -39,10 +39,12 @@ public class StartHandler : MonoBehaviour
 
     void Update()
     {
-           if (rst.restart)
+           if (rst.restart) //If it's a restart
             {
                 timer = -1;
             }
+        
+        //SELECTION OF THE MODE
 
         if (Input.GetKeyDown("1") || Input.GetKeyDown("[1]"))
         {
@@ -76,7 +78,7 @@ public class StartHandler : MonoBehaviour
             gameController.choosenMode = "approx";
         }
 
-        if (Input.GetKeyDown("return") && currentSelection != null)
+        if (Input.GetKeyDown("return") && currentSelection != null) //Launching a mode
         {
             startCountdown = true;
         }
@@ -86,7 +88,8 @@ public class StartHandler : MonoBehaviour
             countDownText.GetComponent<TextMesh>().text = Math.Ceiling(System.Convert.ToDouble(countDown)).ToString();
             countDown -= Time.deltaTime;
             Menu.transform.position += new Vector3(0, 0, -10.0f);
-            if (countDown < 0)
+
+            if (countDown < 0) //After the countdown, we launch the mode
             {
                 gameController.is_started = true;
                 ResetTimer();
@@ -114,7 +117,7 @@ public class StartHandler : MonoBehaviour
         shrinkLoader.fillAmount = 0.0f;
     }
 
-    private void makeItShine(GameObject current)
+    private void makeItShine(GameObject current) //Highlight the button when selected (with 1/2/3)
     {
         target_material[0] = (Material)Resources.Load("Start button");
         target_material[1] = (Material)Resources.Load("Shiny");

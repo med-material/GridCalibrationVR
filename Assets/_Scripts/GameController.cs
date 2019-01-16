@@ -169,13 +169,13 @@ public class GameController : MonoBehaviour
                 wait = false;
                 if (last_target != null)
                 {
-                    if(last_target.circle.transform.localScale == last_target.scale_to_reach)
+                    if(last_target.circle.transform.localScale == last_target.scale_to_reach) //While changing the targets, if the old one's size hasn't changed, it means the user failed to stare at it, we increments a fail count
                     {
                         last_target.calib_failed++;
                     }
-                    if (chooseCircleMode == 2)
+                    if (chooseCircleMode == 2) //We save the original scale and position for the mode
                     {
-                        savedScale = last_target.circle.transform.localScale;
+                        savedScale = last_target.circle.transform.localScale; 
                         savedPosition = last_target.circle.transform.localPosition;
                     }
                     last_target.DestroyTarget();
@@ -183,12 +183,12 @@ public class GameController : MonoBehaviour
                 // If the target is not created, create it
                 if (!trgt.circle_created)
                 {
-                    if (chooseCircleMode == 2)
+                    if (chooseCircleMode == 2) //If it is the declining mode
                     {
-                        if (savedScale != Vector3.zero)
+                        if (savedScale != Vector3.zero) //If we have a saved scale
                         {
                             trgt.CreateTarget(wall, true, chooseCircleMode, false, savedScale);
-                            trgt.SPEED_OF_CIRCLE = SPEED_OF_CIRCLE;
+                            trgt.SPEED_OF_CIRCLE = SPEED_OF_CIRCLE; 
                         }
                         else
                         {
@@ -200,7 +200,7 @@ public class GameController : MonoBehaviour
                         trgt.CreateTarget(wall, true, chooseCircleMode, false);
                     }
 
-                    if (last_target != null && canDetectCircle)
+                    if (last_target != null && canDetectCircle) //We get the distraction when the user is starring at the target
                     {
                         prevPos = last_target.circle.transform.localPosition;
 
@@ -213,7 +213,7 @@ public class GameController : MonoBehaviour
                 ResetTimer();
             }
 
-            // Choose the Circle Mode
+            // Launch the circle mode selected
             if (last_target.circle_created)
             {
                 if (chooseCircleMode == 1)
@@ -258,9 +258,9 @@ public class GameController : MonoBehaviour
             if (looking_at_circle.collider)
             {
 
-                if (canDetectCircle)
+                if (canDetectCircle) //if any changes (depending on the mode) on the target is over
                 {
-                    if (looking_at_circle.collider.name == "Cylinder")
+                    if (looking_at_circle.collider.name == "Cylinder") //if it's on the target
                     {
                         LogData();
                         if (travel_time <= 0.0f)
@@ -353,12 +353,12 @@ public class GameController : MonoBehaviour
         return 100 - (((first_scale - current_scale) / first_scale) * 100);
     }
 
-    public float getDistanceBetweenCircle(Vector3 pos1, Vector3 pos2)
+    public float getDistanceBetweenCircle(Vector3 pos1, Vector3 pos2) //Distance btw two target's positions
     {
         return Vector3.Distance(pos1, pos2);
     }
 
-    public float getDistraction(float dis1, float dis2)
+    public float getDistraction(float dis1, float dis2) //Difference btw two distances (usually the shortest distance btw 2 targets and the distance travelled by the user 's gaze)
     {
         return dis1 - dis2;
     }
