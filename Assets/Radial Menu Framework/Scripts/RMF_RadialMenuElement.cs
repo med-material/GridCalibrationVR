@@ -74,12 +74,12 @@ public class RMF_RadialMenuElement : MonoBehaviour {
 
             EventTrigger.Entry enter = new EventTrigger.Entry();
             enter.eventID = EventTriggerType.PointerEnter;
-            enter.callback.AddListener((eventData) => { setParentMenuLable(label); });
+            //enter.callback.AddListener((eventData) => { setParentMenuLable(label); });
 
 
             EventTrigger.Entry exit = new EventTrigger.Entry();
             exit.eventID = EventTriggerType.PointerExit;
-            exit.callback.AddListener((eventData) => { setParentMenuLable(""); });
+            //exit.callback.AddListener((eventData) => { setParentMenuLable(""); });
 
             t.triggers.Add(enter);
             t.triggers.Add(exit);
@@ -103,7 +103,7 @@ public class RMF_RadialMenuElement : MonoBehaviour {
 
         ExecuteEvents.Execute(button.gameObject, p, ExecuteEvents.selectHandler);
         active = true;
-        setParentMenuLable(label);
+        //setParentMenuLable(label);
     }
 
     //Sets the label of the parent menu. Is set to public so you can call this elsewhere if you need to show a special label for something.
@@ -120,16 +120,7 @@ public class RMF_RadialMenuElement : MonoBehaviour {
         ExecuteEvents.Execute(button.gameObject, p, ExecuteEvents.deselectHandler);
         active = false;
 
-        if (!parentRM.useLazySelection)
-            setParentMenuLable(" ");
+        //if (!parentRM.useLazySelection)
+        //    setParentMenuLable(" ");
     }
-
-    //Just a quick little test you can run to ensure things are working properly.
-    public void clickMeTest() {
-        Debug.Log(assignedIndex);
-    }
-
-
-
-
 }

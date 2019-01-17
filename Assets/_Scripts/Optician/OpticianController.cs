@@ -3,12 +3,13 @@ using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Valve.VR;
+using System.Globalization;
 public class OpticianController : MonoBehaviour
 {
-
     public GameObject landoltC;
     public Text explainText;
     public GameObject FOVTarget;
@@ -20,7 +21,16 @@ public class OpticianController : MonoBehaviour
     public SteamVR_Action_Vector2 touchPadAction;
     public SteamVR_Action_Boolean touchPadActionClick;
     public GameObject radialMenu;
-
+    [SerializeField]
+    private fovScriptableObject FOVPointsSave;
+    [SerializeField]
+    private Text HMDeyeDistanceText;
+    [SerializeField]
+    private Slider slider;
+    [SerializeField]
+    private Button saveButton;
+    [SerializeField]
+    private Image arrowImage;
     private Renderer FOVTargetRenderer;
     private bool isFOVCalibEnded;
     private KeyCode rightArrow = KeyCode.RightArrow;
@@ -34,6 +44,7 @@ public class OpticianController : MonoBehaviour
     private float FOVTimer = 0;
     private RaycastHit userHit;
     private List<string> moveDirections;
+    private List<int> rotateAngles;
     private string moveDirection;
     private int nbDirectionEnded;
     private List<Vector3> FOVPoints; // FOV points, the max points the user can reach in 4 direction
@@ -42,7 +53,8 @@ public class OpticianController : MonoBehaviour
     private List<Vector3> savedTargetposList;
     private Color textColor = new Color(0.6415094f, 0.6415094f, 0.6415094f, 1.0f);
     private bool isSizeOk = false;
-    private bool isConfirmingPosition = false; private bool changePos = false;
+    private bool isConfirmingPosition = false;
+    private bool changePos = false;
     private int currentTargetIndex = 0;
     private bool calibrationIsOver;
     private Material lineMaterial;
@@ -53,6 +65,8 @@ public class OpticianController : MonoBehaviour
     private List<string> acceptedDirection = new List<string>();
     private int calibStep = 1;
     private List<Vector3> FOVpt;
+    private float touchTimer;
+    private float distHMDEye;
 
     void Start()
     {
@@ -67,6 +81,10 @@ public class OpticianController : MonoBehaviour
         lineRendererAcuity.widthMultiplier = 0.02f;
         lineRendererAcuity.gameObject.layer = 11; // 11 = OperatorUI
 
+        slider.value = FOVPointsSave.previous_HMDeye_distance;
+        saveButton.interactable = false;
+        arrowImage.enabled = false;
+
         //// ACUITY SETUP 
         l_rotation = new List<int> { 0, -90, 180, 90 }; // Right, Down, Left, Up
         keyCodes = new List<KeyCode> { rightArrow, downArrow, leftArrow, upArrow }; // have to stay same order than rotation list !!
@@ -76,6 +94,7 @@ public class OpticianController : MonoBehaviour
         savedFOVTargetpos = FOVTarget.transform.localPosition;
         FOVEdgePoints = new List<Vector3>();
         moveDirections = new List<string> { "right", "down", "left", "up", "right-up", "right-down", "left-up", "left-down" };
+        rotateAngles = new List<int> { 0, -45, -90, -135, 180, 135, 90, 45 };
         FOVPoints = new List<Vector3>();
         FOVPointsLocal = new List<Vector3>();
         FOVpt = new List<Vector3>();
@@ -125,6 +144,7 @@ public class OpticianController : MonoBehaviour
                         pointingSystem.start = true;
                         FOVTarget.SetActive(false);
                         pointingSystem.SetupPointingSystem();
+                        LoadFOVPoints();
                     }
                 }
             }
@@ -148,7 +168,8 @@ public class OpticianController : MonoBehaviour
         lrender.SetPositions(temp_pos_list.ToArray());
     }
 
-    void DrawFOVPoint() {
+    void DrawFOVPoint()
+    {
         lineRenderer.positionCount = 0;
         DrawFOV(lineRenderer, pointingSystem.handPoints, Color.blue);
     }
@@ -159,8 +180,13 @@ public class OpticianController : MonoBehaviour
         if (calibrationIsOver)
         {
             radialMenu.SetActive(false);
+            FOVPoints pt = FOVPointsSave.fOVPts.FirstOrDefault(p => p.id == Convert.ToInt32(distHMDEye));
+            if (pt != null)
+                pt.acuityFieldPoints = savedTargetposList;
+
             DrawFOV(lineRendererAcuity, savedTargetposList, Color.red);
             landoltC.SetActive(false);
+            arrowImage.enabled = false;
             explainText.text = "Calibration is over";
         }
         else
@@ -175,13 +201,22 @@ public class OpticianController : MonoBehaviour
                     {
                         isFOVCalibEnded = true;
                         lineRenderer.loop = true;
+                        saveButton.interactable = true;
+                        pointingSystem.StartButton.SetActive(false);
+                        distHMDEye = FOVPointsSave.previous_HMDeye_distance;
+                        FOVPoints pt = FOVPointsSave.fOVPts.FirstOrDefault(p => p.id == Convert.ToInt32(distHMDEye));
+                        if (pt != null)
+                        {
+                            pt.selectedAxes = pointingSystem.selectedAxes;
+                            pointingSystem.selectAxes = true;
+                        }
+
                         // DrawFOV(lineRenderer, pointingSystem.handPoints, Color.blue);
                         FOVTarget.SetActive(false);
                     }
                 }
                 else
                 {
-                    // UpdateMaxFOVCalibration();
                     explainText.text = "Please connect a controller to start.";
                 }
             }
@@ -251,24 +286,18 @@ public class OpticianController : MonoBehaviour
                     MoveTowards(-1);
                 break;
         }
-        bool shouldMove = true;
-        if (landoltC.transform.localPosition == FOVpt[currentTargetIndex])
-        {
-            Debug.Log("Stopped");
-            shouldMove = false;
-
-        }
         float temp = Vector3.Distance(landoltC.transform.localPosition, savedFOVTargetpos); // distance between landolt C and the center point
-        float temp1 = Vector3.Distance(FOVpt[currentTargetIndex], savedFOVTargetpos);       // distance between the limit point and the center point TODO: verify value is the same
-        // FIXME: STOP at the limit
+        float temp1 = Vector3.Distance(FOVpt[currentTargetIndex], savedFOVTargetpos);       // distance between the limit point and the center point
         if (temp >= temp1)
             landoltC.transform.localPosition = previous_pos;
-        //landoltC.transform.localPosition = previous_pos;
     }
 
     private void MoveTowards(int mult)
     {
-        landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], 0.002f * mult);
+        if (mult < 0 && landoltC.transform.localPosition == savedFOVTargetpos) // Prevent the user to go the wrong way
+            print("Not moving the right way");
+        else
+            landoltC.transform.localPosition = Vector3.MoveTowards(landoltC.transform.localPosition, FOVpt[currentTargetIndex], 0.002f * mult);
     }
 
     private IEnumerator FadeText()
@@ -304,8 +333,6 @@ public class OpticianController : MonoBehaviour
 
         if (!landoltC.activeSelf)
         {
-            explainText.text = "Press the up or down arrow to increase or reduce size of the \n circle to the minimum size for wich you can still see "
-            + "the open side of it. \n Press space bar to start";
             explainText.enabled = true;
             explainText.color = textColor;
             landoltC.SetActive(true);
@@ -314,97 +341,113 @@ public class OpticianController : MonoBehaviour
             left_button.interactable = false;
         }
 
-        if (!isSizeOk)
+
+        // TODO: Do all of the next comments
+        // TODO: Add text explication for operator and patient for instruction
+        // 1. Let the user choose the size of the Landolt checked
+        // 2. Let the user confirm positions 
+        // 3. Set the position to center
+        // 4. Move the target slowly to have a smooth poursuit on the current axe
+        // until the FOV limit is reached (patient with touchpad/operator with arrow)
+        // 5. press space bar or trigger to stop the movement and change the Landolt C orientation
+        // 6. The patient or operator moves the target closer to the center until the patient can detect the opening direction
+        // 7. ask the patient to press the touchpad in the good direction (add visual help around the Landolt C simulating the touchpad)
+        // if the patient pressed direction is good,
+        //      if was the last axe, then proceed to result, draw the acuity field.
+        //      else set the current axe to the next one and start to step 3.
+        // else go to step 4.
+        switch (calibStep)
         {
-            if ((Input.GetKeyDown(downArrow) || (touchPadClick && touchPadValue.y < -0.5)) && !isConfirmingPosition)
-            {
-                ReduceCircleSize();
-                SetRandomLandoltOrientation();
-            }
-            else if ((Input.GetKeyDown(upArrow) || (touchPadClick && touchPadValue.y > 0.5)) && !isConfirmingPosition)
-            {
-                IncreaseCircleSize();
-                SetRandomLandoltOrientation();
-            }
-            else if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any))
-            {
-                isConfirmingPosition = !isConfirmingPosition;
+            case 1:
+                explainText.text = "Increase or reduce size of the \n circle to the minimum size for wich you can still see "
+               + "the open side of it. \n Press trigger/space bar to start";
+                right_button.interactable = false;
+                left_button.interactable = false;
+
+                if (Input.GetKeyDown(downArrow) || (touchPadClick && touchPadValue.y < -0.5))
+                {
+                    ReduceCircleSize();
+                    SetRandomLandoltOrientation();
+                }
+                else if (Input.GetKeyDown(upArrow) || (touchPadClick && touchPadValue.y > 0.5))
+                {
+                    IncreaseCircleSize();
+                    SetRandomLandoltOrientation();
+                }
+                else if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateDown(SteamVR_Input_Sources.Any) && touchTimer <= 0)
+                {
+                    calibStep++;
+                    touchTimer = 0.3f;
+                    // Change text to explain this step
+                }
+                break;
+            case 2:
                 right_button.interactable = true;
                 left_button.interactable = true;
-                // Change text to explain this step
-            }
-            else if (isConfirmingPosition)
-            {
+                explainText.text = "Select opened side with the controller touchpad or keyboard arrows";
+                if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any) && touchTimer <= 0)
+                {
+                    calibStep--;
+                    touchTimer = 0.3f;
+                    // Change text to explain this step
+                }
                 keyCodeIndex = GetDirectionIndexPressed();
                 if (keyCodeIndex == rotatIndex)
                 {
                     isSizeOk = true;
                     explainText.text = "";
+                    calibStep++;
                     if (FOVEdgePoints.Count == 0)
                         CalculateAllPosFromPointing();
                 }
-            }
-        }
-        else // Size is well set by user
-        {
-            // TODO: Do all of the next comments
-            // TODO: Add text explication for operator and patient for instruction
-            // 1. Set the position to center
-            // 2. Move the target slowly to have a smooth poursuit on the current axe
-            // until the FOV limit is reached (patient with touchpad/operator with arrow)
-            // 3. press space bar or trigger to stop the movement and change the Landolt C orientation
-            // 4. The patient or operator moves the target closer to the center until the patient can detect the opening direction
-            // 5. ask the patient to press the touchpad in the good direction (add visual help around the Landolt C simulating the touchpad)
-            // if the patient pressed direction is good,
-            //      if was the last axe, then proceed to result, draw the acuity field.
-            //      else set the current axe to the next one and start to step 1.
-            // else go to step 4.
-            switch (calibStep)
-            {
-                case 1:
-                    ToggleRadialMenu(); // remove Radial Menu around landolt C
-                    landoltC.transform.localPosition = landoltC.transform.localPosition != savedFOVTargetpos ? savedFOVTargetpos : landoltC.transform.localPosition; // 1.
+                break;
+            case 3:
+                ToggleRadialMenu(); // remove Radial Menu around landolt C
+                landoltC.transform.localPosition = landoltC.transform.localPosition != savedFOVTargetpos ? savedFOVTargetpos : landoltC.transform.localPosition; // 1.
+                calibStep++;
+                break;
+            case 4:
+                arrowImage.enabled = true; // set the arrow in the good angle to show the user the direction to go
+                int rotat = rotateAngles[currentTargetIndex];
+                arrowImage.transform.localRotation = Quaternion.Euler(0, 0, rotat);
+                // test if the direction moves the target closer or further from the center
+                keyCodeIndex = GetDirectionIndexPressed();
+                // CalculateAcceptedMovingDirection(); // accepted two directions for current axe
+                if (keyCodeIndex != -1)
+                {
+                    moveDirection = moveDirections[keyCodeIndex];
+                    MoveTargetOnAxis();
+                }
+                if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any))
+                {
                     calibStep++;
-                    break;
-                case 2:
-                    // test if the direction moves the target closer or further from the center
-                    keyCodeIndex = GetDirectionIndexPressed();
-                    // CalculateAcceptedMovingDirection(); // accepted two directions for current axe
-                    if (keyCodeIndex != -1)
-                    {
-                        moveDirection = moveDirections[keyCodeIndex];
-                        MoveTargetOnAxis();
-                    }
-                    if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any))
-                    {
-                        calibStep++;
-                        SetRandomLandoltOrientation();
-                        ToggleRadialMenu(); //Add the radial Menu around the Landolt C
-                    }
+                    SetRandomLandoltOrientation();
+                    ToggleRadialMenu(); //Add the radial Menu around the Landolt C
+                }
 
-                    break;
-                case 3:
-                    // Visual help for patient touchpad touch WIP
-                    // get the good direction click corresponding to Landolt C opened side
-                    // Function to listen to click, get the index
-                    keyCodeIndex = GetDirectionIndexPressed();
-                    if (keyCodeIndex == rotatIndex)
-                    {
-                        SavePos();
-                        calibStep++; // the patient pressed the good direction, move to next tt
-                    }
-                    break;
-                case 4:
-                    if (currentTargetIndex >= FOVEdgePoints.Count - 1)
-                        calibrationIsOver = true;
-                    else
-                    {
-                        currentTargetIndex++;
-                        calibStep = 1;
-                    }
-                    break;
-            }
+                break;
+            case 5:
+                // Visual help for patient touchpad touch WIP
+                // get the good direction click corresponding to Landolt C opened side
+                // Function to listen to click, get the index
+                keyCodeIndex = GetDirectionIndexPressed();
+                if (keyCodeIndex == rotatIndex)
+                {
+                    SavePos();
+                    calibStep++; // the patient pressed the good direction, move to next step
+                }
+                break;
+            case 6:
+                if (currentTargetIndex >= FOVEdgePoints.Count - 1)
+                    calibrationIsOver = true;
+                else
+                {
+                    currentTargetIndex++;
+                    calibStep = 3;
+                }
+                break;
         }
+        touchTimer -= Time.deltaTime;
     }
 
     private void ToggleRadialMenu()
@@ -430,14 +473,15 @@ public class OpticianController : MonoBehaviour
     {
         // Calculate position for the target position from the point the user placed
 
-        int index_left = -1;
         Vector3 pt_left = new Vector3();
-        int index_right = -1;
         Vector3 pt_right = new Vector3();
-        int index_top = -1;
         Vector3 pt_top = new Vector3();
-        int index_down = -1;
         Vector3 pt_down = new Vector3();
+        Vector3 pt_s_top_left = new Vector3();
+        Vector3 pt_s_top_right = new Vector3();
+        Vector3 pt_s_down_left = new Vector3();
+        Vector3 pt_s_down_right = new Vector3();
+        int index_right = -1;
 
         foreach (var pt in pointingSystem.handPoints) // Find the point on the right
         {
@@ -446,73 +490,45 @@ public class OpticianController : MonoBehaviour
                 pt_right = pt;
                 index_right = pointingSystem.handPoints.IndexOf(pt);
             }
-
         }
         if (index_right != 0 && index_right != -1)
         {
             pointingSystem.handPoints.AddRange(pointingSystem.handPoints.Take(index_right)); // set the first item list to the right point
             pointingSystem.handPoints.RemoveRange(0, index_right);
         }
-
         pt_right = new Vector3();
-        index_top = -1;
 
         foreach (var pt in pointingSystem.handPoints)
         {
             if (pt.x > pt_right.x)
-            {
                 pt_right = pt;
-                index_right = pointingSystem.handPoints.IndexOf(pt);
-            }
             if (pt.x < pt_left.x)
-            {
                 pt_left = pt;
-                index_left = pointingSystem.handPoints.IndexOf(pt);
-            }
             if (pt.y > pt_top.y)
-            {
                 pt_top = pt;
-                index_top = pointingSystem.handPoints.IndexOf(pt);
-            }
             if (pt.y < pt_down.y)
-            {
                 pt_down = pt;
-                index_down = pointingSystem.handPoints.IndexOf(pt);
-            }
+        }
+        foreach (var pt in pointingSystem.selectedAxes)
+        {
+            if (pt.y > pt_s_top_right.y && pt.x > 0)
+                pt_s_top_right = pt;
+            if (pt.y > pt_s_top_left.y && pt.x < 0)
+                pt_s_top_left = pt;
+            if (pt.y < pt_s_down_left.y && pt.x < 0)
+                pt_s_down_left = pt;
+            if (pt.y < pt_s_down_right.y && pt.x > 0)
+                pt_s_down_right = pt;
         }
 
-        float total_distanceRD = GetTotalDistanceBetweenTwoPoint(index_right, index_down);
-        Vector3 midPointRD = GetMidPoint(index_right, index_down, total_distanceRD);
-
-        float total_distanceDL = GetTotalDistanceBetweenTwoPoint(index_down, index_left);
-        Vector3 midPointDL = GetMidPoint(index_down, index_left, total_distanceDL);
-
-        float total_distanceLT = GetTotalDistanceBetweenTwoPoint(index_left, index_top);
-        Vector3 midPointLT = GetMidPoint(index_left, index_top, total_distanceLT);
-
-        float total_distanceTR = GetTotalDistanceBetweenTwoPoint(index_top, pointingSystem.handPoints.Count - 1);
-        Vector3 midPointTR = GetMidPoint(index_top, pointingSystem.handPoints.Count - 1, total_distanceTR);
-
         FOVEdgePoints.Add(pt_right);
-        FOVEdgePoints.Add(midPointRD);
+        FOVEdgePoints.Add(pt_s_down_right);
         FOVEdgePoints.Add(pt_down);
-        FOVEdgePoints.Add(midPointDL);
+        FOVEdgePoints.Add(pt_s_down_left);
         FOVEdgePoints.Add(pt_left);
-        FOVEdgePoints.Add(midPointLT);
+        FOVEdgePoints.Add(pt_s_top_left);
         FOVEdgePoints.Add(pt_top);
-        FOVEdgePoints.Add(midPointTR);
-
-        DrawFOV(lineRendererAcuity, FOVEdgePoints, Color.red);
-
-
-        // FOVEdgePoints.Add(pt_right);
-        // FOVEdgePoints.Add(pt_down);
-        // FOVEdgePoints.Insert(1, (FOVEdgePoints[1] + (FOVEdgePoints[0] - FOVEdgePoints[1]) / 2)); // Bottom right point
-        // FOVEdgePoints.Add(pt_left);
-        // FOVEdgePoints.Insert(3, (FOVEdgePoints[3] + (FOVEdgePoints[2] - FOVEdgePoints[3]) / 2)); // Bottom Left point 
-        // FOVEdgePoints.Add(pt_top);
-        // FOVEdgePoints.Insert(5, (FOVEdgePoints[5] + (FOVEdgePoints[4] - FOVEdgePoints[5]) / 2)); // Top left point 
-        // FOVEdgePoints.Insert(7, (FOVEdgePoints[0] + (FOVEdgePoints[6] - FOVEdgePoints[0]) / 2)); // Right point
+        FOVEdgePoints.Add(pt_s_top_right);
 
         int i = 0;
         foreach (var item in FOVEdgePoints)
@@ -522,37 +538,8 @@ public class OpticianController : MonoBehaviour
             FOVpt.Add(pt);
             i++;
         }
-    }
 
-    private float GetTotalDistanceBetweenTwoPoint(int index1, int index2)
-    {
-        float tot_dist = 0.0f;
-        for (var i = index1; i <= index2; i++)
-        {
-            tot_dist += Vector3.Distance(pointingSystem.handPoints[i], pointingSystem.handPoints[index2]);
-        }
-        return tot_dist;
-    }
-
-    private Vector3 GetMidPoint(int index1, int index2, float tot_dist)
-    {
-        //FIXME: CAMARCHEPA
-        float mid_dist = tot_dist / 2;
-        float local_dist = 0.0f;
-        int local_index = -1;
-        for (var i = index1; i <= index2; i++)
-        {
-            local_dist += Vector3.Distance(pointingSystem.handPoints[i], pointingSystem.handPoints[i + 1]);
-             if (local_dist >= mid_dist)
-            {
-                local_index = i;  // the middle point is between this point[i] and point[i+1]
-                i = 99;
-            }
-        }
-        int ind = local_index ==0 ? 0:local_index-1;
-        Vector3 pos = (pointingSystem.handPoints[ind]+pointingSystem.handPoints[local_index])/2;
-
-        return pos;
+        DrawFOV(lineRendererAcuity, FOVpt, Color.red);
     }
 
     // Vector3.MoveTowards
@@ -622,6 +609,7 @@ public class OpticianController : MonoBehaviour
     {
         rotatIndex = GetRandomIndex(l_rotation, rotatIndex);
         int rotat = l_rotation[rotatIndex];
+        radialMenu.transform.GetChild(0).GetComponent<RMF_RadialMenu>().textLabel.text = moveDirections[rotatIndex];
         landoltC.transform.localRotation = Quaternion.Euler(0, 0, rotat);
     }
 
@@ -634,5 +622,70 @@ public class OpticianController : MonoBehaviour
             temp_index = rand.Next(0, lst.ToList().Count);
         } while (temp_index == previous_index);
         return temp_index;
+    }
+
+    public void SaveFOVPointsToScriptableObj()
+    {
+        int key = Convert.ToInt32(distHMDEye);
+
+        if (FOVPointsSave.fOVPts == null) // test if list has been initialized
+            FOVPointsSave.fOVPts = new List<FOVPoints>();
+        FOVPoints FOVpt = null;
+        if (FOVPointsSave.fOVPts.Count > 0)
+            FOVpt = FOVPointsSave.fOVPts.FirstOrDefault(p => p.id == key); // look for object with the choosen id
+        if (FOVpt == null)
+        {
+            FOVpt = new FOVPoints();
+            FOVpt.id = key;
+            FOVpt.points = pointingSystem.handPoints;
+            FOVpt.selectedAxes = pointingSystem.selectedAxes;
+            FOVPointsSave.fOVPts.Add(FOVpt);
+        }
+        else
+        {
+            FOVpt.points = pointingSystem.handPoints;
+            FOVpt.selectedAxes = pointingSystem.selectedAxes;
+        }
+    }
+
+    public void ResetFOVPoints()
+    {
+        FOVPointsSave.fOVPts.Clear();
+    }
+
+    public void ChangeHMDEyeDistanceValue(Slider slider)
+    {
+        distHMDEye = slider.value;
+        FOVPointsSave.previous_HMDeye_distance = distHMDEye;
+        HMDeyeDistanceText.text = (slider.value / 2).ToString();
+        LoadFOVPoints();
+    }
+
+    // Function to load points from the scriptable object FOVPoints
+    //     also draw the LineRenderer paths from the points
+    private void LoadFOVPoints()
+    {
+        distHMDEye = FOVPointsSave.previous_HMDeye_distance;
+        FOVPoints FOVpt = null;
+        if (FOVPointsSave.fOVPts.Count > 0)
+            FOVpt = FOVPointsSave.fOVPts.FirstOrDefault(p => p.id == Convert.ToInt32(distHMDEye)); // look for object with the choosen id
+        if (FOVpt != null)
+        {
+            pointingSystem.handPoints = FOVpt.points;
+            pointingSystem.selectedAxes = FOVpt.selectedAxes;
+            DrawFOV(lineRenderer, pointingSystem.handPoints, Color.blue);
+            pointingSystem.isCalibEnded = true;
+        }
+    }
+
+    public void LoadNextScene(string nextScene)
+    {
+        SceneManager.LoadSceneAsync(nextScene);
+        SceneManager.UnloadSceneAsync("OpticianCalibration");
+    }
+
+    private void OnDisable()
+    {
+        EditorUtility.SetDirty(FOVPointsSave);
     }
 }

@@ -19,11 +19,11 @@ public class PointingSystem : MonoBehaviour
     public AxisType facingAxis = AxisType.ZAxis;
     public float length = 100f;
     public bool showCursor = true;
-    
+
     [HideInInspector]
     public bool isCalibEnded = false;
     public Text explainText;
-    public delegate void OnAddPointdeleg () ;
+    public delegate void OnAddPointdeleg();
 
     internal Vector3 handPoint;
     internal List<Vector3> handPoints;
@@ -37,15 +37,17 @@ public class PointingSystem : MonoBehaviour
     Vector3 cursorScale = new Vector3(0.05f, 0.05f, 0.05f);
     float contactDistance = 0f;
     Transform contactTarget = null;
-    private bool selectAxes;
+    public bool selectAxes;
     private Text textButton;
+    public List<Vector3> selectedAxes;
 
-    
-	public static event OnAddPointdeleg OnAddPoint;
+    public static event OnAddPointdeleg OnAddPoint;
 
-    void Start() {
+    void Start()
+    {
         textButton = StartButton.GetComponentInChildren<Text>();
         textButton.text = "SET FOV POINTS";
+        selectedAxes = new List<Vector3>();
     }
     void SetPointerTransform(float setLength, float setThicknes)
     {
@@ -150,11 +152,11 @@ public class PointingSystem : MonoBehaviour
 
     void Update()
     {
+        Ray raycast = new Ray(transform.position, transform.forward);
+
+        bool rayHit = Physics.Raycast(raycast, out hitObject);
         if (start && !selectAxes)
         {
-            Ray raycast = new Ray(transform.position, transform.forward);
-
-            bool rayHit = Physics.Raycast(raycast, out hitObject);
             if (SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any) && !GameObject.ReferenceEquals(hitObject.collider.gameObject, StartButton))
             {
                 AddPoint();
@@ -172,33 +174,35 @@ public class PointingSystem : MonoBehaviour
                 }
             }
         }
-        if(selectAxes) {
-            // draw four major axes
-            // let the user select four middle axes
-
-
-        }
-    }
-
-    private void CalculateAxesPoints() {
-        
-        // Calculate position for the target position from the point the user placed
-
-        Vector3 pt_left = new Vector3();
-        Vector3 pt_right = new Vector3();
-        Vector3 pt_top = new Vector3();
-        Vector3 pt_down = new Vector3();
-
-        foreach (var pt in handPoints)
+        if (selectAxes)
         {
-            if (pt.x > pt_right.x)
-                pt_right = pt;
-            if (pt.x < pt_left.x)
-                pt_left = pt;
-            if (pt.y > pt_top.y)
-                pt_top = pt;
-            if (pt.y < pt_down.y)
-                pt_down = pt;
+            if (selectedAxes.Count < 4)
+            {
+                if (SteamVR_Input._default.inActions.GrabPinch.GetStateDown(SteamVR_Input_Sources.Any) && !GameObject.ReferenceEquals(hitObject.collider.gameObject, StartButton))
+                {
+                    Vector3 selected_point = new Vector3();
+                    if (hitObject.collider != null)
+                    {
+                        handPoint = hitObject.collider.transform.worldToLocalMatrix.MultiplyPoint3x4(hitObject.point);
+                        float dist = float.MaxValue;
+
+                        foreach (Vector3 point in handPoints)
+                        {
+                            float temp_dist = Vector3.Distance(point, handPoint);
+                            if (temp_dist <= dist)
+                            {
+                                dist = temp_dist;
+                                selected_point = point;
+                            }
+                        }
+                    }
+                    selectedAxes.Add(selected_point);
+                }
+            }
+            if (selectedAxes.Count == 4)
+            {
+                isCalibEnded = true;
+            }
         }
     }
 
@@ -208,7 +212,7 @@ public class PointingSystem : MonoBehaviour
         {
             handPoint = hitObject.collider.transform.worldToLocalMatrix.MultiplyPoint3x4(hitObject.point);
             handPoints.Add(handPoint);
-            if(OnAddPoint!= null)
+            if (OnAddPoint != null)
                 OnAddPoint();
         }
     }
