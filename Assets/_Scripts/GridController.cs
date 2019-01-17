@@ -24,7 +24,8 @@ public class GridController : MonoBehaviour
         PupilData.calculateMovingAverage = false;
         positionText = gameObject.GetComponent<TextMesh>();
         sceneCamera = gameObject.GetComponent<Camera>();
-        heading = gameObject.GetComponent<LineRenderer>();
+        //heading = gameObject.GetComponent<LineRenderer>();
+        heading = GameObject.Find("LineRenderer").GetComponent<LineRenderer>();
     }
 
     void OnEnable()

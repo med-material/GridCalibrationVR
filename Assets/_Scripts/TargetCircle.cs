@@ -172,11 +172,7 @@ public class TargetCirle
                 Vector3 last_good_scale = previous_scales.Reverse<Vector3>().ToList()[l_looked.Reverse<bool>().ToList().FindIndex(l => l)];
                 circle.transform.localScale += (last_good_scale - previous_scale) / 2;
             }
-            // If the last four times the target was looked
-            /**if (l_looked.Reverse<bool>().Take(4).ToList().Where(l => l).ToList().Count == 4)
-            {
-                ResetScale();
-            }*/
+
             // If the last four times the target was NOT looked
             if (l_looked.Reverse<bool>().Take(5).ToList().Where(l => !l).ToList().Count == 5)
             {
@@ -201,7 +197,7 @@ public class TargetCirle
         Object.Destroy(circle);
     }
 
-    internal void ReduceScale()
+    internal void ReduceScale() 
     {
 
             circle.transform.localScale *= target_shrinking;
@@ -210,7 +206,7 @@ public class TargetCirle
             previous_scales.Add(previous_scale);
     }
 
-    internal void reduceSpeed(float dis, float coef, int mode)
+    internal void reduceSpeed(float dis, float coef, int mode) //Reduce the speed depending of the mode and a given coefficient
     {
 
         timer += Time.deltaTime;
@@ -234,7 +230,7 @@ public class TargetCirle
         }
     }
 
-    internal void outlinePulse(Material mat, float max, float step)
+    internal void outlinePulse(Material mat, float max, float step) //The pulsation is set with a max value of width and a step
     {
 
         if(highlightWidth < max)
@@ -248,10 +244,10 @@ public class TargetCirle
         mat.SetFloat("_OutlineWidth", highlightWidth);
     }
 
-    internal bool bigCircleMode()
+    internal bool bigCircleMode() 
     {
 
-        if (circle.transform.localScale.x * 0.98f > scale_to_reach.x)
+        if (circle.transform.localScale.x * 0.98f > scale_to_reach.x) //While the decreasing local scale is bigger than the normal scale for a target
         {
             circle.transform.localScale *= 0.988f;
             isCirleGoodSize = false;
@@ -259,7 +255,7 @@ public class TargetCirle
         }
         else
         {
-            if (!isCirleGoodSize)
+            if (!isCirleGoodSize) //If the local scale went under the normal scale for a target, the local scale become the normal scale
             {
                 circle.transform.localScale = scale_to_reach;
                 isCirleGoodSize = true;
@@ -273,22 +269,21 @@ public class TargetCirle
     {
         if (!isPositionOk)
         {
-            if (startMovingCircle)
+            if (startMovingCircle) //We save the local position of the newly created circle, and for now we give it the position of the old circle
             {
                 position_to_reach = circle.transform.localPosition;
                 circle.transform.localPosition = savedPosition;
                 startMovingCircle = false;
                 isPositionOk = false;
-                distance = Vector3.Distance(circle.transform.localPosition, position_to_reach);
+                distance = Vector3.Distance(circle.transform.localPosition, position_to_reach); //We calculate the distance between the old and new target
                 timeToGrow = distance / SPEED_OF_CIRCLE;
             }
             else
             {
 
-                if (circle.transform.localPosition != position_to_reach)
+                if (circle.transform.localPosition != position_to_reach) //While the circle is not in the right position, we move it with a speed depending on how much time the circle will have to grow back to its original size
                 {
                     float step = SPEED_OF_CIRCLE * Time.deltaTime;
-                    //circle.transform.position = Vector3.Lerp(circle.transform.localPosition, position_to_reach, t);
                     circle.transform.localPosition = Vector3.MoveTowards(circle.transform.localPosition, position_to_reach, step);
                     isPositionOk = false;
                 }
@@ -312,7 +307,7 @@ public class TargetCirle
             else
             {
 
-                if (startReGrowthCircle)
+                if (startReGrowthCircle) //We save the current scale of the new circle and give it the last scale of the old circle
                 {
                     circle.transform.localScale = savedScale;
                     startReGrowthCircle = false;
@@ -321,13 +316,13 @@ public class TargetCirle
                 }
                 else
                 {
-                    float step = (distToGrow/timeToGrow) * Time.deltaTime;
-                    if (circle.transform.localScale.x * step < scale_to_reach.x)
+                    float step = (distToGrow/timeToGrow) * Time.deltaTime; //the step value is calculated depending of the calculated time for the target to grow back to the normal size
+                    if (circle.transform.localScale.x * step < scale_to_reach.x) //While the increasing local scale is smaller than the normal scale for a target
                     {
                         circle.transform.localScale = Vector3.MoveTowards(circle.transform.localScale, scale_to_reach, step);
                         isSizeOk = false;
                     }
-                    else
+                    else //If the local scale went bigger than the normal scale for a target, the local scale become the normal scale
                     {
                         circle.transform.localScale = scale_to_reach;
                         startReGrowthCircle = true;
@@ -337,7 +332,7 @@ public class TargetCirle
             }
         }
 
-        if(isPositionOk && isSizeOk)
+        if(isPositionOk && isSizeOk) //If the size and position of the target are the "normal" one
         {
             isPositionOk = false;
             isSizeOk = false;

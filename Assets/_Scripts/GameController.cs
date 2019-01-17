@@ -74,14 +74,8 @@ public class GameController : MonoBehaviour
         ResetTargetTimer();
         ResetTimer();
 
-        /* if (rst.restart){
 
-            dedicatedCapture = rst.camera;
-
-        } else{*/
-
-            dedicatedCapture = Camera.main;
-        //}
+        dedicatedCapture = Camera.main;
         rst = GameObject.Find("SceneController").GetComponent<ResetHandler>();
         logger = GetComponent<LoggerBehavior>();
         userbhv = GetComponent<UserBehaviour>();
@@ -148,90 +142,6 @@ public class GameController : MonoBehaviour
         CENTER_Y_T = wall_height - wall_height / 3;
     }
 
-   /* private void StartApproxMode()
-    {
-        // Check if calibration is ended, delete current target, create each target in centered position
-        if (calib_end && only_one)
-        {
-            print("Calibration test end.");
-            targets.ForEach(t =>
-            {
-                if (t.circle_created)
-                {
-                    t.DestroyTarget();
-                }
-                t.CreateTarget(wall, true, chooseCircleMode);
-            });
-            only_one = false;
-        }
-        else if (only_one)
-        {
-            // Get the current object looked at
-            looking_at_circle = gridController.GetCurrentCollider();
-            timeLeft -= Time.deltaTime;
-            if (timeLeft < 0)
-            {
-                ResetTimer();
-                // Destroy last target
-                if (last_target != null)
-                {
-                    last_target.DestroyTarget();
-                    travel_time = -1.0f;
-                }
-                // Get a random target and spawn it
-                TargetCirle trgt = selectItem();
-                if (trgt != null)
-                {
-                    trgt.CreateTarget(wall, false, chooseCircleMode);
-                    //print(trgt.circle.transform.localScale.ToString("F5"));
-                    last_target = trgt;
-                }
-            }
-
-            // Process the target looked at 
-            if (looking_at_circle.collider)
-            {
-                if (looking_at_circle.collider.name == "Cylinder" && canDetectCircle)
-                {
-                    if (looking_at_circle_before.collider)
-                    {
-                        if (System.Object.ReferenceEquals(looking_at_circle.collider, looking_at_circle_before.collider))
-                        {
-                            if (travel_time < 0)
-                            {
-                                travel_time = timeLeft;
-                            }
-                            // If the target looked at is the same as before, start time
-                            target_timer -= Time.deltaTime;
-                            if (target_timer < 10)
-                            {
-                                looking_at_circle.collider.GetComponent<Renderer>().material.color = success_color;
-                            }
-                        }
-                        else
-                        {
-                            looking_at_circle.collider.GetComponent<Renderer>().material.color = Color.white;
-                            ResetTargetTimer();
-                        }
-                    }
-                    looking_at_circle_before = looking_at_circle;
-                }
-                else
-                {
-                    ResetTargetTimer();
-                }
-            }
-            // If the target has been fixed
-            if (target_timer < 0)
-            {
-                //print("The target was looked for 300ms");
-                timeLeft = -1.0f;
-                last_target.was_looked = true;
-                ResetTargetTimer();
-            }
-        }
-    }*/
-
     private void StartShrinkMode()
     {
         if (calib_end && only_one)
@@ -259,13 +169,13 @@ public class GameController : MonoBehaviour
                 wait = false;
                 if (last_target != null)
                 {
-                    if(last_target.circle.transform.localScale == last_target.scale_to_reach)
+                    if(last_target.circle.transform.localScale == last_target.scale_to_reach) //While changing the targets, if the old one's size hasn't changed, it means the user failed to stare at it, we increments a fail count
                     {
                         last_target.calib_failed++;
                     }
-                    if (chooseCircleMode == 2)
+                    if (chooseCircleMode == 2) //We save the original scale and position for the mode
                     {
-                        savedScale = last_target.circle.transform.localScale;
+                        savedScale = last_target.circle.transform.localScale; 
                         savedPosition = last_target.circle.transform.localPosition;
                     }
                     last_target.DestroyTarget();
@@ -273,12 +183,12 @@ public class GameController : MonoBehaviour
                 // If the target is not created, create it
                 if (!trgt.circle_created)
                 {
-                    if (chooseCircleMode == 2)
+                    if (chooseCircleMode == 2) //If it is the declining mode
                     {
-                        if (savedScale != Vector3.zero)
+                        if (savedScale != Vector3.zero) //If we have a saved scale
                         {
                             trgt.CreateTarget(wall, true, chooseCircleMode, false, savedScale);
-                            trgt.SPEED_OF_CIRCLE = SPEED_OF_CIRCLE;
+                            trgt.SPEED_OF_CIRCLE = SPEED_OF_CIRCLE; 
                         }
                         else
                         {
@@ -290,14 +200,11 @@ public class GameController : MonoBehaviour
                         trgt.CreateTarget(wall, true, chooseCircleMode, false);
                     }
 
-                    if (last_target != null && canDetectCircle)
+                    if (last_target != null && canDetectCircle) //We get the distraction when the user is starring at the target
                     {
                         prevPos = last_target.circle.transform.localPosition;
 
                         distraction = getDistraction(userbhv.totalGazePointsDistance, Vector3.Distance(prevPos, trgt.circle.transform.localPosition));
-                        print("DISTRACTION :" + distraction);
-
-                        print("Premier cercle : " + last_target.circle.transform.localPosition + " Nouveau cercle " + trgt.circle.transform.localPosition + " Distance avec le cercle précèdent " + Vector3.Distance(prevPos, trgt.circle.transform.localPosition));
                     }
                     travel_time = 0.0f;
                     target_timer = 0.0f;
@@ -306,7 +213,7 @@ public class GameController : MonoBehaviour
                 ResetTimer();
             }
 
-            // Choose the Circle Mode
+            // Launch the circle mode selected
             if (last_target.circle_created)
             {
                 if (chooseCircleMode == 1)
@@ -350,11 +257,10 @@ public class GameController : MonoBehaviour
             // If the user is looking the target, reduce its scale 
             if (looking_at_circle.collider)
             {
-                //Vector3 posCircleHeatMap = new Vector3(looking_at_circle.transform.position.x, looking_at_circle.transform.position.y, looking_at_circle.transform.position.z - 0.5f);
-                //Vector3 posCircleHeatMap = looking_at_circle.transform.position;
-                if (canDetectCircle)
+
+                if (canDetectCircle) //if any changes (depending on the mode) on the target is over
                 {
-                    if (looking_at_circle.collider.name == "Cylinder")
+                    if (looking_at_circle.collider.name == "Cylinder") //if it's on the target
                     {
                         LogData();
                         if (travel_time <= 0.0f)
@@ -369,7 +275,6 @@ public class GameController : MonoBehaviour
 
                         //Depending of the dispersion, we reduce or increase the shrinking speed.
                         last_target.reduceSpeed(userbhv.getDispersion(), 0.038f, 1);
-                        print("JE REDUIS LE CERCLE " + canDetectCircle);
                         last_target.ReduceScale();
                         looking_at_circle_before = looking_at_circle;
                     }
@@ -410,7 +315,7 @@ public class GameController : MonoBehaviour
             do
             {
                 target_index = rand.Next(lst_trgt.Count);
-                //} while (last_index == target_index);
+
             } while (System.Object.ReferenceEquals(last_target, lst_trgt[target_index]));
             last_index = target_index;
             target = lst_trgt[target_index];
@@ -448,12 +353,12 @@ public class GameController : MonoBehaviour
         return 100 - (((first_scale - current_scale) / first_scale) * 100);
     }
 
-    public float getDistanceBetweenCircle(Vector3 pos1, Vector3 pos2)
+    public float getDistanceBetweenCircle(Vector3 pos1, Vector3 pos2) //Distance btw two target's positions
     {
         return Vector3.Distance(pos1, pos2);
     }
 
-    public float getDistraction(float dis1, float dis2)
+    public float getDistraction(float dis1, float dis2) //Difference btw two distances (usually the shortest distance btw 2 targets and the distance travelled by the user 's gaze)
     {
         return dis1 - dis2;
     }
