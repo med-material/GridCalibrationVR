@@ -8,7 +8,7 @@ public class GridController : MonoBehaviour
     public Camera eyeCamera;
     private Camera sceneCamera;
     private TextMesh positionText;
-    private LineRenderer heading;
+    public LineRenderer heading;
     private Vector3 standardViewportPoint = new Vector3(0.5f, 0.5f, 10);
     private Vector2 gazePointLeft;
     private Vector2 gazePointRight;
@@ -24,8 +24,6 @@ public class GridController : MonoBehaviour
         PupilData.calculateMovingAverage = false;
         positionText = gameObject.GetComponent<TextMesh>();
         sceneCamera = gameObject.GetComponent<Camera>();
-        //heading = gameObject.GetComponent<LineRenderer>();
-        heading = GameObject.Find("LineRenderer").GetComponent<LineRenderer>();
     }
 
     void OnEnable()

@@ -10,10 +10,10 @@ using Valve.VR;
 using System.Globalization;
 public class OpticianController : MonoBehaviour
 {
+    public Text directionLabel;
     public GameObject landoltC;
     public Text explainText;
     public GameObject FOVTarget;
-    public GridController gridController;
     public List<Vector3> FOVPointsLocal;
     public Transform OperatorPlane;
     public Transform FovContainer;
@@ -42,7 +42,6 @@ public class OpticianController : MonoBehaviour
     private int rotatIndex = 0;
     private int keyCodeIndex;
     private float FOVTimer = 0;
-    private RaycastHit userHit;
     private List<string> moveDirections;
     private List<int> rotateAngles;
     private string moveDirection;
@@ -108,6 +107,7 @@ public class OpticianController : MonoBehaviour
         explainText.color = textColor;
         nbDirectionEnded = 0;
         moveDirection = moveDirections[nbDirectionEnded];
+        directionLabel.gameObject.layer = 11;
 
         if (!lineMaterial)
         {
@@ -176,7 +176,6 @@ public class OpticianController : MonoBehaviour
 
     void Update()
     {
-        userHit = gridController.GetCurrentCollider();
         if (calibrationIsOver)
         {
             radialMenu.SetActive(false);
@@ -609,7 +608,7 @@ public class OpticianController : MonoBehaviour
     {
         rotatIndex = GetRandomIndex(l_rotation, rotatIndex);
         int rotat = l_rotation[rotatIndex];
-        radialMenu.transform.GetChild(0).GetComponent<RMF_RadialMenu>().textLabel.text = moveDirections[rotatIndex];
+        directionLabel.text = moveDirections[rotatIndex];
         landoltC.transform.localRotation = Quaternion.Euler(0, 0, rotat);
     }
 
@@ -680,8 +679,8 @@ public class OpticianController : MonoBehaviour
 
     public void LoadNextScene(string nextScene)
     {
-        SceneManager.LoadSceneAsync(nextScene);
-        SceneManager.UnloadSceneAsync("OpticianCalibration");
+        //SceneManager.LoadSceneAsync(nextScene);
+        //SceneManager.UnloadSceneAsync("OpticianCalibration");
     }
 
     private void OnDisable()

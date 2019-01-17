@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18072857, g: 0.22174108, b: 0.2810852, a: 1}
+  m_IndirectSpecularColor: {r: 0.18072876, g: 0.22174138, b: 0.2810855, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1785,7 +1785,7 @@ GameObject:
   - component: {fileID: 1475910803}
   - component: {fileID: 1475910804}
   m_Layer: 11
-  m_Name: LineRenderer
+  m_Name: LineR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2369,6 +2369,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   eyeCamera: {fileID: 526578068}
+  heading: {fileID: 1475910804}
   shaderMaterial: {fileID: 2100000, guid: f51f5d0c76790c44cb42ff0209bc174e, type: 2}
 --- !u!81 &1915425638
 AudioListener:
