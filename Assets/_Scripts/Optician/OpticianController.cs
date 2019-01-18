@@ -52,8 +52,6 @@ public class OpticianController : MonoBehaviour
     private List<Vector3> savedTargetposList;
     private Color textColor = new Color(0.6415094f, 0.6415094f, 0.6415094f, 1.0f);
     private bool isSizeOk = false;
-    private bool isConfirmingPosition = false;
-    private bool changePos = false;
     private int currentTargetIndex = 0;
     private bool calibrationIsOver;
     private Material lineMaterial;
@@ -61,7 +59,6 @@ public class OpticianController : MonoBehaviour
     private LineRenderer lineRendererAcuity;
     private List<float> landolt_factor = new List<float>() { 2.0f, 1.5f, 1.33f, 1.25f, 1.20f, 1.1666667f, 1.1424f, 1.1261213f, 1.11f, 1.5f, 1.332f };
     private int landolt_current_index = 0;
-    private List<string> acceptedDirection = new List<string>();
     private int calibStep = 1;
     private List<Vector3> FOVpt;
     private float touchTimer;
@@ -679,8 +676,8 @@ public class OpticianController : MonoBehaviour
 
     public void LoadNextScene(string nextScene)
     {
-        //SceneManager.LoadSceneAsync(nextScene);
-        //SceneManager.UnloadSceneAsync("OpticianCalibration");
+        SceneManager.LoadSceneAsync(nextScene);
+        SceneManager.UnloadSceneAsync("OpticianCalibration");
     }
 
     private void OnDisable()

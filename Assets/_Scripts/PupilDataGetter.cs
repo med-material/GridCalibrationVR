@@ -10,7 +10,6 @@ public class PupilDataGetter
     private static PupilDataGetter instance;
 
     # region public_data
-    public float confidence;
     public float left_confidence;
     public float right_confidence;
     public string current_topic;
@@ -27,8 +26,6 @@ public class PupilDataGetter
     public Vector2 norm_pos_right;
     public float diameter_right;
     public float diameter_left;
-    public Vector3 rotation_right;
-    public Vector3 rotation_left;
     public float pupil_angle_left;
     public float pupil_angle_right;
     public Vector3 pupil_center_left;

@@ -7,23 +7,13 @@ using UnityEngine.SceneManagement;
 
 public class StartHandler : MonoBehaviour
 {
-
-    public GridController gridController;
     public GameController gameController;
     private ResetHandler rst;
-    private RaycastHit obj;
     private GameObject normal, declining, moving, currentSelection;
     private Material[] target_material = new Material[2];
     public GameObject Menu;
-    public GameObject startButton;
-    public GameObject approxButton;
-    public GameObject shrinkButton;
-    public Image shrinkLoader;
-    public Image approxLoader;
-    public Image startLoader;
     public GameObject countDownText;
     public float timer;
-    public bool isRestarted;
     private float countDown = 3.0f;
     private bool startCountdown = false;
 
@@ -108,13 +98,6 @@ public class StartHandler : MonoBehaviour
     private void ResetTimer()
     {
         timer = 2.0f;
-    }
-
-    private void ResetFillAmount()
-    {
-        startLoader.fillAmount = 0.0f;
-        approxLoader.fillAmount = 0.0f;
-        shrinkLoader.fillAmount = 0.0f;
     }
 
     private void makeItShine(GameObject current) //Highlight the button when selected (with 1/2/3)

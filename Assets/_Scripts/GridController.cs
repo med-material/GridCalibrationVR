@@ -16,7 +16,6 @@ public class GridController : MonoBehaviour
     private RaycastHit hit;
     private RaycastHit circleHit;
     private RaycastHit[] hits;
-    public Material shaderMaterial;
     LayerMask collisionCircleLayer;
 
     void Start()

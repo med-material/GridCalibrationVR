@@ -18,7 +18,6 @@ public class GameController : MonoBehaviour
     public float choosenTime;
     public float travel_time = -1.0f;
     public string choosenMode = "";
-    public string test_name;
     public bool calib_end = false;
     [Range(0.4f, 2f)]
     public float SPEED_OF_CIRCLE = 0.4f;
@@ -29,7 +28,6 @@ public class GameController : MonoBehaviour
     # region private_value
 
     private ResetHandler rst;
-    private Vector3 gazeToWorld;
     private float CENTER_X_L;
     private float CENTER_Y_C;
     private float CENTER_X_R;
@@ -46,11 +44,7 @@ public class GameController : MonoBehaviour
     private float target_timer;
     private float heat_timer;
     private bool only_one = true;
-    private Color success_color = new Color(0.07f, 0.8f, 0.07f, 1);
-    private Vector2 pixelUV;
-
     private Vector3 prevPos;
-
     private float distraction;
 
     //private bool chooseCircleMode = false;
