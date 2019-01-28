@@ -41,7 +41,8 @@ public class StartHandler : MonoBehaviour
 
             if(currentSelection != null)
             {
-                currentSelection.GetComponent<MeshRenderer>().materials[1] = null;
+                //currentSelection.GetComponent<MeshRenderer>().materials[1] = null;
+                makeItNormal(currentSelection);
             }
             currentSelection = normal;
             makeItShine(currentSelection);
@@ -51,7 +52,8 @@ public class StartHandler : MonoBehaviour
         {
             if (currentSelection != null)
             {
-                currentSelection.GetComponent<MeshRenderer>().materials[1] = null;
+                //currentSelection.GetComponent<MeshRenderer>().materials[1] = null;
+                makeItNormal(currentSelection);
             }
             currentSelection = declining;
             makeItShine(currentSelection);
@@ -61,7 +63,8 @@ public class StartHandler : MonoBehaviour
         {
             if (currentSelection != null)
             {
-                currentSelection.GetComponent<MeshRenderer>().materials[1] = null;
+                //currentSelection.GetComponent<MeshRenderer>().materials[1] = null;
+                makeItNormal(currentSelection);
             }
             currentSelection = moving;
             makeItShine(currentSelection);
@@ -104,6 +107,13 @@ public class StartHandler : MonoBehaviour
     {
         target_material[0] = (Material)Resources.Load("Start button");
         target_material[1] = (Material)Resources.Load("Shiny");
+        currentSelection.GetComponent<MeshRenderer>().materials = target_material;
+    }
+
+    private void makeItNormal(GameObject current) //Stop higlighting when button no longer selected
+    {
+        target_material[0] = (Material)Resources.Load("Start button");
+        target_material[1] = null;
         currentSelection.GetComponent<MeshRenderer>().materials = target_material;
     }
 
