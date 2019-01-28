@@ -195,16 +195,22 @@ public class OpticianController : MonoBehaviour
                 {
                     if (pointingSystem.isCalibEnded)
                     {
-                        isFOVCalibEnded = true;
-                        lineRenderer.loop = true;
-                        saveButton.interactable = true;
-                        pointingSystem.StartButton.SetActive(false);
                         distHMDEye = FOVPointsSave.previous_HMDeye_distance;
                         FOVPoints pt = FOVPointsSave.fOVPts.FirstOrDefault(p => p.id == Convert.ToInt32(distHMDEye));
                         if (pt != null)
                         {
-                            pt.selectedAxes = pointingSystem.selectedAxes;
-                            pointingSystem.selectAxes = true;
+                            if (pt.points.Count != 0)
+                            {
+                                saveButton.interactable = true;
+                                if (pointingSystem.selectedAxes.Count > 3)
+                                {
+                                    pointingSystem.StartButton.SetActive(false);
+                                    lineRenderer.loop = true;
+                                    isFOVCalibEnded = true;
+                                    pt.selectedAxes = pointingSystem.selectedAxes;
+                                    pointingSystem.selectAxes = true;
+                                }
+                            }
                         }
 
                         // DrawFOV(lineRenderer, pointingSystem.handPoints, Color.blue);

@@ -51,7 +51,7 @@ public class GridController : MonoBehaviour
         if (heading.enabled)
         {
             heading.SetPosition(0, sceneCamera.transform.position - sceneCamera.transform.up);
-
+    
             Ray ray = sceneCamera.ViewportPointToRay(viewportPoint);
 
             hits = Physics.RaycastAll(ray);

@@ -155,7 +155,7 @@ public class PointingSystem : MonoBehaviour
         Ray raycast = new Ray(transform.position, transform.forward);
 
         bool rayHit = Physics.Raycast(raycast, out hitObject);
-        if (start && !selectAxes)
+            if (start && !selectAxes)
         {
             if (SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any) && !GameObject.ReferenceEquals(hitObject.collider.gameObject, StartButton))
             {
