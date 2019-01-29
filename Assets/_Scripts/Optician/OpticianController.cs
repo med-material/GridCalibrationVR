@@ -343,9 +343,7 @@ public class OpticianController : MonoBehaviour
             left_button.interactable = false;
         }
 
-
-        // TODO: Do all of the next comments
-        // TODO: Add text explication for operator and patient for instruction
+        // TODO: Add better text explication for operator and patient for instruction
         // 1. Let the user choose the size of the Landolt checked
         // 2. Let the user confirm positions 
         // 3. Set the position to center
@@ -360,9 +358,9 @@ public class OpticianController : MonoBehaviour
         // else go to step 4.
         switch (calibStep)
         {
-            case 1:
-                explainText.text = "Increase or reduce size of the \n circle to the minimum size for wich you can still see "
-               + "the open side of it. \n Press trigger/space bar to start";
+            case 1: // selecting Landolt C size
+                explainText.text = "Increase or reduce size of the \n Landolt C to the minimum size for wich you can still see "
+               + "the gap. Press trigger/space bar to start";
                 right_button.interactable = false;
                 left_button.interactable = false;
 
@@ -380,13 +378,12 @@ public class OpticianController : MonoBehaviour
                 {
                     calibStep++;
                     touchTimer = 0.3f;
-                    // Change text to explain this step
                 }
                 break;
-            case 2:
+            case 2: // Confirming Landolt C size
                 right_button.interactable = true;
                 left_button.interactable = true;
-                explainText.text = "Select opened side with the controller touchpad or keyboard arrows";
+                explainText.text = "Select gap position with the controller touchpad or keyboard arrows";
                 if (Input.GetKeyDown(KeyCode.Space) || SteamVR_Input._default.inActions.GrabPinch.GetStateUp(SteamVR_Input_Sources.Any) && touchTimer <= 0)
                 {
                     calibStep--;
@@ -402,13 +399,18 @@ public class OpticianController : MonoBehaviour
                     if (FOVEdgePoints.Count == 0)
                         CalculateAllPosFromPointing();
                 }
+                else {
+                    // The user failed pressing the good gap position
+                    // go back to previous step
+                    calibStep--;
+                }
                 break;
-            case 3:
+            case 3: // Setup the Landolt C in the middle 
                 ToggleRadialMenu(); // remove Radial Menu around landolt C
                 landoltC.transform.localPosition = landoltC.transform.localPosition != savedFOVTargetpos ? savedFOVTargetpos : landoltC.transform.localPosition; // 1.
                 calibStep++;
                 break;
-            case 4:
+            case 4: // User moves the Landolt C
                 arrowImage.enabled = true; // set the arrow in the good angle to show the user the direction to go
                 int rotat = rotateAngles[currentTargetIndex];
                 arrowImage.transform.localRotation = Quaternion.Euler(0, 0, rotat);
@@ -438,8 +440,12 @@ public class OpticianController : MonoBehaviour
                     SavePos();
                     calibStep++; // the patient pressed the good direction, move to next step
                 }
+                else {
+                    // user failed pressing good gap position, get back to step 2
+                    calibStep = 3;
+                }
                 break;
-            case 6:
+            case 6: // checking if calibration is over or if proceeding to next axe
                 if (currentTargetIndex >= FOVEdgePoints.Count - 1)
                     calibrationIsOver = true;
                 else
@@ -650,9 +656,13 @@ public class OpticianController : MonoBehaviour
         }
     }
 
+    // function to reset points for one eye-lens distance value set for the slider
     public void ResetFOVPoints()
     {
-        FOVPointsSave.fOVPts.Clear();
+        FOVPoints fov = FOVPointsSave.fOVPts[Convert.ToInt32(distHMDEye)];
+        fov.points.Clear();
+        fov.selectedAxes.Clear();
+        fov.acuityFieldPoints.Clear();
     }
 
     public void ChangeHMDEyeDistanceValue(Slider slider)
