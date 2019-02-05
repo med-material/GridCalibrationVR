@@ -1500,7 +1500,7 @@ GameObject:
   - component: {fileID: 1607788668}
   - component: {fileID: 1607788667}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: Menu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2180,7 +2180,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2103314850}
   - component: {fileID: 2103314849}
-  - component: {fileID: 2103314851}
   m_Layer: 0
   m_Name: MenuController
   m_TagString: Untagged
@@ -2212,19 +2211,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2103314851
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2103314848}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37bc500822e7a454b8d29726c95a51b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Settings: {fileID: 11400000, guid: 6cffd4f881bd6e34093ceac4826b0519, type: 2}
-  ProjectName: 
 --- !u!1 &2127097069
 GameObject:
   m_ObjectHideFlags: 0

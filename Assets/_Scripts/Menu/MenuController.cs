@@ -20,6 +20,7 @@ public class MenuController : MonoBehaviour
     private const string calibArthurButtonName = "Calibration test (Arthur)";
     private Image statusDot;
     private Text statusText;
+    private bool saveStatus;
     private Text infoText;
     private Dictionary<Button, string> dicButtonTooltip;
     private string defaultTooltipValue = "Hover buttons to print information here.";
@@ -36,39 +37,52 @@ public class MenuController : MonoBehaviour
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnLevelFinishedLoading;
-        // get the notification if pupil service is started and change the Dot color regardings that info
-        
+
         // Setup event for mouse hover on button to toggle tooltip
         MouseController.onMouseEnter += ToggleTooltip;
         MouseController.onMouseExit += ToggleDefaultTooltip;
         MouseController.onMouseClick += StartScene;
     }
 
-    void Start(){
+    void Start()
+    {
         PupilTools.OnConnected += DotStatusOn;
         PupilTools.OnDisconnecting += DotStatusOff;
         PupilTools.OnCalibrationEnded += ActivateButtonsCalib;
-        
-        PupilSettings.Instance.currentCamera = Camera.main;
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
-            SceneManager.LoadScene("Menu Transition");
+            SceneManager.LoadScene("Menu transition", LoadSceneMode.Additive);
+        if(saveStatus)
+            DotStatusOn();
     }
 
     // TODO: Add the event click() for the WAMButton and LaBaguetteButton on the inspector
     private void DotStatusOn()
     {
-        statusDot.color = new Color32(0, 255, 0, 255);
-        statusText.text = "Pupil is Connected";
+        if (statusDot != null)
+        {
+            statusDot.color = new Color32(0, 255, 0, 255);
+            statusText.text = "Pupil is Connected";
+            saveStatus = false;
+        }
+        else {
+            saveStatus = true;
+        }
+
     }
 
     private void DotStatusOff()
     {
-        statusDot.color = new Color32(255, 0, 0, 255);
-        statusText.text = "Pupil is not connected";
+        if (statusDot != null)
+        {
+            statusDot.color = new Color32(255, 0, 0, 255);
+            statusText.text = "Pupil is not connected";
+        }
+        else 
+            saveStatus  = false;
     }
 
     public void StartScene(GameObject button)
@@ -91,11 +105,6 @@ public class MenuController : MonoBehaviour
                 print("No actions registered for this button.");
                 break;
         }
-
-
-        //SceneManager.LoadScene(sceneName);
-        //SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene().buildIndex);
-        //SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneName));
     }
 
     private void ToggleTooltip(GameObject button)
@@ -122,6 +131,7 @@ public class MenuController : MonoBehaviour
 
     void onDisable()
     {
+        // get the notification if pupil service is started and change the Dot color regardings that info
         SceneManager.sceneLoaded -= OnLevelFinishedLoading;
         PupilTools.OnConnected -= DotStatusOn;
         PupilTools.OnDisconnecting -= DotStatusOff;
@@ -129,27 +139,30 @@ public class MenuController : MonoBehaviour
 
     void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode)
     {
+        if (scene.name == "Menu transition")
+        {
+            dicButtonTooltip = new Dictionary<Button, string>();
+            // Get the GameObjects like this to keep them even after a reload
+            baguetteButton = GameObject.Find(baguetteButtonName).GetComponent<Button>();
+            wamButton = GameObject.Find(wamButtonName).GetComponent<Button>();
+            calibTestButton = GameObject.Find(calibTestButtonName).GetComponent<Button>();
+            acuityButton = GameObject.Find(acuityButtonName).GetComponent<Button>();
+            pupilButton = GameObject.Find(pupilButtonName).GetComponent<Button>();
+            statusDot = GameObject.Find("PupilStatusDot").GetComponent<Image>();
+            statusText = GameObject.Find("PupilStatusText").GetComponent<Text>();
+            infoText = GameObject.Find("Info text").GetComponent<Text>();
 
-        dicButtonTooltip = new Dictionary<Button, string>();
-        // Get the GameObjects like this to keep them even after a reload
-        baguetteButton = GameObject.Find(baguetteButtonName).GetComponent<Button>();
-        wamButton = GameObject.Find(wamButtonName).GetComponent<Button>();
-        calibTestButton = GameObject.Find(calibTestButtonName).GetComponent<Button>();
-        acuityButton = GameObject.Find(acuityButtonName).GetComponent<Button>();
-        pupilButton = GameObject.Find(pupilButtonName).GetComponent<Button>();
-        statusDot = GameObject.Find("PupilStatusDot").GetComponent<Image>();
-        statusText = GameObject.Find("PupilStatusText").GetComponent<Text>();
-        infoText = GameObject.Find("Info text").GetComponent<Text>();
+            // Build the tooltip for every button
+            dicButtonTooltip.Add(baguetteButton, "Requires pupil Calibration. Bisectional test with Baguette and knife.");
+            dicButtonTooltip.Add(wamButton, "Requires pupil Calibration. Whack-a-mole-like rehabilitation game.");
+            dicButtonTooltip.Add(calibTestButton, "Requires pupil Calibration. Test the pupil calibration with heatmap and video result.");
+            dicButtonTooltip.Add(acuityButton, "Help to put the HMD on head. Test the user's max acuity zone.");
+            dicButtonTooltip.Add(pupilButton, "Starts the pupil calibration. Required for several tests.");
 
-        // Build the tooltip for every button
-        dicButtonTooltip.Add(baguetteButton, "Requires pupil Calibration. Bisectional test with Baguette and knife.");
-        dicButtonTooltip.Add(wamButton, "Requires pupil Calibration. Whack-a-mole-like rehabilitation game.");
-        dicButtonTooltip.Add(calibTestButton, "Requires pupil Calibration. Test the pupil calibration with heatmap and video result.");
-        dicButtonTooltip.Add(acuityButton, "Help to put the HMD on head. Test the user's max acuity zone.");
-        dicButtonTooltip.Add(pupilButton, "Starts the pupil calibration. Required for several tests.");
+            //Setup the tooltip default value
+            statusText.text = defaultStatusValue;
+            infoText.text = defaultTooltipValue;
+        }
 
-        // Setup the tooltip default value
-        statusText.text = defaultStatusValue;
-        infoText.text = defaultTooltipValue;
     }
 }
