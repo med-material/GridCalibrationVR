@@ -23,6 +23,7 @@ public class MenuController : MonoBehaviour
     private bool saveStatus;
     private Text infoText;
     private Dictionary<Button, string> dicButtonTooltip;
+    private bool activateLater = true;
     private string defaultTooltipValue = "Hover buttons to print information here.";
     private string defaultStatusValue = "Pupil Connection status";
 
@@ -54,9 +55,11 @@ public class MenuController : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
-            SceneManager.LoadScene("Menu transition", LoadSceneMode.Additive);
-        if(saveStatus)
+            SceneManager.LoadScene("Menu transition");
+        if (saveStatus)
             DotStatusOn();
+        if (!activateLater)
+            ActivateButtonsCalib();
     }
 
     // TODO: Add the event click() for the WAMButton and LaBaguetteButton on the inspector
@@ -68,10 +71,10 @@ public class MenuController : MonoBehaviour
             statusText.text = "Pupil is Connected";
             saveStatus = false;
         }
-        else {
+        else
+        {
             saveStatus = true;
         }
-
     }
 
     private void DotStatusOff()
@@ -81,8 +84,8 @@ public class MenuController : MonoBehaviour
             statusDot.color = new Color32(255, 0, 0, 255);
             statusText.text = "Pupil is not connected";
         }
-        else 
-            saveStatus  = false;
+        else
+            saveStatus = false;
     }
 
     public void StartScene(GameObject button)
@@ -123,10 +126,16 @@ public class MenuController : MonoBehaviour
     // Activate all buttons if the pupil calibration is done
     private void ActivateButtonsCalib()
     {
-        foreach (KeyValuePair<Button, string> entry in dicButtonTooltip)
+        if (acuityButton != null)
         {
-            entry.Key.interactable = true;
+            foreach (KeyValuePair<Button, string> entry in dicButtonTooltip)
+            {
+                entry.Key.interactable = true;
+            }
         }
+        else 
+            activateLater = false;
+
     }
 
     void onDisable()
@@ -139,6 +148,7 @@ public class MenuController : MonoBehaviour
 
     void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode)
     {
+        
         if (scene.name == "Menu transition")
         {
             dicButtonTooltip = new Dictionary<Button, string>();
@@ -148,6 +158,7 @@ public class MenuController : MonoBehaviour
             calibTestButton = GameObject.Find(calibTestButtonName).GetComponent<Button>();
             acuityButton = GameObject.Find(acuityButtonName).GetComponent<Button>();
             pupilButton = GameObject.Find(pupilButtonName).GetComponent<Button>();
+            calibArthurButton = GameObject.Find(calibArthurButtonName).GetComponent<Button>();
             statusDot = GameObject.Find("PupilStatusDot").GetComponent<Image>();
             statusText = GameObject.Find("PupilStatusText").GetComponent<Text>();
             infoText = GameObject.Find("Info text").GetComponent<Text>();
@@ -158,11 +169,11 @@ public class MenuController : MonoBehaviour
             dicButtonTooltip.Add(calibTestButton, "Requires pupil Calibration. Test the pupil calibration with heatmap and video result.");
             dicButtonTooltip.Add(acuityButton, "Help to put the HMD on head. Test the user's max acuity zone.");
             dicButtonTooltip.Add(pupilButton, "Starts the pupil calibration. Required for several tests.");
+            dicButtonTooltip.Add(calibArthurButton, "Requires pupil Calibration. Test the pupil calibration with dispersion, gaze tracking and data logging.");
 
             //Setup the tooltip default value
             statusText.text = defaultStatusValue;
             infoText.text = defaultTooltipValue;
         }
-
     }
 }
