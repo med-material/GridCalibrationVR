@@ -11,7 +11,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7f99b5209bd86441a74f3b0c7aab951, type: 3}
   m_Name: SteamVR_Settings
   m_EditorClassIdentifier: 
-  pauseGameWhenDashboardVisible: 0
+  pauseGameWhenDashboardVisible: 1
   lockPhysicsUpdateRateToRenderFrequency: 1
   trackingSpace: 1
   actionsFilePath: actions.json

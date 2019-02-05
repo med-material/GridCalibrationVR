@@ -37,14 +37,19 @@ public class MenuController : MonoBehaviour
     {
         SceneManager.sceneLoaded += OnLevelFinishedLoading;
         // get the notification if pupil service is started and change the Dot color regardings that info
-        PupilTools.OnConnected += DotStatusOn;
-        PupilTools.OnDisconnecting += DotStatusOff;
-        PupilTools.OnCalibrationEnded += ActivateButtonsCalib;
-
+        
         // Setup event for mouse hover on button to toggle tooltip
         MouseController.onMouseEnter += ToggleTooltip;
         MouseController.onMouseExit += ToggleDefaultTooltip;
         MouseController.onMouseClick += StartScene;
+    }
+
+    void Start(){
+        PupilTools.OnConnected += DotStatusOn;
+        PupilTools.OnDisconnecting += DotStatusOff;
+        PupilTools.OnCalibrationEnded += ActivateButtonsCalib;
+        
+        PupilSettings.Instance.currentCamera = Camera.main;
     }
 
     void Update()
