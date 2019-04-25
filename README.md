@@ -34,10 +34,9 @@ Same is for the grid, the user will only see the targets.
 ![calib_start](https://user-images.githubusercontent.com/3967945/56736752-3fbba580-6769-11e9-853e-f744814c1158.png)
 ![78](https://user-images.githubusercontent.com/3967945/56736733-34687a00-6769-11e9-8f63-9a3baaa2250a.png)
 ![34](https://user-images.githubusercontent.com/3967945/56736734-34687a00-6769-11e9-9b3e-8ea4453980c4.png)
-![45](https://user-images.githubusercontent.com/3967945/56736736-34687a00-6769-11e9-84f7-527411bec79b.png)
 ![56](https://user-images.githubusercontent.com/3967945/56736737-34687a00-6769-11e9-86ac-84aa474e0c1f.png)
 ![67](https://user-images.githubusercontent.com/3967945/56736738-34687a00-6769-11e9-81fa-7f3309e31458.png)
-
+![45](https://user-images.githubusercontent.com/3967945/56736736-34687a00-6769-11e9-84f7-527411bec79b.png)
 
 
 
